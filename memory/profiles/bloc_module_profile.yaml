@@ -1,0 +1,17 @@
+profile:
+  name: "bloc_module_profile"
+  description: "适用于按 module 组织、业务状态以 Bloc/Cubit 风格管理的 Flutter 项目。"
+  source: "template"
+
+  conventions:
+    directory_structure: "按 module 分目录，每个 module 内含 views/bloc/models/repository。"
+    state_management: "页面和业务状态优先通过 Bloc/Cubit 组织。"
+    naming: "状态类和事件类按 Bloc 习惯命名，页面命名服从 module 语义。"
+    routing: "路由集中配置，页面跳转通过统一路由层分发。"
+
+  usage:
+    good_for:
+      - "已有 Bloc / Cubit 历史沉淀的项目"
+      - "业务流程和状态流较复杂的项目"
+    avoid_when:
+      - "项目主流不是 Bloc"

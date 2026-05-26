@@ -1,0 +1,19 @@
+[f-forge] 页面工程师：已完成实现并验证。
+
+```yaml
+checklist:
+  target_files:
+    - lib/pages/login_page.dart
+    - lib/widgets/primary_button.dart
+  changes:
+    - "ElevatedButton 颜色 blue 改为 theme.primary"
+    - "提取 PrimaryButton 公共组件"
+  freeze_alignment: true
+  deviations: []
+  regression_scope:
+    - "登录按钮点击"
+    - "密码找回按钮点击"
+  verification_type: minimal
+  commands_run:
+    - "flutter analyze"
+```

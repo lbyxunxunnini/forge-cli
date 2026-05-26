@@ -1,0 +1,112 @@
+version: v1
+
+session:
+  core_task_fields:
+    - key: goal_status
+      label: 目标状态
+      values: [未确认, 已确认]
+    - key: scope_status
+      label: 范围状态
+      values: [未确认, 已确认]
+    - key: acceptance_status
+      label: 验收状态
+      values: [未确认, 已确认]
+    - key: constraint_status
+      label: 约束状态
+      values: [未确认, 已确认]
+  work_unit_fields:
+    - key: current_work_unit
+      label: 当前子单元
+      values: free_text
+    - key: work_unit_status
+      label: 子单元状态
+      values: [未冻结, 已冻结, 实现中, 待验证, 已通过, 未通过]
+    - key: verification_status
+      label: 验证状态
+      values: [未验证, 验证中, 已通过, 未通过]
+  execution_lock_fields:
+    - key: scope_risk
+      label: 超范围风险
+      values: [无, 已发现]
+    - key: plan_conflict
+      label: 计划冲突状态
+      values: [无, 已发现待回退]
+    - key: task_exit_criteria
+      label: 任务结束条件
+      values: free_text
+    - key: mode_lock
+      label: 工作模式锁
+      values: [激活, 可退出]
+    - key: exit_permission
+      label: 退出许可
+      values: [禁止, 允许]
+
+gates:
+  - name: phase_progression
+    purpose: S4 前禁止实现类写入
+    depends_on: [当前阶段]
+  - name: change_contract
+    purpose: 标准模式下缺少改动契约时阻断写入
+    depends_on: [改动契约, 确认状态]
+  - name: confirmation_status
+    purpose: 标准模式下未确认契约时阻断写入
+    depends_on: [确认状态]
+  - name: output_validation
+    purpose: 阶段日志与输出校验未通过时阻断实现写入
+    depends_on: [输出校验, 校验阶段]
+  - name: role_scope
+    purpose: 角色越权写入阻断
+    depends_on: [活跃代理]
+  - name: core_definition
+    purpose: 核心任务定义未冻结时阻断实现
+    depends_on: [目标状态, 范围状态, 验收状态, 约束状态]
+  - name: current_work_unit
+    purpose: 当前子单元未冻结时阻断实现
+    depends_on: [当前子单元, 子单元状态]
+  - name: scope_expansion
+    purpose: 发现超范围风险后强制回退
+    depends_on: [超范围风险]
+  - name: plan_conflict
+    purpose: 计划与代码现实冲突时强制回退
+    depends_on: [计划冲突状态]
+  - name: verification_truth
+    purpose: 验证未通过时禁止伪装收口
+    depends_on: [验证状态, 当前阶段]
+  - name: mode_exit
+    purpose: 未拿到退出许可时禁止进入 S6
+    depends_on: [工作模式锁, 退出许可, 当前阶段]
+
+policies:
+  standard:
+    can_auto_fill_core_task_fields: false
+    can_skip_change_contract_confirmation: false
+  fast:
+    can_auto_fill_core_task_fields: false
+    can_skip_change_contract_confirmation: true
+    note: 仅未升级轻量路径可豁免最强等待
+  autonomous:
+    can_auto_fill_core_task_fields: false
+    can_skip_change_contract_confirmation: true
+    note: 只允许自动补非核心缺口
+
+maintenance_surfaces:
+  phase_gates:
+    docs:
+      - SKILL.md
+      - references/decision_and_question_protocol.md
+      - references/task_runtime_prompt.md
+    runtime:
+      - scripts/gate_check.py
+      - scripts/controller.py
+    validation:
+      - scripts/release_checks/gates.sh
+  session_fields:
+    docs:
+      - references/session_management.md
+    runtime:
+      - scripts/ff_session.sh
+      - scripts/gate_check.py
+      - scripts/controller.py
+    validation:
+      - scripts/release_checks/session.sh
+      - scripts/release_checks/gates.sh

@@ -1,0 +1,18 @@
+profile:
+  name: "go_router_dio_freezed_profile"
+  description: "适用于 go_router + Dio + freezed/json_serializable + build_runner 的标准业务 Flutter 项目。"
+  source: "template"
+
+  conventions:
+    routing: "路由集中在 app_router/router 入口，新页面必须注册 route，并优先使用声明式导航。"
+    api_integration: "网络请求统一走 Dio client / api service；页面层不直接 new Dio。"
+    model_mapping: "接口模型优先使用 freezed + json_serializable；新增模型需补 part 文件和 build_runner 生成链路。"
+    error_handling: "Repository / service 层归一化错误，页面层只处理用户可见状态。"
+
+  usage:
+    good_for:
+      - "标准业务 App"
+      - "接口模型多、需要稳定序列化链路的项目"
+    avoid_when:
+      - "项目没有代码生成链路"
+      - "项目网络层不是 Dio"

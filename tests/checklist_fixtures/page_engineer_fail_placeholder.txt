@@ -1,0 +1,14 @@
+[f-forge] 页面工程师：已完成实现并验证。
+
+```yaml
+checklist:
+  target_files:
+    - "..."
+  changes:
+    - TBD
+  freeze_alignment: true
+  deviations: []
+  regression_scope: []
+  verification_type: minimal
+  commands_run: []
+```

@@ -1,0 +1,21 @@
+# Flutter Forge 配置文件
+# 放置位置: ~/.flutter-forge/config.yaml
+
+models:
+  default: deepseek-chat
+  available:
+    - name: deepseek-chat
+      base_url: https://api.deepseek.com/v1
+      api_key: ''
+    - name: qwen-plus
+      base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api_key: ''
+    - name: MiMo-V2.5-Pro
+      base_url: https://token-plan-sgp.xiaomimimo.com/v1
+      api_key: ''
+    - name: MiMo-V2.5
+      base_url: https://token-plan-sgp.xiaomimimo.com/v1
+      api_key: ''
+
+project:
+  root: .

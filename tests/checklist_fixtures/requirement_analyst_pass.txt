@@ -1,0 +1,21 @@
+[f-forge] 需求分析师：需求已收口，允许进入下一阶段。
+
+```yaml
+checklist:
+  business_goal: "用户可以在订单列表页查看历史订单并按状态筛选"
+  scope_in:
+    - "订单列表展示"
+    - "按状态筛选"
+    - "下拉刷新和分页"
+  scope_out:
+    - "订单详情页"
+    - "退款流程"
+  key_branches:
+    - "空态展示"
+    - "网络错误重试"
+    - "筛选无结果"
+  non_functional:
+    - "首屏加载 < 2s"
+  task_semantic: page
+  decision: allow
+```

@@ -1,0 +1,114 @@
+project_guardrails:
+  project:
+    name: "example_project"        # 项目名称，用 snake_case
+    type: "flutter"                # 固定值
+    status: "existing"             # existing = 存量/迭代中项目, new = 新项目
+    root_type: "flutter_existing"  # flutter_existing | empty_new
+    overall_confidence: "medium"   # guardrails 整体置信度
+
+  team_rules:
+    directory_structure:
+      rule: ""                     # 例：lib/features/<module>/pages/
+      confidence: "low|medium|high"
+      evidence: []
+
+    module_boundaries:
+      rule: ""                     # 例：feature 级隔离，shared 放跨模块组件
+      confidence: "low|medium|high"
+      evidence: []
+
+    naming_conventions:
+      pages: ""                    # 例：xxx_page.dart, XxxPage
+      widgets: ""                  # 例：xxx_widget.dart, XxxWidget
+      states: ""                   # 例：xxx_cubit.dart / xxx_provider.dart
+      models: ""                   # 例：xxx_model.dart, XxxModel
+      helpers: ""                  # 例：xxx_utils.dart
+      confidence: "low|medium|high"
+      evidence: []
+
+    state_management:
+      primary_pattern: ""          # 例：Bloc / Riverpod / Provider / GetX
+      scope_rules: ""              # 例：页面级用 XxxCubit，全局用 XxxNotifier
+      confidence: "low|medium|high"
+      evidence: []
+
+    component_boundaries:
+      shared_component_rule: ""    # 例：跨 2+ 页面使用才放 shared
+      page_private_component_rule: "" # 例：仅本页使用的 widget 放 page 目录
+      confidence: "low|medium|high"
+      evidence: []
+
+    api_integration:
+      request_layer_rule: ""       # 例：统一走 lib/core/api/
+      model_mapping_rule: ""       # 例：json_serializable / freezed
+      error_handling_rule: ""      # 例：统一走 AppException，页面层 catch 后展示 SnackBar
+      confidence: "low|medium|high"
+      evidence: []
+
+    routing_and_navigation:
+      route_definition_rule: ""    # 例：GoRouter routes 统一在 app_router.dart 定义
+      route_naming_rule: ""        # 例：路径用 kebab-case，路由名用 camelCase
+      navigation_trigger_rule: ""  # 例：页面跳转统一通过 context.go / context.push
+      confidence: "low|medium|high"
+      evidence: []
+
+    error_handling:
+      global_handler: ""           # 例：FlutterError.onError + runZonedGuarded
+      user_visible_pattern: ""     # 例：SnackBar / Dialog / Toast
+      page_level_rule: ""          # 例：页面级 try-catch，不吞异常
+      confidence: "low|medium|high"
+      evidence: []
+
+    testing:
+      framework: ""                # 例：flutter_test + mockito / mocktail
+      coverage_rule: ""            # 例：核心业务逻辑必须有单元测试
+      widget_test_rule: ""         # 例：新页面必须有 widget 测试
+      confidence: "low|medium|high"
+      evidence: []
+
+    performance_budget:
+      max_widget_depth: 5          # Widget 树最大嵌套层数
+      max_function_lines: 50       # 函数最大行数
+      list_must_use_builder: true  # ListView/GridView 是否必须用 .builder
+      image_cache_enabled: true    # 图片是否必须缓存
+      confidence: "low|medium|high"
+      evidence: []
+
+    i18n:
+      enabled: false               # 是否启用国际化
+      l10n_path: ""                # 例：lib/l10n/
+      supported_locales: []        # 例：["zh", "en"]
+      confidence: "low|medium|high"
+      evidence: []
+
+    accessibility:
+      enabled: false               # 是否启用无障碍检查
+      min_touch_target: 48         # 最小触摸目标（逻辑像素）
+      contrast_standard: "AA"      # WCAG 对比度标准（AA / AAA）
+      screen_reader_support: false # 是否需要屏幕阅读器支持
+      confidence: "low|medium|high"
+      evidence: []
+
+  personal_preferences:
+    page_split_style:
+      rule: ""                     # 例：一个页面一个文件夹，还是按功能拆文件
+      confidence: "low|medium|high"
+
+    private_widget_naming:
+      rule: ""                     # 例：_XxxBody / _XxxContent / _XxxView
+      confidence: "low|medium|high"
+
+  inferred_rules:
+    active_rules: []
+    low_confidence_rules: []
+    conflicts_to_watch: []
+
+  reuse_knowledge:
+    similar_pages: []
+    reusable_patterns: []
+    avoid_reuse_targets: []
+
+  task_only_context:
+    temporary_business_rules: []
+    field_special_cases: []
+    api_compat_notes: []

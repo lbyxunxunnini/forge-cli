@@ -1,0 +1,18 @@
+profile:
+  name: "lean_mvp_profile"
+  description: "适用于尚未形成复杂架构的新项目或快速验证项目。"
+  source: "template"
+
+  conventions:
+    directory_structure: "先保持 lib/pages、lib/widgets、lib/models、lib/services 的轻结构；复杂度上升后再迁移 feature-first。"
+    state_management: "优先使用局部 state；只有出现跨页面共享或异步业务流时再引入全局状态方案。"
+    routing: "可以使用轻量命名路由或 go_router；一旦页面超过 5 个，建议集中路由表。"
+    testing: "先保证核心业务函数和关键页面流程有测试，不追求一次性全覆盖。"
+
+  usage:
+    good_for:
+      - "MVP"
+      - "内部工具"
+      - "早期想法验证"
+    avoid_when:
+      - "已有明确团队架构规范"

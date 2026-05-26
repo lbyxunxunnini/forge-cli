@@ -1,0 +1,21 @@
+[f-forge] 架构设计师：结构已冻结，允许进入实现。
+
+```yaml
+checklist:
+  module_layout:
+    - "lib/features/order/pages/order_list_page.dart"
+    - "lib/features/order/widgets/order_card.dart"
+    - "lib/features/order/providers/order_list_provider.dart"
+  state_management: "Riverpod StateNotifier + AsyncValue"
+  routing: "go_router 新增 /orders 路由，挂在 ShellRoute 下"
+  freeze_constraints:
+    - "order_list_provider 只暴露 AsyncValue<List<Order>>"
+    - "筛选状态由 StateProvider 管理，不进 StateNotifier"
+  reuse_strategy:
+    - "复用现有 OrderCard 组件，增加状态标签"
+    - "复用 PaginatedListView 公共组件"
+  write_scope:
+    - "lib/features/order/"
+    - "lib/router/app_router.dart（仅新增路由条目）"
+  decision: allow
+```

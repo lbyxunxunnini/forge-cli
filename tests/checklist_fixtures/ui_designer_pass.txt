@@ -1,0 +1,22 @@
+[f-forge] UI 设计师：结构已拆分，允许进入实现。
+
+```yaml
+checklist:
+  source: text_description
+  blocks:
+    - "顶部筛选栏（状态 Tab）"
+    - "订单卡片列表区"
+    - "底部加载更多指示器"
+  hierarchy: "筛选栏固定顶部，列表区可滚动，卡片内信息按 订单号-商品-金额-状态 排列"
+  interactions:
+    - "Tab 切换触发列表刷新"
+    - "下拉刷新"
+    - "滚动到底加载更多"
+    - "卡片点击进入详情"
+  missing_inputs: []
+  component_ownership:
+    - "OrderFilterTabs: 页面私有"
+    - "OrderCard: 功能复用（已有）"
+    - "PaginatedListView: 通用组件（已有）"
+  decision: allow
+```

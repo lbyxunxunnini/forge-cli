@@ -1,0 +1,22 @@
+[f-forge] 验证工程师：规格合规审查通过，代码质量审查通过，允许完成。
+
+```yaml
+checklist:
+  # === 第一阶段：规格合规审查 ===
+  spec_compliance: true
+  requirement_coverage: true
+  contract_alignment: true
+  edge_cases_checked:
+    - "空态展示正确"
+    - "网络错误重试可用"
+    - "筛选无结果展示"
+  spec_issues: []
+  # === 第二阶段：代码质量审查 ===
+  code_quality: true
+  regression_clear: true
+  quality_checks:
+    - "flutter analyze 无 error"
+    - "命名符合guardrails"
+  logs_compliant: true
+  decision: pass
+```
