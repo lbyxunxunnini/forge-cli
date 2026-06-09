@@ -15,11 +15,16 @@ import { confidenceScorer } from '../confidence/scorer.js';
 import { learningMode } from '../learning/manager.js';
 import { ControllerAgent } from './controller.js';
 import type { AgentRole, AgentResult, AgentContext } from './types.js';
+import { Tracer, initTracer, clearTracer, getTracer } from '../utils/trace.js';
+import { ToolRetryExecutor } from '../utils/retry.js';
+import { generateSummary, formatSummary } from '../utils/summary.js';
 
 export class AgentOrchestrator {
   private controller: ControllerAgent;
   private context: AgentContext;
   private sessionInitialized = false;
+  private tracer: Tracer | null = null;
+  private toolRetry: ToolRetryExecutor;
 
   constructor(
     private aiClient: AIClient,
@@ -37,6 +42,9 @@ export class AgentOrchestrator {
       sessionData: {},
     };
 
+    // 初始化工具重试执行器
+    this.toolRetry = new ToolRetryExecutor({ maxAttempts: 2 });
+
     // 初始化插件管理器
     this.initPluginManager();
   }
@@ -53,96 +61,139 @@ export class AgentOrchestrator {
 
   // 执行用户输入
   async execute(userInput: string): Promise<AgentResult> {
-    // 先让大模型判断：是否需要进入 f-forge 工作流
-    const isFlutterTask = await this.classifyTask(userInput);
+    const startTime = Date.now();
 
-    if (isFlutterTask === null) {
-      return {
-        success: false,
-        output: '',
-        error: '模型不可用，请检查 API 配置（/model）',
-      };
-    }
+    // 初始化 tracer（使用 session ID）
+    const session = sessionManager.get();
+    const traceId = session?.id || `orch-${Date.now()}`;
+    this.tracer = initTracer(traceId, { consoleOutput: false });
+    this.tracer.record('user_input', { input: userInput });
+    this.toolRetry = new ToolRetryExecutor({ maxAttempts: 2 }, this.tracer);
 
-    if (!isFlutterTask) {
-      // 非工作流任务：直接用工具回答（带上下文）
-      return await this.directResponse(userInput);
-    }
+    try {
+      // 先让大模型判断：是否需要进入 f-forge 工作流
+      this.tracer.traceLLMCall('classifier', 1, 0);
+      const classifyStart = Date.now();
+      const isFlutterTask = await this.classifyTask(userInput);
+      this.tracer.traceLLMResponse(
+        isFlutterTask ? '是' : '否',
+        0,
+        Date.now() - classifyStart
+      );
 
-    // ─── 以下为 Flutter 任务的完整工作流 ───
-
-    // 执行 PromptSubmit 钩子
-    const promptHookResult = await hookManager.execute('PromptSubmit', {
-      event: 'PromptSubmit',
-      userPrompt: userInput,
-    });
-
-    if (promptHookResult.action === 'block') {
-      return {
-        success: false,
-        output: '',
-        error: promptHookResult.message || '操作被钩子阻止',
-      };
-    }
-
-    // 安全检查
-    const securityResult = securityChecker.checkCode(userInput);
-    if (!securityResult.passed && securityResult.score < 50) {
-      forgeLogger.logWarning(`安全检查警告 (分数: ${securityResult.score})`);
-      for (const issue of securityResult.issues) {
-        forgeLogger.logWarning(`  - ${issue.pattern.message}: ${issue.match}`);
+      if (isFlutterTask === null) {
+        this.tracer.traceError(new Error('模型不可用'), 'classifyTask');
+        this.finishTrace();
+        return {
+          success: false,
+          output: '',
+          error: '模型不可用，请检查 API 配置（/model）',
+        };
       }
-    }
 
-    // 初始化 session（如果需要）
-    if (!this.sessionInitialized) {
-      sessionManager.init(this.context.projectRoot, userInput);
-      this.sessionInitialized = true;
+      if (!isFlutterTask) {
+        this.tracer.record('state_change', { from: 'classify', to: 'direct_response', reason: '非 Flutter 任务' });
+        const result = await this.directResponse(userInput);
+        this.finishTrace();
+        return result;
+      }
 
-      // 执行 SessionStart 钩子
-      await hookManager.execute('SessionStart', {
-        event: 'SessionStart',
-        sessionState: sessionManager.get() as unknown as Record<string, unknown>,
+      // ─── 以下为 Flutter 任务的完整工作流 ───
+
+      // 执行 PromptSubmit 钩子
+      const promptHookResult = await hookManager.execute('PromptSubmit', {
+        event: 'PromptSubmit',
+        userPrompt: userInput,
       });
+
+      if (promptHookResult.action === 'block') {
+        this.tracer.traceWarning('PromptSubmit hook blocked', { message: promptHookResult.message });
+        this.finishTrace();
+        return {
+          success: false,
+          output: '',
+          error: promptHookResult.message || '操作被钩子阻止',
+        };
+      }
+
+      // 安全检查
+      const securityResult = securityChecker.checkCode(userInput);
+      if (!securityResult.passed && securityResult.score < 50) {
+        this.tracer.traceWarning(`安全检查警告 (分数: ${securityResult.score})`);
+        forgeLogger.logWarning(`安全检查警告 (分数: ${securityResult.score})`);
+      }
+
+      // 初始化 session（如果需要）
+      if (!this.sessionInitialized) {
+        sessionManager.init(this.context.projectRoot, userInput);
+        this.sessionInitialized = true;
+
+        // 执行 SessionStart 钩子
+        await hookManager.execute('SessionStart', {
+          event: 'SessionStart',
+          sessionState: sessionManager.get() as unknown as Record<string, unknown>,
+        });
+      }
+
+      // 更新 session 状态
+      sessionManager.setState('executing');
+      sessionManager.addHistory('user_input', 'user', userInput);
+
+      // 检查是否需要中断（ff-a 模式）
+      if (autonomousMode.isEnabled() && !autonomousMode.canAutoProceed(userInput)) {
+        this.tracer.traceWarning('高风险操作，等待用户确认');
+        forgeLogger.logWaiting('检测到高风险操作，等待用户确认');
+        sessionManager.waitForInput();
+        this.finishTrace();
+        return {
+          success: true,
+          output: '[f-forge] 检测到高风险操作，请确认是否继续',
+          needsUserInput: true,
+        };
+      }
+
+      // 路由判断
+      const targetAgent = this.controller.route(userInput);
+      this.tracer.record('state_change', { from: 'classify', to: 'route', agent: targetAgent });
+
+      // 更新上下文（先更新阶段，再检查门禁）
+      const prevPhase = this.context.currentPhase;
+      this.updateContext(targetAgent);
+      if (this.context.currentPhase !== prevPhase) {
+        this.tracer.tracePhaseAdvance(prevPhase, this.context.currentPhase);
+      }
+
+      sessionManager.setActiveAgent(targetAgent);
+      sessionManager.setPhase(this.context.currentPhase);
+
+      // 日志：进入 controller
+      forgeLogger.enterController();
+      forgeLogger.logPhase(this.context.currentPhase);
+
+      // 调度执行
+      const dispatchStart = Date.now();
+      const result = await this.controller.dispatch(targetAgent, userInput, this.context);
+      this.tracer.record('state_change', {
+        from: 'dispatch',
+        to: result.success ? 'success' : 'failed',
+        agent: targetAgent,
+        duration: Date.now() - dispatchStart,
+      });
+
+      // 处理结果
+      this.processResult(result);
+
+      // 记录结果到 session
+      sessionManager.addHistory('agent_result', targetAgent, result.output);
+
+      this.finishTrace();
+      return result;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.tracer.traceError(err, 'orchestrator.execute');
+      this.finishTrace();
+      throw err;
     }
-
-    // 更新 session 状态
-    sessionManager.setState('executing');
-    sessionManager.addHistory('user_input', 'user', userInput);
-
-    // 检查是否需要中断（ff-a 模式）
-    if (autonomousMode.isEnabled() && !autonomousMode.canAutoProceed(userInput)) {
-      forgeLogger.logWaiting('检测到高风险操作，等待用户确认');
-      sessionManager.waitForInput();
-      return {
-        success: true,
-        output: '[f-forge] 检测到高风险操作，请确认是否继续',
-        needsUserInput: true,
-      };
-    }
-
-    // 路由判断
-    const targetAgent = this.controller.route(userInput);
-
-    // 更新上下文（先更新阶段，再检查门禁）
-    this.updateContext(targetAgent);
-    sessionManager.setActiveAgent(targetAgent);
-    sessionManager.setPhase(this.context.currentPhase);
-
-    // 日志：进入 controller
-    forgeLogger.enterController();
-    forgeLogger.logPhase(this.context.currentPhase);
-
-    // 调度执行
-    const result = await this.controller.dispatch(targetAgent, userInput, this.context);
-
-    // 处理结果
-    this.processResult(result);
-
-    // 记录结果到 session
-    sessionManager.addHistory('agent_result', targetAgent, result.output);
-
-    return result;
   }
 
   // 非工作流任务：直接回答（带上下文和工具）
@@ -196,35 +247,121 @@ export class AgentOrchestrator {
     }
   }
 
-  // 流式执行
+  // 流式执行（完整流程：分类 → 路由 → 流式输出）
   async *executeStream(userInput: string): AsyncGenerator<{ type: 'text' | 'tool-call' | 'tool-result'; content: string }> {
-    // 初始化 session（如果需要）
-    if (!this.sessionInitialized) {
-      sessionManager.init(this.context.projectRoot, userInput);
-      this.sessionInitialized = true;
+    const startTime = Date.now();
+
+    // 初始化 tracer
+    const session = sessionManager.get();
+    const traceId = session?.id || `stream-${Date.now()}`;
+    this.tracer = initTracer(traceId, { consoleOutput: false });
+    this.tracer.record('user_input', { input: userInput });
+
+    try {
+      // 先判断是否需要进入工作流
+      this.tracer.traceLLMCall('classifier', 1, 0);
+      const classifyStart = Date.now();
+      const isFlutterTask = await this.classifyTask(userInput);
+      this.tracer.traceLLMResponse(isFlutterTask ? '是' : '否', 0, Date.now() - classifyStart);
+
+      if (isFlutterTask === null) {
+        this.tracer.traceError(new Error('模型不可用'), 'classifyTask');
+        this.finishTrace();
+        yield { type: 'text', content: '模型不可用，请检查 API 配置（/model）' };
+        return;
+      }
+
+      if (!isFlutterTask) {
+        this.tracer.record('state_change', { from: 'classify', to: 'direct_response' });
+        yield* this.directResponseStream(userInput);
+        this.finishTrace();
+        return;
+      }
+
+      // ─── Flutter 工作流 ───
+
+      // PromptSubmit 钩子
+      const promptHookResult = await hookManager.execute('PromptSubmit', {
+        event: 'PromptSubmit',
+        userPrompt: userInput,
+      });
+      if (promptHookResult.action === 'block') {
+        this.tracer.traceWarning('PromptSubmit hook blocked');
+        this.finishTrace();
+        yield { type: 'text', content: promptHookResult.message || '操作被钩子阻止' };
+        return;
+      }
+
+      // 初始化 session
+      if (!this.sessionInitialized) {
+        sessionManager.init(this.context.projectRoot, userInput);
+        this.sessionInitialized = true;
+        await hookManager.execute('SessionStart', {
+          event: 'SessionStart',
+          sessionState: sessionManager.get() as unknown as Record<string, unknown>,
+        });
+      }
+
+      sessionManager.setState('executing');
+      sessionManager.addHistory('user_input', 'user', userInput);
+
+      // 路由判断
+      const targetAgent = this.controller.route(userInput);
+      this.tracer.record('state_change', { from: 'classify', to: 'route', agent: targetAgent });
+
+      const prevPhase = this.context.currentPhase;
+      this.updateContext(targetAgent);
+      if (this.context.currentPhase !== prevPhase) {
+        this.tracer.tracePhaseAdvance(prevPhase, this.context.currentPhase);
+      }
+
+      sessionManager.setActiveAgent(targetAgent);
+      sessionManager.setPhase(this.context.currentPhase);
+
+      forgeLogger.enterController();
+      forgeLogger.logPhase(this.context.currentPhase);
+
+      yield* this.controller.executeStream(userInput, this.context);
+
+      this.tracer.record('state_change', {
+        from: 'stream',
+        to: 'complete',
+        agent: targetAgent,
+        duration: Date.now() - startTime,
+      });
+
+      sessionManager.addHistory('stream_complete', targetAgent, '');
+      this.finishTrace();
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.tracer.traceError(err, 'orchestrator.executeStream');
+      this.finishTrace();
+      throw err;
+    }
+  }
+
+  // 非工作流流式回答
+  private async *directResponseStream(userInput: string): AsyncGenerator<{ type: 'text' | 'tool-call' | 'tool-result'; content: string }> {
+    this.contextManager.addUserMessage(userInput);
+
+    const tools = this.toolRegistry.getAll().map(t => ({
+      name: t.definition.name,
+      description: t.definition.description,
+      parameters: t.definition.parameters.properties,
+      execute: t.execute,
+    }));
+
+    let fullText = '';
+    for await (const event of this.aiClient.streamWithMessages(
+      this.contextManager.getMessages(),
+      tools,
+      5
+    )) {
+      if (event.type === 'text') fullText += event.content;
+      yield event;
     }
 
-    // 更新 session 状态
-    sessionManager.setState('executing');
-    sessionManager.addHistory('user_input', 'user', userInput);
-
-    // 路由判断
-    const targetAgent = this.controller.route(userInput);
-
-    // 更新上下文
-    this.updateContext(targetAgent);
-    sessionManager.setActiveAgent(targetAgent);
-    sessionManager.setPhase(this.context.currentPhase);
-
-    // 日志：进入 controller
-    forgeLogger.enterController();
-    forgeLogger.logPhase(this.context.currentPhase);
-
-    // 调度执行
-    yield* this.controller.executeStream(userInput, this.context);
-
-    // 记录完成
-    sessionManager.addHistory('stream_complete', targetAgent, '');
+    this.contextManager.addAssistantMessage(fullText);
   }
 
   // 更新上下文
@@ -402,6 +539,31 @@ export class AgentOrchestrator {
   // 获取钩子管理器
   getHookManager() {
     return hookManager;
+  }
+
+  // 结束 trace 并输出摘要
+  private finishTrace(): void {
+    if (!this.tracer) return;
+
+    const session = this.tracer.getSession();
+    const stats = this.tracer.getStats();
+    const summary = generateSummary(session, stats);
+
+    // 存储摘要到 session metadata
+    sessionManager.setMetadata('traceStats', stats);
+    sessionManager.setMetadata('traceSummary', summary);
+
+    this.tracer.end();
+  }
+
+  // 获取 trace 统计（供 /status 命令使用）
+  getTraceStats(): import('../utils/trace.js').TraceStats | null {
+    return this.tracer?.getStats() || null;
+  }
+
+  // 获取当前 tracer 实例
+  getTracer(): Tracer | null {
+    return this.tracer;
   }
 
   // 并行执行多个任务

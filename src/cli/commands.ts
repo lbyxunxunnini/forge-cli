@@ -5,6 +5,8 @@ import type { ContextManager } from '../llm/context.js';
 import type { AIClient } from '../llm/client-v2.js';
 import type { AgentOrchestrator } from '../agents/index.js';
 import { renderHelp, renderStatus, renderSuccess, renderError } from './renderer.js';
+import { memoryManager } from '../memory/manager.js';
+import { generateSummary, formatSummary } from '../utils/summary.js';
 
 export interface CommandResult {
   handled: boolean;
@@ -87,6 +89,10 @@ export async function handleCommand(
       return handleReviewCommand(args, orchestrator);
     case '/hook':
       return handleHookCommand(args, orchestrator);
+    case '/memory':
+      return handleMemoryCommand();
+    case '/trace':
+      return handleTraceCommand(orchestrator);
     default:
       return { handled: true, output: renderError(`未知命令: ${command}\n输入 /help 查看可用命令`) };
   }
@@ -300,6 +306,33 @@ function handleReviewCommand(args: string[], orchestrator?: AgentOrchestrator): 
   ].join('\n') };
 }
 
+function handleMemoryCommand(): CommandResult {
+  const entries = memoryManager.getAll();
+  if (entries.length === 0) {
+    return { handled: true, output: chalk.dim('\n暂无记忆') };
+  }
+
+  const typeLabels: Record<string, string> = {
+    user: chalk.blue('用户'),
+    project: chalk.green('项目'),
+    feedback: chalk.yellow('反馈'),
+    reference: chalk.magenta('参考'),
+  };
+
+  const lines = [chalk.bold('\n记忆系统:')];
+  const byType: Record<string, typeof entries> = {};
+  for (const e of entries) {
+    (byType[e.type] ??= []).push(e);
+  }
+  for (const [type, items] of Object.entries(byType)) {
+    lines.push(`  ${typeLabels[type] || type}:`);
+    for (const e of items) {
+      lines.push(`    ${chalk.cyan(e.name)} — ${chalk.dim(e.description)}`);
+    }
+  }
+  return { handled: true, output: lines.join('\n') };
+}
+
 function handleHookCommand(args: string[], orchestrator?: AgentOrchestrator): CommandResult {
   if (!orchestrator) return { handled: true, output: renderError('编排器未初始化') };
   const hooks = orchestrator.getHookManager().getHooks();
@@ -311,4 +344,19 @@ function handleHookCommand(args: string[], orchestrator?: AgentOrchestrator): Co
       return `  ${s} ${chalk.cyan(h.name)} ${chalk.dim(`[${h.event}]`)}`;
     }),
   ].join('\n') };
+}
+
+function handleTraceCommand(orchestrator?: AgentOrchestrator): CommandResult {
+  if (!orchestrator) return { handled: true, output: renderError('编排器未初始化') };
+
+  const tracer = orchestrator.getTracer();
+  if (!tracer) {
+    return { handled: true, output: chalk.dim('\n无活跃的 Trace 会话（执行一次任务后可查看）') };
+  }
+
+  const session = tracer.getSession();
+  const stats = tracer.getStats();
+  const summary = generateSummary(session, stats);
+
+  return { handled: true, output: '\n' + formatSummary(summary) };
 }

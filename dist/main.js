@@ -143,15 +143,28 @@ var ContextManager = class _ContextManager {
   messages = [];
   systemPrompt = "";
   maxMessages;
-  constructor(maxMessages = 100) {
+  maxTokens;
+  summarizer;
+  constructor(maxMessages = 100, maxTokens = 32e3) {
     this.maxMessages = maxMessages;
+    this.maxTokens = maxTokens;
+  }
+  // 设置摘要生成器（需要 LLM 客户端）
+  setSummarizer(fn) {
+    this.summarizer = fn;
   }
   setSystemPrompt(prompt) {
     this.systemPrompt = prompt;
   }
   addMessage(message) {
+    if (!message.tokenEstimate) {
+      message.tokenEstimate = estimateTokens(message.content);
+    }
+    if (!message.importance) {
+      message.importance = classifyImportance(message);
+    }
     this.messages.push(message);
-    this.truncateIfNeeded();
+    this.compressIfNeeded();
   }
   addUserMessage(content) {
     this.addMessage({ role: "user", content });
@@ -160,14 +173,19 @@ var ContextManager = class _ContextManager {
     this.addMessage({ role: "assistant", content });
   }
   addToolResult(toolCallId, content) {
-    this.addMessage({ role: "tool", content, tool_call_id: toolCallId });
+    const trimmed = trimToolResult(content);
+    this.addMessage({ role: "tool", content: trimmed, tool_call_id: toolCallId, importance: "low" });
   }
   getMessages() {
     const messages = [];
     if (this.systemPrompt) {
       messages.push({ role: "system", content: this.systemPrompt });
     }
-    messages.push(...this.messages);
+    messages.push(...this.messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+      ...m.tool_call_id ? { tool_call_id: m.tool_call_id } : {}
+    })));
     return messages;
   }
   getHistory() {
@@ -179,11 +197,20 @@ var ContextManager = class _ContextManager {
   getLength() {
     return this.messages.length;
   }
+  getTotalTokens() {
+    return this.messages.reduce((sum, m) => sum + (m.tokenEstimate || 0), 0);
+  }
   getSummary() {
     const userMessages = this.messages.filter((m) => m.role === "user").length;
     const assistantMessages = this.messages.filter((m) => m.role === "assistant").length;
     const toolMessages = this.messages.filter((m) => m.role === "tool").length;
-    return `\u6D88\u606F\u6570: ${this.messages.length} (\u7528\u6237: ${userMessages}, \u52A9\u624B: ${assistantMessages}, \u5DE5\u5177: ${toolMessages})`;
+    const tokens = this.getTotalTokens();
+    const pct = Math.min(100, Math.round(tokens / this.maxTokens * 100));
+    return `\u6D88\u606F\u6570: ${this.messages.length} (\u7528\u6237: ${userMessages}, \u52A9\u624B: ${assistantMessages}, \u5DE5\u5177: ${toolMessages}) | Token: ~${tokens} (${pct}%)`;
+  }
+  // 获取上下文使用百分比（用于状态栏）
+  getContextPercent() {
+    return Math.min(100, Math.round(this.getTotalTokens() / this.maxTokens * 100));
   }
   isEmpty() {
     return this.messages.length === 0;
@@ -217,15 +244,78 @@ var ContextManager = class _ContextManager {
     manager.messages = data.messages || [];
     return manager;
   }
-  truncateIfNeeded() {
-    if (this.messages.length <= this.maxMessages) return;
+  // ─── 压缩策略 ───────────────────────────────────────────────
+  compressIfNeeded() {
+    if (this.messages.length > this.maxMessages) {
+      this.truncateByCount();
+    }
+    if (this.getTotalTokens() > this.maxTokens) {
+      this.compressByTokens();
+    }
+  }
+  truncateByCount() {
     const prefixSize = Math.min(10, Math.floor(this.maxMessages * 0.2));
     const windowSize = this.maxMessages - prefixSize;
     const prefix = this.messages.slice(0, prefixSize);
     const recent = this.messages.slice(this.messages.length - windowSize);
     this.messages = [...prefix, ...recent];
   }
+  compressByTokens() {
+    for (const msg of this.messages) {
+      if (msg.importance === "low" && (msg.tokenEstimate || 0) > 500) {
+        msg.content = msg.content.slice(0, 500) + "\n... [\u5DF2\u88C1\u526A]";
+        msg.tokenEstimate = estimateTokens(msg.content);
+        msg.compressed = true;
+      }
+    }
+    if (this.getTotalTokens() > this.maxTokens && this.summarizer) {
+      this.summarizeOldMessages();
+    }
+  }
+  async summarizeOldMessages() {
+    if (!this.summarizer) return;
+    const prefixSize = Math.min(5, Math.floor(this.messages.length * 0.1));
+    const summarizeEnd = Math.floor(this.messages.length * 0.5);
+    const toSummarize = this.messages.slice(prefixSize, summarizeEnd);
+    if (toSummarize.length < 3) return;
+    try {
+      const summary = await this.summarizer(toSummarize);
+      const summaryMsg = {
+        role: "assistant",
+        content: `[\u5BF9\u8BDD\u6458\u8981] ${summary}`,
+        importance: "high",
+        tokenEstimate: estimateTokens(summary),
+        compressed: true
+      };
+      const prefix = this.messages.slice(0, prefixSize);
+      const recent = this.messages.slice(summarizeEnd);
+      this.messages = [...prefix, summaryMsg, ...recent];
+    } catch {
+      this.truncateByCount();
+    }
+  }
 };
+function estimateTokens(text) {
+  const cjkChars = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
+  const otherChars = text.length - cjkChars;
+  return Math.ceil(cjkChars / 2 + otherChars / 4);
+}
+function classifyImportance(msg) {
+  if (msg.role === "system") return "critical";
+  if (msg.role === "tool") return "low";
+  if (msg.role === "user") return "high";
+  return "normal";
+}
+function trimToolResult(content, maxChars = 2e3) {
+  if (content.length <= maxChars) return content;
+  const head = content.slice(0, maxChars * 0.7);
+  const tail = content.slice(-maxChars * 0.2);
+  return `${head}
+
+... [\u5DF2\u88C1\u526A ${content.length - maxChars} \u5B57\u7B26] ...
+
+${tail}`;
+}
 var contextManager = new ContextManager();
 
 // src/llm/client-v2.ts
@@ -325,8 +415,14 @@ var AIClient = class {
       temperature: 0.7,
       stopWhen: maxSteps ? stepCountIs(maxSteps) : void 0
     });
-    for await (const chunk of result.textStream) {
-      yield { type: "text", content: chunk };
+    for await (const event of result.fullStream) {
+      if (event.type === "text-delta") {
+        yield { type: "text", content: event.text ?? event.textDelta ?? "" };
+      } else if (event.type === "tool-call") {
+        yield { type: "tool-call", content: JSON.stringify({ name: event.toolName, args: event.args ?? event.input ?? {} }) };
+      } else if (event.type === "tool-result") {
+        yield { type: "tool-result", content: JSON.stringify({ name: event.toolName, result: event.result ?? event.output ?? "" }) };
+      }
     }
   }
   // 带上下文的生成
@@ -367,8 +463,14 @@ var AIClient = class {
       temperature: 0.7,
       stopWhen: maxSteps ? stepCountIs(maxSteps) : void 0
     });
-    for await (const chunk of result.textStream) {
-      yield { type: "text", content: chunk };
+    for await (const event of result.fullStream) {
+      if (event.type === "text-delta") {
+        yield { type: "text", content: event.text ?? event.textDelta ?? "" };
+      } else if (event.type === "tool-call") {
+        yield { type: "tool-call", content: JSON.stringify({ name: event.toolName, args: event.args ?? event.input ?? {} }) };
+      } else if (event.type === "tool-result") {
+        yield { type: "tool-result", content: JSON.stringify({ name: event.toolName, result: event.result ?? event.output ?? "" }) };
+      }
     }
   }
 };
@@ -389,21 +491,21 @@ var AGENT_CONFIGS = {
     role: "requirement_analyst",
     name: "\u9700\u6C42\u5206\u6790\u5E08",
     description: "\u76EE\u6807\u51BB\u7ED3\u3001\u8303\u56F4\u786E\u8BA4\u3001\u9A8C\u6536\u6807\u51C6\u3001\u7EA6\u675F\u5B9A\u4E49",
-    allowedTools: ["read_file", "list_files", "search_files", "scan_project", "detect_project_state"],
+    allowedTools: ["read_file", "list_files", "search_files", "glob", "grep", "ls", "scan_project", "detect_project_state", "save_memory", "read_memory"],
     forbiddenTools: ["write_file", "edit_file", "run_command"]
   },
   ui_designer: {
     role: "ui_designer",
     name: "UI \u8BBE\u8BA1\u5E08",
     description: "\u89C6\u89C9\u65B9\u6848\u3001\u4EA4\u4E92\u8BBE\u8BA1\u3001\u6837\u5F0F\u89C4\u8303",
-    allowedTools: ["read_file", "list_files", "search_files", "scan_project"],
+    allowedTools: ["read_file", "list_files", "search_files", "glob", "grep", "ls", "scan_project", "save_memory", "read_memory"],
     forbiddenTools: ["write_file", "edit_file", "run_command"]
   },
   architecture_designer: {
     role: "architecture_designer",
     name: "\u67B6\u6784\u8BBE\u8BA1\u5E08",
     description: "\u67B6\u6784\u8BBE\u8BA1\u3001\u6A21\u5757\u5212\u5206\u3001\u6280\u672F\u9009\u578B",
-    allowedTools: ["read_file", "list_files", "search_files", "scan_project", "detect_project_state"],
+    allowedTools: ["read_file", "list_files", "search_files", "glob", "grep", "ls", "scan_project", "detect_project_state", "save_memory", "read_memory"],
     forbiddenTools: ["write_file", "edit_file", "run_command"]
   },
   page_engineer: {
@@ -417,7 +519,7 @@ var AGENT_CONFIGS = {
     role: "verify_agent",
     name: "\u9A8C\u8BC1\u5DE5\u7A0B\u5E08",
     description: "\u529F\u80FD\u9A8C\u8BC1\u3001\u6D4B\u8BD5\u6267\u884C\u3001\u8D28\u91CF\u68C0\u67E5",
-    allowedTools: ["read_file", "list_files", "search_files", "run_command", "validate_output", "validate_docs_sync"],
+    allowedTools: ["read_file", "list_files", "search_files", "glob", "grep", "ls", "run_command", "validate_output", "validate_docs_sync", "save_memory", "read_memory"],
     forbiddenTools: ["write_file", "edit_file"]
   }
 };
@@ -870,8 +972,8 @@ var SessionManager = class {
     if (!existsSync2(SESSION_DIR)) {
       return [];
     }
-    const { readdirSync: readdirSync4 } = __require("fs");
-    const files = readdirSync4(SESSION_DIR).filter((f) => f.endsWith(".yaml"));
+    const { readdirSync: readdirSync5 } = __require("fs");
+    const files = readdirSync5(SESSION_DIR).filter((f) => f.endsWith(".yaml"));
     const sessions = [];
     for (const file of files) {
       try {
@@ -2988,6 +3090,366 @@ var LearningMode = class {
 };
 var learningMode = new LearningMode();
 
+// src/utils/trace.ts
+import { writeFileSync as writeFileSync4, existsSync as existsSync5, mkdirSync as mkdirSync4 } from "fs";
+import { join as join6 } from "path";
+import { homedir as homedir5 } from "os";
+var DEFAULT_CONFIG2 = {
+  enabled: true,
+  persistToDisk: true,
+  dir: join6(homedir5(), ".flutter-forge", "traces"),
+  maxEvents: 500,
+  consoleOutput: false
+};
+var Tracer = class {
+  session;
+  config;
+  startTime;
+  eventCounter = 0;
+  constructor(sessionId, config) {
+    this.config = { ...DEFAULT_CONFIG2, ...config };
+    this.startTime = Date.now();
+    this.session = {
+      sessionId,
+      startedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      events: [],
+      metadata: {}
+    };
+  }
+  // 记录事件
+  record(type, data, tags) {
+    if (!this.config.enabled) {
+      return this.createEvent(type, data, tags);
+    }
+    const event = this.createEvent(type, data, tags);
+    this.session.events.push(event);
+    if (this.session.events.length > this.config.maxEvents) {
+      this.session.events = this.session.events.slice(-this.config.maxEvents);
+    }
+    if (this.config.consoleOutput) {
+      this.printEvent(event);
+    }
+    return event;
+  }
+  // 便捷方法
+  traceLLMCall(model, messageCount, toolCount) {
+    this.record("llm_call", { model, messageCount, toolCount });
+  }
+  traceLLMResponse(content, toolCalls, duration) {
+    this.record("llm_response", {
+      contentLength: content.length,
+      toolCallCount: toolCalls,
+      duration
+    });
+  }
+  traceToolCall(name, args) {
+    this.record("tool_call", { toolName: name, args });
+  }
+  traceToolResult(name, success, outputLength, duration) {
+    this.record("tool_result", {
+      toolName: name,
+      success,
+      outputLength,
+      duration
+    });
+  }
+  traceStateChange(from, to, reason) {
+    this.record("state_change", { from, to, reason });
+  }
+  tracePhaseAdvance(from, to) {
+    this.record("phase_advance", { from, to });
+  }
+  traceError(error, context) {
+    this.record("error", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      context
+    }, ["error"]);
+  }
+  traceRetry(attempt, maxAttempts, error, delay) {
+    this.record("retry", { attempt, maxAttempts, error, delay }, ["retry"]);
+  }
+  traceWarning(message, context) {
+    this.record("warning", { message, ...context }, ["warning"]);
+  }
+  // 设置元数据
+  setMetadata(key, value) {
+    this.session.metadata[key] = value;
+  }
+  // 获取当前会话数据
+  getSession() {
+    return { ...this.session };
+  }
+  // 获取统计信息
+  getStats() {
+    const events = this.session.events;
+    const toolCalls = events.filter((e) => e.type === "tool_call");
+    const toolResults = events.filter((e) => e.type === "tool_result");
+    const errors = events.filter((e) => e.type === "error");
+    const retries = events.filter((e) => e.type === "retry");
+    const llmCalls = events.filter((e) => e.type === "llm_call");
+    const successfulTools = toolResults.filter((e) => e.data.success === true);
+    const failedTools = toolResults.filter((e) => e.data.success === false);
+    const totalDuration = this.session.endedAt ? new Date(this.session.endedAt).getTime() - new Date(this.session.startedAt).getTime() : Date.now() - this.startTime;
+    return {
+      totalEvents: events.length,
+      llmCallCount: llmCalls.length,
+      toolCallCount: toolCalls.length,
+      toolSuccessCount: successfulTools.length,
+      toolFailCount: failedTools.length,
+      errorCount: errors.length,
+      retryCount: retries.length,
+      totalDuration,
+      toolSuccessRate: toolResults.length > 0 ? successfulTools.length / toolResults.length : 0
+    };
+  }
+  // 结束会话
+  end() {
+    this.session.endedAt = (/* @__PURE__ */ new Date()).toISOString();
+    if (this.config.persistToDisk) {
+      this.persist();
+    }
+  }
+  // 持久化到磁盘
+  persist() {
+    if (!existsSync5(this.config.dir)) {
+      mkdirSync4(this.config.dir, { recursive: true });
+    }
+    const filename = `trace-${this.session.sessionId}.json`;
+    const filepath = join6(this.config.dir, filename);
+    try {
+      writeFileSync4(filepath, JSON.stringify(this.session, null, 2), "utf-8");
+    } catch {
+    }
+  }
+  // 创建事件对象
+  createEvent(type, data, tags) {
+    this.eventCounter++;
+    return {
+      id: `${this.session.sessionId}-${this.eventCounter}`,
+      type,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      elapsed: Date.now() - this.startTime,
+      data,
+      tags
+    };
+  }
+  // 控制台输出（调试用）
+  printEvent(event) {
+    const elapsed = (event.elapsed / 1e3).toFixed(2);
+    const prefix = `[Trace ${elapsed}s]`;
+    const dataStr = JSON.stringify(event.data, null, 0);
+    console.log(`${prefix} ${event.type}: ${dataStr}`);
+  }
+};
+var globalTracer = null;
+function initTracer(sessionId, config) {
+  globalTracer = new Tracer(sessionId, config);
+  return globalTracer;
+}
+
+// src/utils/retry.ts
+var DEFAULT_TOOL_RETRY = {
+  maxAttempts: 2,
+  baseDelay: 500,
+  retryableErrors: [
+    "timeout",
+    "ECONNRESET",
+    "rate limit",
+    "429"
+  ]
+};
+var ToolRetryExecutor = class {
+  config;
+  tracer;
+  constructor(config, tracer) {
+    this.config = { ...DEFAULT_TOOL_RETRY, ...config };
+    this.tracer = tracer;
+  }
+  async execute(toolName, fn) {
+    let lastError;
+    for (let attempt = 1; attempt <= this.config.maxAttempts; attempt++) {
+      try {
+        return await fn();
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        const retryable = this.config.retryableErrors.some(
+          (pattern) => lastError.message.toLowerCase().includes(pattern.toLowerCase())
+        );
+        if (!retryable || attempt >= this.config.maxAttempts) {
+          throw lastError;
+        }
+        const delay = this.config.baseDelay * attempt;
+        if (this.tracer) {
+          this.tracer.traceRetry(attempt, this.config.maxAttempts, lastError.message, delay);
+        }
+        await new Promise((resolve8) => setTimeout(resolve8, delay));
+      }
+    }
+    throw lastError;
+  }
+};
+
+// src/utils/summary.ts
+function generateSummary(session, stats) {
+  const toolBreakdown = buildToolBreakdown(session);
+  const errorSummary = buildErrorSummary(session);
+  const phaseProgression = buildPhaseProgression(session);
+  const recommendations = generateRecommendations(stats, errorSummary);
+  let status = "success";
+  if (stats.errorCount > 0 && stats.toolSuccessRate < 0.5) {
+    status = "failed";
+  } else if (stats.errorCount > 0 || stats.toolSuccessRate < 1) {
+    status = "partial";
+  }
+  return {
+    sessionId: session.sessionId,
+    status,
+    duration: formatDuration(stats.totalDuration),
+    stats: {
+      llmCalls: stats.llmCallCount,
+      toolCalls: stats.toolCallCount,
+      toolSuccessRate: (stats.toolSuccessRate * 100).toFixed(1) + "%",
+      errors: stats.errorCount,
+      retries: stats.retryCount
+    },
+    toolBreakdown,
+    errorSummary,
+    phaseProgression,
+    recommendations
+  };
+}
+function formatSummary(summary) {
+  const lines = [];
+  lines.push("\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550");
+  lines.push("  Agent \u6267\u884C\u6458\u8981");
+  lines.push("\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550");
+  lines.push("");
+  const statusIcon = summary.status === "success" ? "\u2713" : summary.status === "partial" ? "\u26A0" : "\u2717";
+  lines.push(`  ${statusIcon} \u72B6\u6001: ${summary.status}`);
+  lines.push(`  \u23F1 \u8017\u65F6: ${summary.duration}`);
+  lines.push("");
+  lines.push("  \u2500\u2500 \u7EDF\u8BA1 \u2500\u2500");
+  lines.push(`  LLM \u8C03\u7528:     ${summary.stats.llmCalls}`);
+  lines.push(`  \u5DE5\u5177\u8C03\u7528:     ${summary.stats.toolCalls}`);
+  lines.push(`  \u5DE5\u5177\u6210\u529F\u7387:   ${summary.stats.toolSuccessRate}`);
+  lines.push(`  \u9519\u8BEF\u6570:       ${summary.stats.errors}`);
+  lines.push(`  \u91CD\u8BD5\u6B21\u6570:     ${summary.stats.retries}`);
+  lines.push("");
+  if (summary.toolBreakdown.length > 0) {
+    lines.push("  \u2500\u2500 \u5DE5\u5177\u660E\u7EC6 \u2500\u2500");
+    for (const tool2 of summary.toolBreakdown) {
+      const icon = tool2.failures > 0 ? "\u26A0" : "\u2713";
+      lines.push(`  ${icon} ${tool2.name}: ${tool2.calls}\u6B21 (${tool2.successes}\u6210\u529F/${tool2.failures}\u5931\u8D25)`);
+    }
+    lines.push("");
+  }
+  if (summary.errorSummary.length > 0) {
+    lines.push("  \u2500\u2500 \u9519\u8BEF\u6458\u8981 \u2500\u2500");
+    for (const err of summary.errorSummary) {
+      lines.push(`  \u2717 ${err.message} (${err.count}\u6B21, ${err.category})`);
+    }
+    lines.push("");
+  }
+  if (summary.phaseProgression.length > 0) {
+    lines.push("  \u2500\u2500 \u9636\u6BB5\u8FDB\u5C55 \u2500\u2500");
+    lines.push(`  ${summary.phaseProgression.join(" \u2192 ")}`);
+    lines.push("");
+  }
+  if (summary.recommendations.length > 0) {
+    lines.push("  \u2500\u2500 \u5EFA\u8BAE \u2500\u2500");
+    for (const rec of summary.recommendations) {
+      lines.push(`  \u2192 ${rec}`);
+    }
+    lines.push("");
+  }
+  lines.push("\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550");
+  return lines.join("\n");
+}
+function buildToolBreakdown(session) {
+  const toolMap = /* @__PURE__ */ new Map();
+  for (const event of session.events) {
+    if (event.type === "tool_call") {
+      const name = event.data.toolName;
+      const existing = toolMap.get(name) || { calls: 0, successes: 0, failures: 0 };
+      existing.calls++;
+      toolMap.set(name, existing);
+    }
+    if (event.type === "tool_result") {
+      const name = event.data.toolName;
+      const existing = toolMap.get(name) || { calls: 0, successes: 0, failures: 0 };
+      if (event.data.success) {
+        existing.successes++;
+      } else {
+        existing.failures++;
+      }
+      toolMap.set(name, existing);
+    }
+  }
+  return Array.from(toolMap.entries()).map(([name, stats]) => ({
+    name,
+    ...stats
+  }));
+}
+function buildErrorSummary(session) {
+  const errorMap = /* @__PURE__ */ new Map();
+  for (const event of session.events) {
+    if (event.type === "error") {
+      const msg = event.data.message || "Unknown error";
+      const existing = errorMap.get(msg) || { count: 0, category: "unknown" };
+      existing.count++;
+      if (event.tags?.includes("retry")) {
+        existing.category = "transient";
+      }
+      errorMap.set(msg, existing);
+    }
+  }
+  return Array.from(errorMap.entries()).map(([message, stats]) => ({
+    message,
+    ...stats
+  }));
+}
+function buildPhaseProgression(session) {
+  const phases = [];
+  for (const event of session.events) {
+    if (event.type === "phase_advance") {
+      const from = event.data.from;
+      const to = event.data.to;
+      if (phases.length === 0) phases.push(from);
+      phases.push(to);
+    }
+  }
+  return phases;
+}
+function generateRecommendations(stats, errorSummary) {
+  const recs = [];
+  if (stats.toolSuccessRate < 0.8 && stats.toolCallCount > 0) {
+    recs.push("\u5DE5\u5177\u6210\u529F\u7387\u504F\u4F4E\uFF0C\u68C0\u67E5\u5DE5\u5177\u53C2\u6570\u5B9A\u4E49\u662F\u5426\u6E05\u6670\uFF0C\u6216\u589E\u52A0\u8F93\u5165\u6821\u9A8C");
+  }
+  if (stats.retryCount > 3) {
+    recs.push("\u91CD\u8BD5\u6B21\u6570\u8FC7\u591A\uFF0C\u8003\u8651\u589E\u52A0\u8D85\u65F6\u65F6\u95F4\u6216\u68C0\u67E5\u7F51\u7EDC\u7A33\u5B9A\u6027");
+  }
+  if (stats.llmCallCount > 8) {
+    recs.push("LLM \u8C03\u7528\u6B21\u6570\u8F83\u591A\uFF0C\u8003\u8651\u4F18\u5316 prompt \u51CF\u5C11\u4E0D\u5FC5\u8981\u7684\u5FAA\u73AF");
+  }
+  const hasPermanentErrors = errorSummary.some((e) => e.category === "permanent");
+  if (hasPermanentErrors) {
+    recs.push("\u5B58\u5728\u6C38\u4E45\u6027\u9519\u8BEF\uFF08\u5982\u8BA4\u8BC1\u5931\u8D25\uFF09\uFF0C\u8BF7\u68C0\u67E5 API Key \u6216\u6743\u9650\u914D\u7F6E");
+  }
+  if (stats.totalDuration > 12e4) {
+    recs.push("\u6267\u884C\u65F6\u95F4\u8D85\u8FC7 2 \u5206\u949F\uFF0C\u8003\u8651\u62C6\u5206\u4EFB\u52A1\u6216\u51CF\u5C11\u4E0A\u4E0B\u6587\u957F\u5EA6");
+  }
+  return recs;
+}
+function formatDuration(ms) {
+  if (ms < 1e3) return `${ms}ms`;
+  if (ms < 6e4) return `${(ms / 1e3).toFixed(1)}s`;
+  const minutes = Math.floor(ms / 6e4);
+  const seconds = Math.floor(ms % 6e4 / 1e3);
+  return `${minutes}m ${seconds}s`;
+}
+
 // src/agents/orchestrator.ts
 var AgentOrchestrator = class {
   constructor(aiClient, contextManager2, toolRegistry2, projectRoot) {
@@ -3004,6 +3466,7 @@ var AgentOrchestrator = class {
       designConfirmed: false,
       sessionData: {}
     };
+    this.toolRetry = new ToolRetryExecutor({ maxAttempts: 2 });
     this.initPluginManager();
   }
   aiClient;
@@ -3013,6 +3476,8 @@ var AgentOrchestrator = class {
   controller;
   context;
   sessionInitialized = false;
+  tracer = null;
+  toolRetry;
   // 初始化插件管理器
   async initPluginManager() {
     try {
@@ -3024,64 +3489,104 @@ var AgentOrchestrator = class {
   }
   // 执行用户输入
   async execute(userInput) {
-    const isFlutterTask = await this.classifyTask(userInput);
-    if (isFlutterTask === null) {
-      return {
-        success: false,
-        output: "",
-        error: "\u6A21\u578B\u4E0D\u53EF\u7528\uFF0C\u8BF7\u68C0\u67E5 API \u914D\u7F6E\uFF08/model\uFF09"
-      };
-    }
-    if (!isFlutterTask) {
-      return await this.directResponse(userInput);
-    }
-    const promptHookResult = await hookManager.execute("PromptSubmit", {
-      event: "PromptSubmit",
-      userPrompt: userInput
-    });
-    if (promptHookResult.action === "block") {
-      return {
-        success: false,
-        output: "",
-        error: promptHookResult.message || "\u64CD\u4F5C\u88AB\u94A9\u5B50\u963B\u6B62"
-      };
-    }
-    const securityResult = securityChecker.checkCode(userInput);
-    if (!securityResult.passed && securityResult.score < 50) {
-      forgeLogger.logWarning(`\u5B89\u5168\u68C0\u67E5\u8B66\u544A (\u5206\u6570: ${securityResult.score})`);
-      for (const issue of securityResult.issues) {
-        forgeLogger.logWarning(`  - ${issue.pattern.message}: ${issue.match}`);
+    const startTime = Date.now();
+    const session = sessionManager.get();
+    const traceId = session?.id || `orch-${Date.now()}`;
+    this.tracer = initTracer(traceId, { consoleOutput: false });
+    this.tracer.record("user_input", { input: userInput });
+    this.toolRetry = new ToolRetryExecutor({ maxAttempts: 2 }, this.tracer);
+    try {
+      this.tracer.traceLLMCall("classifier", 1, 0);
+      const classifyStart = Date.now();
+      const isFlutterTask = await this.classifyTask(userInput);
+      this.tracer.traceLLMResponse(
+        isFlutterTask ? "\u662F" : "\u5426",
+        0,
+        Date.now() - classifyStart
+      );
+      if (isFlutterTask === null) {
+        this.tracer.traceError(new Error("\u6A21\u578B\u4E0D\u53EF\u7528"), "classifyTask");
+        this.finishTrace();
+        return {
+          success: false,
+          output: "",
+          error: "\u6A21\u578B\u4E0D\u53EF\u7528\uFF0C\u8BF7\u68C0\u67E5 API \u914D\u7F6E\uFF08/model\uFF09"
+        };
       }
-    }
-    if (!this.sessionInitialized) {
-      sessionManager.init(this.context.projectRoot, userInput);
-      this.sessionInitialized = true;
-      await hookManager.execute("SessionStart", {
-        event: "SessionStart",
-        sessionState: sessionManager.get()
+      if (!isFlutterTask) {
+        this.tracer.record("state_change", { from: "classify", to: "direct_response", reason: "\u975E Flutter \u4EFB\u52A1" });
+        const result2 = await this.directResponse(userInput);
+        this.finishTrace();
+        return result2;
+      }
+      const promptHookResult = await hookManager.execute("PromptSubmit", {
+        event: "PromptSubmit",
+        userPrompt: userInput
       });
+      if (promptHookResult.action === "block") {
+        this.tracer.traceWarning("PromptSubmit hook blocked", { message: promptHookResult.message });
+        this.finishTrace();
+        return {
+          success: false,
+          output: "",
+          error: promptHookResult.message || "\u64CD\u4F5C\u88AB\u94A9\u5B50\u963B\u6B62"
+        };
+      }
+      const securityResult = securityChecker.checkCode(userInput);
+      if (!securityResult.passed && securityResult.score < 50) {
+        this.tracer.traceWarning(`\u5B89\u5168\u68C0\u67E5\u8B66\u544A (\u5206\u6570: ${securityResult.score})`);
+        forgeLogger.logWarning(`\u5B89\u5168\u68C0\u67E5\u8B66\u544A (\u5206\u6570: ${securityResult.score})`);
+      }
+      if (!this.sessionInitialized) {
+        sessionManager.init(this.context.projectRoot, userInput);
+        this.sessionInitialized = true;
+        await hookManager.execute("SessionStart", {
+          event: "SessionStart",
+          sessionState: sessionManager.get()
+        });
+      }
+      sessionManager.setState("executing");
+      sessionManager.addHistory("user_input", "user", userInput);
+      if (autonomousMode.isEnabled() && !autonomousMode.canAutoProceed(userInput)) {
+        this.tracer.traceWarning("\u9AD8\u98CE\u9669\u64CD\u4F5C\uFF0C\u7B49\u5F85\u7528\u6237\u786E\u8BA4");
+        forgeLogger.logWaiting("\u68C0\u6D4B\u5230\u9AD8\u98CE\u9669\u64CD\u4F5C\uFF0C\u7B49\u5F85\u7528\u6237\u786E\u8BA4");
+        sessionManager.waitForInput();
+        this.finishTrace();
+        return {
+          success: true,
+          output: "[f-forge] \u68C0\u6D4B\u5230\u9AD8\u98CE\u9669\u64CD\u4F5C\uFF0C\u8BF7\u786E\u8BA4\u662F\u5426\u7EE7\u7EED",
+          needsUserInput: true
+        };
+      }
+      const targetAgent = this.controller.route(userInput);
+      this.tracer.record("state_change", { from: "classify", to: "route", agent: targetAgent });
+      const prevPhase = this.context.currentPhase;
+      this.updateContext(targetAgent);
+      if (this.context.currentPhase !== prevPhase) {
+        this.tracer.tracePhaseAdvance(prevPhase, this.context.currentPhase);
+      }
+      sessionManager.setActiveAgent(targetAgent);
+      sessionManager.setPhase(this.context.currentPhase);
+      forgeLogger.enterController();
+      forgeLogger.logPhase(this.context.currentPhase);
+      const dispatchStart = Date.now();
+      const result = await this.controller.dispatch(targetAgent, userInput, this.context);
+      this.tracer.record("state_change", {
+        from: "dispatch",
+        to: result.success ? "success" : "failed",
+        agent: targetAgent,
+        duration: Date.now() - dispatchStart
+      });
+      this.processResult(result);
+      sessionManager.addHistory("agent_result", targetAgent, result.output);
+      this.finishTrace();
+      return result;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.tracer.traceError(err, "orchestrator.execute");
+      this.finishTrace();
+      throw err;
     }
-    sessionManager.setState("executing");
-    sessionManager.addHistory("user_input", "user", userInput);
-    if (autonomousMode.isEnabled() && !autonomousMode.canAutoProceed(userInput)) {
-      forgeLogger.logWaiting("\u68C0\u6D4B\u5230\u9AD8\u98CE\u9669\u64CD\u4F5C\uFF0C\u7B49\u5F85\u7528\u6237\u786E\u8BA4");
-      sessionManager.waitForInput();
-      return {
-        success: true,
-        output: "[f-forge] \u68C0\u6D4B\u5230\u9AD8\u98CE\u9669\u64CD\u4F5C\uFF0C\u8BF7\u786E\u8BA4\u662F\u5426\u7EE7\u7EED",
-        needsUserInput: true
-      };
-    }
-    const targetAgent = this.controller.route(userInput);
-    this.updateContext(targetAgent);
-    sessionManager.setActiveAgent(targetAgent);
-    sessionManager.setPhase(this.context.currentPhase);
-    forgeLogger.enterController();
-    forgeLogger.logPhase(this.context.currentPhase);
-    const result = await this.controller.dispatch(targetAgent, userInput, this.context);
-    this.processResult(result);
-    sessionManager.addHistory("agent_result", targetAgent, result.output);
-    return result;
   }
   // 非工作流任务：直接回答（带上下文和工具）
   async directResponse(userInput) {
@@ -3126,22 +3631,96 @@ var AgentOrchestrator = class {
       return null;
     }
   }
-  // 流式执行
+  // 流式执行（完整流程：分类 → 路由 → 流式输出）
   async *executeStream(userInput) {
-    if (!this.sessionInitialized) {
-      sessionManager.init(this.context.projectRoot, userInput);
-      this.sessionInitialized = true;
+    const startTime = Date.now();
+    const session = sessionManager.get();
+    const traceId = session?.id || `stream-${Date.now()}`;
+    this.tracer = initTracer(traceId, { consoleOutput: false });
+    this.tracer.record("user_input", { input: userInput });
+    try {
+      this.tracer.traceLLMCall("classifier", 1, 0);
+      const classifyStart = Date.now();
+      const isFlutterTask = await this.classifyTask(userInput);
+      this.tracer.traceLLMResponse(isFlutterTask ? "\u662F" : "\u5426", 0, Date.now() - classifyStart);
+      if (isFlutterTask === null) {
+        this.tracer.traceError(new Error("\u6A21\u578B\u4E0D\u53EF\u7528"), "classifyTask");
+        this.finishTrace();
+        yield { type: "text", content: "\u6A21\u578B\u4E0D\u53EF\u7528\uFF0C\u8BF7\u68C0\u67E5 API \u914D\u7F6E\uFF08/model\uFF09" };
+        return;
+      }
+      if (!isFlutterTask) {
+        this.tracer.record("state_change", { from: "classify", to: "direct_response" });
+        yield* this.directResponseStream(userInput);
+        this.finishTrace();
+        return;
+      }
+      const promptHookResult = await hookManager.execute("PromptSubmit", {
+        event: "PromptSubmit",
+        userPrompt: userInput
+      });
+      if (promptHookResult.action === "block") {
+        this.tracer.traceWarning("PromptSubmit hook blocked");
+        this.finishTrace();
+        yield { type: "text", content: promptHookResult.message || "\u64CD\u4F5C\u88AB\u94A9\u5B50\u963B\u6B62" };
+        return;
+      }
+      if (!this.sessionInitialized) {
+        sessionManager.init(this.context.projectRoot, userInput);
+        this.sessionInitialized = true;
+        await hookManager.execute("SessionStart", {
+          event: "SessionStart",
+          sessionState: sessionManager.get()
+        });
+      }
+      sessionManager.setState("executing");
+      sessionManager.addHistory("user_input", "user", userInput);
+      const targetAgent = this.controller.route(userInput);
+      this.tracer.record("state_change", { from: "classify", to: "route", agent: targetAgent });
+      const prevPhase = this.context.currentPhase;
+      this.updateContext(targetAgent);
+      if (this.context.currentPhase !== prevPhase) {
+        this.tracer.tracePhaseAdvance(prevPhase, this.context.currentPhase);
+      }
+      sessionManager.setActiveAgent(targetAgent);
+      sessionManager.setPhase(this.context.currentPhase);
+      forgeLogger.enterController();
+      forgeLogger.logPhase(this.context.currentPhase);
+      yield* this.controller.executeStream(userInput, this.context);
+      this.tracer.record("state_change", {
+        from: "stream",
+        to: "complete",
+        agent: targetAgent,
+        duration: Date.now() - startTime
+      });
+      sessionManager.addHistory("stream_complete", targetAgent, "");
+      this.finishTrace();
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.tracer.traceError(err, "orchestrator.executeStream");
+      this.finishTrace();
+      throw err;
     }
-    sessionManager.setState("executing");
-    sessionManager.addHistory("user_input", "user", userInput);
-    const targetAgent = this.controller.route(userInput);
-    this.updateContext(targetAgent);
-    sessionManager.setActiveAgent(targetAgent);
-    sessionManager.setPhase(this.context.currentPhase);
-    forgeLogger.enterController();
-    forgeLogger.logPhase(this.context.currentPhase);
-    yield* this.controller.executeStream(userInput, this.context);
-    sessionManager.addHistory("stream_complete", targetAgent, "");
+  }
+  // 非工作流流式回答
+  async *directResponseStream(userInput) {
+    this.contextManager.addUserMessage(userInput);
+    const tools = this.toolRegistry.getAll().map((t) => ({
+      name: t.definition.name,
+      description: t.definition.description,
+      parameters: t.definition.parameters.properties,
+      execute: t.execute
+    }));
+    let fullText = "";
+    for await (const event of this.aiClient.streamWithMessages(
+      this.contextManager.getMessages(),
+      tools,
+      5
+    )) {
+      if (event.type === "text") fullText += event.content;
+      yield event;
+    }
+    this.contextManager.addAssistantMessage(fullText);
   }
   // 更新上下文
   updateContext(targetAgent) {
@@ -3284,6 +3863,24 @@ var AgentOrchestrator = class {
   getHookManager() {
     return hookManager;
   }
+  // 结束 trace 并输出摘要
+  finishTrace() {
+    if (!this.tracer) return;
+    const session = this.tracer.getSession();
+    const stats = this.tracer.getStats();
+    const summary = generateSummary(session, stats);
+    sessionManager.setMetadata("traceStats", stats);
+    sessionManager.setMetadata("traceSummary", summary);
+    this.tracer.end();
+  }
+  // 获取 trace 统计（供 /status 命令使用）
+  getTraceStats() {
+    return this.tracer?.getStats() || null;
+  }
+  // 获取当前 tracer 实例
+  getTracer() {
+    return this.tracer;
+  }
   // 并行执行多个任务
   async parallelExecute(tasks) {
     const agentTasks = tasks.map((task, index) => ({
@@ -3362,7 +3959,7 @@ var ToolRegistry = class {
 var toolRegistry = new ToolRegistry();
 
 // src/tools/scanner.ts
-import { join as join6 } from "path";
+import { join as join7 } from "path";
 
 // src/tools/executor.ts
 import { exec } from "child_process";
@@ -3401,7 +3998,7 @@ async function executeShell(scriptPath, args = [], cwd) {
 }
 
 // src/tools/scanner.ts
-var SCRIPTS_DIR = join6(import.meta.dirname, "..", "..", "scripts");
+var SCRIPTS_DIR = join7(import.meta.dirname, "..", "..", "scripts");
 var scanProjectTool = {
   definition: {
     name: "scan_project",
@@ -3419,7 +4016,7 @@ var scanProjectTool = {
   },
   async execute(args) {
     const { project_root } = args;
-    const scriptPath = join6(SCRIPTS_DIR, "flutter_stack_scan.py");
+    const scriptPath = join7(SCRIPTS_DIR, "flutter_stack_scan.py");
     const result = await executePython(scriptPath, [project_root]);
     return {
       success: result.exitCode === 0,
@@ -3445,7 +4042,7 @@ var detectProjectStateTool = {
   },
   async execute(args) {
     const { project_root } = args;
-    const scriptPath = join6(SCRIPTS_DIR, "detect_project_root_state.py");
+    const scriptPath = join7(SCRIPTS_DIR, "detect_project_root_state.py");
     const result = await executePython(scriptPath, [project_root]);
     return {
       success: result.exitCode === 0,
@@ -3456,8 +4053,8 @@ var detectProjectStateTool = {
 };
 
 // src/tools/validator.ts
-import { join as join7 } from "path";
-var SCRIPTS_DIR2 = join7(import.meta.dirname, "..", "..", "scripts");
+import { join as join8 } from "path";
+var SCRIPTS_DIR2 = join8(import.meta.dirname, "..", "..", "scripts");
 var validateOutputTool = {
   definition: {
     name: "validate_output",
@@ -3483,7 +4080,7 @@ var validateOutputTool = {
   },
   async execute(args) {
     const { output, require_s4, require_complete } = args;
-    const scriptPath = join7(SCRIPTS_DIR2, "validate_output.sh");
+    const scriptPath = join8(SCRIPTS_DIR2, "validate_output.sh");
     const scriptArgs = [];
     if (require_s4 === "true") scriptArgs.push("--require-s4");
     if (require_complete === "true") scriptArgs.push("--require-complete");
@@ -3515,7 +4112,7 @@ var validateDocsSyncTool = {
   },
   async execute(args) {
     const { project_root } = args;
-    const scriptPath = join7(SCRIPTS_DIR2, "validate_docs_sync.py");
+    const scriptPath = join8(SCRIPTS_DIR2, "validate_docs_sync.py");
     const result = await executeShell(scriptPath, [project_root]);
     return {
       success: result.exitCode === 0,
@@ -3526,8 +4123,8 @@ var validateDocsSyncTool = {
 };
 
 // src/tools/guardrails.ts
-import { join as join8 } from "path";
-var SCRIPTS_DIR3 = join8(import.meta.dirname, "..", "..", "scripts");
+import { join as join9 } from "path";
+var SCRIPTS_DIR3 = join9(import.meta.dirname, "..", "..", "scripts");
 var checkGuardrailsTool = {
   definition: {
     name: "check_guardrails",
@@ -3549,7 +4146,7 @@ var checkGuardrailsTool = {
   },
   async execute(args) {
     const { project_root, cached } = args;
-    const scriptPath = join8(SCRIPTS_DIR3, "check_project_guardrails.sh");
+    const scriptPath = join9(SCRIPTS_DIR3, "check_project_guardrails.sh");
     const scriptArgs = [project_root];
     if (cached !== "false") {
       scriptArgs.push("--cached", "300");
@@ -3579,7 +4176,7 @@ var initGuardrailsTool = {
   },
   async execute(args) {
     const { project_root } = args;
-    const scriptPath = join8(SCRIPTS_DIR3, "init_project_guardrails.py");
+    const scriptPath = join9(SCRIPTS_DIR3, "init_project_guardrails.py");
     const result = await executePython(scriptPath, [project_root]);
     return {
       success: result.exitCode === 0,
@@ -3590,8 +4187,8 @@ var initGuardrailsTool = {
 };
 
 // src/tools/classifier.ts
-import { join as join9 } from "path";
-var SCRIPTS_DIR4 = join9(import.meta.dirname, "..", "..", "scripts");
+import { join as join10 } from "path";
+var SCRIPTS_DIR4 = join10(import.meta.dirname, "..", "..", "scripts");
 var classifyTaskTool = {
   definition: {
     name: "classify_task",
@@ -3613,7 +4210,7 @@ var classifyTaskTool = {
   },
   async execute(args) {
     const { user_input, project_root } = args;
-    const scriptPath = join9(SCRIPTS_DIR4, "classify_task.sh");
+    const scriptPath = join10(SCRIPTS_DIR4, "classify_task.sh");
     const scriptArgs = [JSON.stringify(user_input)];
     if (project_root) {
       scriptArgs.push("--project-root", project_root);
@@ -3628,8 +4225,8 @@ var classifyTaskTool = {
 };
 
 // src/tools/filesystem.ts
-import { readFileSync as readFileSync6, writeFileSync as writeFileSync4, existsSync as existsSync5, mkdirSync as mkdirSync4, readdirSync as readdirSync3, statSync as statSync2 } from "fs";
-import { join as join10, resolve as resolve6, dirname } from "path";
+import { readFileSync as readFileSync6, writeFileSync as writeFileSync5, existsSync as existsSync6, mkdirSync as mkdirSync5, readdirSync as readdirSync3, statSync as statSync2 } from "fs";
+import { join as join11, resolve as resolve6, dirname } from "path";
 var readFileTool = {
   definition: {
     name: "read_file",
@@ -3656,7 +4253,7 @@ var readFileTool = {
   async execute(args) {
     const { path, start_line, end_line } = args;
     const resolvedPath = resolve6(path);
-    if (!existsSync5(resolvedPath)) {
+    if (!existsSync6(resolvedPath)) {
       return {
         success: false,
         output: "",
@@ -3713,10 +4310,10 @@ var writeFileTool = {
     const resolvedPath = resolve6(path);
     try {
       const dir = dirname(resolvedPath);
-      if (!existsSync5(dir)) {
-        mkdirSync4(dir, { recursive: true });
+      if (!existsSync6(dir)) {
+        mkdirSync5(dir, { recursive: true });
       }
-      writeFileSync4(resolvedPath, content, "utf-8");
+      writeFileSync5(resolvedPath, content, "utf-8");
       return {
         success: true,
         output: `\u6587\u4EF6\u5DF2\u5199\u5165: ${resolvedPath}`
@@ -3757,7 +4354,7 @@ var editFileTool = {
   async execute(args) {
     const { path, old_text, new_text } = args;
     const resolvedPath = resolve6(path);
-    if (!existsSync5(resolvedPath)) {
+    if (!existsSync6(resolvedPath)) {
       return {
         success: false,
         output: "",
@@ -3774,7 +4371,7 @@ var editFileTool = {
         };
       }
       const newContent = content.replace(old_text, new_text);
-      writeFileSync4(resolvedPath, newContent, "utf-8");
+      writeFileSync5(resolvedPath, newContent, "utf-8");
       return {
         success: true,
         output: `\u6587\u4EF6\u5DF2\u7F16\u8F91: ${resolvedPath}`
@@ -3811,7 +4408,7 @@ var listFilesTool = {
   async execute(args) {
     const { path, recursive } = args;
     const resolvedPath = resolve6(path || ".");
-    if (!existsSync5(resolvedPath)) {
+    if (!existsSync6(resolvedPath)) {
       return {
         success: false,
         output: "",
@@ -3881,7 +4478,7 @@ function listDirectory(dirPath, recursive, prefix = "") {
   const entries = readdirSync3(dirPath);
   for (const entry of entries) {
     if (entry.startsWith(".") || entry === "node_modules" || entry === "dist") continue;
-    const fullPath = join10(dirPath, entry);
+    const fullPath = join11(dirPath, entry);
     const stat = statSync2(fullPath);
     const isDir = stat.isDirectory();
     items.push(`${prefix}${isDir ? "\u{1F4C1}" : "\u{1F4C4}"} ${entry}`);
@@ -3898,7 +4495,7 @@ function searchInFiles(dirPath, pattern, filePattern) {
     const entries = readdirSync3(currentDir);
     for (const entry of entries) {
       if (entry.startsWith(".") || entry === "node_modules" || entry === "dist") continue;
-      const fullPath = join10(currentDir, entry);
+      const fullPath = join11(currentDir, entry);
       const stat = statSync2(fullPath);
       if (stat.isDirectory()) {
         searchDir(fullPath);
@@ -3924,6 +4521,262 @@ function searchInFiles(dirPath, pattern, filePattern) {
 function matchGlob(filename, pattern) {
   const regexPattern = pattern.replace(/\./g, "\\.").replace(/\*/g, ".*").replace(/\?/g, ".");
   return new RegExp(`^${regexPattern}$`).test(filename);
+}
+var globTool = {
+  definition: {
+    name: "glob",
+    description: "\u6309\u6A21\u5F0F\u641C\u7D22\u6587\u4EF6\uFF08\u652F\u6301 **/*.dart\u3001src/**/*.ts \u7B49 glob \u6A21\u5F0F\uFF09",
+    parameters: {
+      type: "object",
+      properties: {
+        pattern: {
+          type: "string",
+          description: "glob \u6A21\u5F0F\uFF0C\u5982 **/*.dart\u3001src/**/*.ts"
+        },
+        path: {
+          type: "string",
+          description: "\u641C\u7D22\u6839\u76EE\u5F55\uFF08\u9ED8\u8BA4\u5F53\u524D\u76EE\u5F55\uFF09"
+        }
+      },
+      required: ["pattern"]
+    }
+  },
+  async execute(args) {
+    const { pattern, path: rootPath } = args;
+    const root = resolve6(rootPath || ".");
+    if (!existsSync6(root)) {
+      return { success: false, output: "", error: `\u76EE\u5F55\u4E0D\u5B58\u5728: ${root}` };
+    }
+    try {
+      const files = globMatch(root, pattern);
+      return {
+        success: true,
+        output: files.length > 0 ? files.join("\n") : "\u672A\u627E\u5230\u5339\u914D\u6587\u4EF6"
+      };
+    } catch (error) {
+      return { success: false, output: "", error: `\u641C\u7D22\u5931\u8D25: ${error instanceof Error ? error.message : String(error)}` };
+    }
+  }
+};
+function globMatch(root, pattern) {
+  const results = [];
+  const parts = pattern.split("/");
+  const ignoreDirs = /* @__PURE__ */ new Set(["node_modules", ".git", "dist", "build", ".dart_tool", ".idea", ".vscode"]);
+  function walk(dir, depth) {
+    if (depth > 20) return;
+    let entries;
+    try {
+      entries = readdirSync3(dir);
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (ignoreDirs.has(entry)) continue;
+      const fullPath = join11(dir, entry);
+      let stat;
+      try {
+        stat = statSync2(fullPath);
+      } catch {
+        continue;
+      }
+      const relativePath = fullPath.slice(root.length + 1);
+      if (stat.isDirectory()) {
+        if (parts.includes("**") || depth < parts.length - 1) {
+          walk(fullPath, depth + 1);
+        }
+      } else {
+        if (matchGlobPattern(relativePath, pattern)) {
+          results.push(relativePath);
+        }
+      }
+    }
+    if (results.length > 200) return;
+  }
+  walk(root, 0);
+  return results.slice(0, 200);
+}
+function matchGlobPattern(filePath, pattern) {
+  const regexStr = pattern.replace(/\./g, "\\.").replace(/\*\*\//g, "(.+/)?").replace(/\*/g, "[^/]*").replace(/\?/g, "[^/]");
+  return new RegExp(`^${regexStr}$`).test(filePath);
+}
+var grepTool = {
+  definition: {
+    name: "grep",
+    description: "\u5728\u6587\u4EF6\u4E2D\u641C\u7D22\u5185\u5BB9\uFF08\u652F\u6301\u6B63\u5219\u3001\u6587\u4EF6\u7C7B\u578B\u8FC7\u6EE4\u3001\u4E0A\u4E0B\u6587\u884C\uFF09",
+    parameters: {
+      type: "object",
+      properties: {
+        pattern: {
+          type: "string",
+          description: "\u641C\u7D22\u6A21\u5F0F\uFF08\u6B63\u5219\u8868\u8FBE\u5F0F\uFF09"
+        },
+        path: {
+          type: "string",
+          description: "\u641C\u7D22\u76EE\u5F55\uFF08\u9ED8\u8BA4\u5F53\u524D\u76EE\u5F55\uFF09"
+        },
+        glob: {
+          type: "string",
+          description: "\u6587\u4EF6\u540D\u8FC7\u6EE4\uFF0C\u5982 *.ts\u3001*.dart"
+        },
+        context: {
+          type: "number",
+          description: "\u663E\u793A\u5339\u914D\u884C\u524D\u540E N \u884C\u4E0A\u4E0B\u6587\uFF08\u9ED8\u8BA4 0\uFF09"
+        }
+      },
+      required: ["pattern"]
+    }
+  },
+  async execute(args) {
+    const { pattern, path: searchPath, glob: fileGlob, context: ctxLines } = args;
+    const root = resolve6(searchPath || ".");
+    const contextN = ctxLines ? parseInt(String(ctxLines)) : 0;
+    if (!existsSync6(root)) {
+      return { success: false, output: "", error: `\u76EE\u5F55\u4E0D\u5B58\u5728: ${root}` };
+    }
+    try {
+      const results = grepSearch(root, pattern, fileGlob, contextN);
+      return {
+        success: true,
+        output: results.length > 0 ? results.join("\n") : "\u672A\u627E\u5230\u5339\u914D\u5185\u5BB9"
+      };
+    } catch (error) {
+      return { success: false, output: "", error: `\u641C\u7D22\u5931\u8D25: ${error instanceof Error ? error.message : String(error)}` };
+    }
+  }
+};
+function grepSearch(root, pattern, fileGlob, contextN = 0) {
+  const results = [];
+  const regex = new RegExp(pattern, "gi");
+  const ignoreDirs = /* @__PURE__ */ new Set(["node_modules", ".git", "dist", "build", ".dart_tool", ".idea", ".vscode"]);
+  function walk(dir) {
+    if (results.length >= 100) return;
+    let entries;
+    try {
+      entries = readdirSync3(dir);
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (results.length >= 100) return;
+      if (ignoreDirs.has(entry)) continue;
+      const fullPath = join11(dir, entry);
+      let stat;
+      try {
+        stat = statSync2(fullPath);
+      } catch {
+        continue;
+      }
+      if (stat.isDirectory()) {
+        walk(fullPath);
+      } else {
+        if (fileGlob && !matchGlob(entry, fileGlob)) continue;
+        if (stat.size > 1024 * 1024) continue;
+        try {
+          const content = readFileSync6(fullPath, "utf-8");
+          const lines = content.split("\n");
+          const relativePath = fullPath.slice(root.length + 1).replace(/^\//, "");
+          for (let i = 0; i < lines.length; i++) {
+            if (regex.test(lines[i])) {
+              regex.lastIndex = 0;
+              if (contextN > 0) {
+                const start = Math.max(0, i - contextN);
+                for (let j = start; j < i; j++) {
+                  results.push(`${relativePath}:${j + 1}- ${lines[j]}`);
+                }
+              }
+              results.push(`${relativePath}:${i + 1}: ${lines[i]}`);
+              if (contextN > 0) {
+                const end = Math.min(lines.length - 1, i + contextN);
+                for (let j = i + 1; j <= end; j++) {
+                  results.push(`${relativePath}:${j + 1}- ${lines[j]}`);
+                }
+                results.push("");
+              }
+            } else {
+              regex.lastIndex = 0;
+            }
+          }
+        } catch {
+        }
+      }
+    }
+  }
+  walk(root);
+  return results.slice(0, 200);
+}
+var lsTool = {
+  definition: {
+    name: "ls",
+    description: "\u5217\u51FA\u76EE\u5F55\u7ED3\u6784\uFF08\u6811\u5F62\u5C55\u793A\uFF09",
+    parameters: {
+      type: "object",
+      properties: {
+        path: {
+          type: "string",
+          description: "\u76EE\u5F55\u8DEF\u5F84\uFF08\u9ED8\u8BA4\u5F53\u524D\u76EE\u5F55\uFF09"
+        },
+        depth: {
+          type: "number",
+          description: "\u9012\u5F52\u6DF1\u5EA6\uFF08\u9ED8\u8BA4 2\uFF09"
+        }
+      },
+      required: []
+    }
+  },
+  async execute(args) {
+    const { path: dirPath, depth: depthStr } = args;
+    const root = resolve6(dirPath || ".");
+    const maxDepth = depthStr ? parseInt(String(depthStr)) : 2;
+    if (!existsSync6(root)) {
+      return { success: false, output: "", error: `\u76EE\u5F55\u4E0D\u5B58\u5728: ${root}` };
+    }
+    try {
+      const lines = lsTree(root, maxDepth);
+      return { success: true, output: lines.join("\n") };
+    } catch (error) {
+      return { success: false, output: "", error: `\u5217\u51FA\u5931\u8D25: ${error instanceof Error ? error.message : String(error)}` };
+    }
+  }
+};
+function lsTree(root, maxDepth) {
+  const ignoreDirs = /* @__PURE__ */ new Set(["node_modules", ".git", "dist", "build", ".dart_tool"]);
+  const lines = [root + "/"];
+  function walk(dir, prefix, depth) {
+    if (depth >= maxDepth) return;
+    let entries;
+    try {
+      entries = readdirSync3(dir).sort((a, b) => {
+        const aIsDir = statSync2(join11(dir, a)).isDirectory();
+        const bIsDir = statSync2(join11(dir, b)).isDirectory();
+        if (aIsDir !== bIsDir) return aIsDir ? -1 : 1;
+        return a.localeCompare(b);
+      });
+    } catch {
+      return;
+    }
+    entries = entries.filter((e) => !ignoreDirs.has(e));
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const isLast = i === entries.length - 1;
+      const connector = isLast ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 ";
+      const fullPath = join11(dir, entry);
+      let stat;
+      try {
+        stat = statSync2(fullPath);
+      } catch {
+        continue;
+      }
+      const isDir = stat.isDirectory();
+      const display = isDir ? entry + "/" : entry;
+      lines.push(prefix + connector + display);
+      if (isDir) {
+        const nextPrefix = prefix + (isLast ? "    " : "\u2502   ");
+        walk(fullPath, nextPrefix, depth + 1);
+      }
+    }
+  }
+  walk(root, "", 0);
+  return lines;
 }
 
 // src/tools/command.ts
@@ -4022,6 +4875,1104 @@ var runCommandWithOutputTool = {
   }
 };
 
+// src/memory/manager.ts
+import { readFileSync as readFileSync7, writeFileSync as writeFileSync6, existsSync as existsSync7, mkdirSync as mkdirSync6, readdirSync as readdirSync4, unlinkSync } from "fs";
+import { join as join12 } from "path";
+import { homedir as homedir6 } from "os";
+
+// src/memory/types.ts
+var DEFAULT_THRESHOLD = {
+  minConfidence: 0.6,
+  minOccurrences: 2,
+  blockTypes: ["temporary", "one_time"],
+  maxEntries: 100
+};
+
+// src/memory/threshold.ts
+function checkThreshold(name, type, content, existingEntries, config) {
+  const threshold = { ...DEFAULT_THRESHOLD, ...config };
+  const suggestions = [];
+  let confidence = 0.5;
+  if (content.trim().length < 10) {
+    return {
+      allowed: false,
+      reason: "\u5185\u5BB9\u592A\u77ED\uFF0C\u4E0D\u503C\u5F97\u4F5C\u4E3A\u957F\u671F\u8BB0\u5FC6",
+      confidence: 0,
+      suggestions: ["\u8BF7\u63D0\u4F9B\u66F4\u8BE6\u7EC6\u7684\u4FE1\u606F"]
+    };
+  }
+  const oneTimePatterns = [
+    /^(帮我|请|现在|马上|立刻|赶紧)/,
+    /^(运行|执行|启动|停止|重启)/,
+    /^(查看|显示|列出|打印)/,
+    /一下$/,
+    /看看$/
+  ];
+  for (const pattern of oneTimePatterns) {
+    if (pattern.test(content.trim())) {
+      confidence -= 0.3;
+      suggestions.push("\u8FD9\u770B\u8D77\u6765\u662F\u4E00\u6B21\u6027\u6307\u4EE4\uFF0C\u4E0D\u9002\u5408\u4F5C\u4E3A\u957F\u671F\u8BB0\u5FC6");
+    }
+  }
+  const similarCount = countSimilarEntries(content, existingEntries);
+  if (similarCount >= threshold.minOccurrences) {
+    confidence += 0.3;
+  } else if (similarCount >= 1) {
+    confidence += 0.1;
+    suggestions.push("\u5DF2\u6709\u7C7B\u4F3C\u8BB0\u5FC6\uFF0C\u5EFA\u8BAE\u5408\u5E76\u800C\u975E\u65B0\u5EFA");
+  }
+  const typeWeights = {
+    user: 0.2,
+    // 用户偏好通常稳定
+    project: 0.15,
+    // 项目知识较稳定
+    feedback: 0.1,
+    // 反馈可能变化
+    reference: 0.1
+    // 参考资料较稳定
+  };
+  confidence += typeWeights[type] || 0;
+  const keywords = extractKeywords(content);
+  if (keywords.length >= 3) {
+    confidence += 0.15;
+  } else if (keywords.length <= 1) {
+    confidence -= 0.1;
+    suggestions.push("\u4FE1\u606F\u5BC6\u5EA6\u8F83\u4F4E\uFF0C\u5EFA\u8BAE\u8865\u5145\u66F4\u591A\u7EC6\u8282");
+  }
+  const explicitRemember = [
+    /记住/,
+    /记下/,
+    /以后/,
+    /每次都/,
+    /总是/,
+    /不要/,
+    /不喜欢/,
+    /偏好/
+  ];
+  for (const pattern of explicitRemember) {
+    if (pattern.test(content)) {
+      confidence += 0.2;
+      break;
+    }
+  }
+  if (existingEntries.length >= threshold.maxEntries) {
+    return {
+      allowed: true,
+      reason: `\u8BB0\u5FC6\u5DF2\u6EE1\uFF08${existingEntries.length}/${threshold.maxEntries}\uFF09\uFF0C\u5C06\u89E6\u53D1\u538B\u7F29`,
+      confidence: Math.max(0, Math.min(1, confidence)),
+      suggestions: ["\u5EFA\u8BAE\u5148\u538B\u7F29\u6216\u6E05\u7406\u65E7\u8BB0\u5FC6"]
+    };
+  }
+  confidence = Math.max(0, Math.min(1, confidence));
+  const allowed = confidence >= threshold.minConfidence;
+  return {
+    allowed,
+    reason: allowed ? `\u7F6E\u4FE1\u5EA6 ${confidence.toFixed(2)} >= ${threshold.minConfidence}\uFF0C\u5141\u8BB8\u5199\u5165` : `\u7F6E\u4FE1\u5EA6 ${confidence.toFixed(2)} < ${threshold.minConfidence}\uFF0C\u5EFA\u8BAE\u6807\u8BB0\u4E3A\u4E0D\u7A33\u5B9A`,
+    confidence,
+    suggestions
+  };
+}
+function countSimilarEntries(content, entries) {
+  const contentLower = content.toLowerCase();
+  const contentKeywords = extractKeywords(content);
+  let count = 0;
+  for (const entry of entries) {
+    const entryLower = entry.content.toLowerCase();
+    if (entryLower.includes(contentLower) || contentLower.includes(entryLower)) {
+      count++;
+      continue;
+    }
+    const entryKeywords = extractKeywords(entry.content);
+    const overlap = contentKeywords.filter((k) => entryKeywords.includes(k));
+    if (overlap.length >= Math.min(contentKeywords.length, entryKeywords.length) * 0.6) {
+      count++;
+    }
+  }
+  return count;
+}
+function extractKeywords(text) {
+  const stopWords = /* @__PURE__ */ new Set([
+    "\u7684",
+    "\u4E86",
+    "\u662F",
+    "\u5728",
+    "\u6211",
+    "\u6709",
+    "\u548C",
+    "\u5C31",
+    "\u4E0D",
+    "\u4EBA",
+    "\u90FD",
+    "\u4E00",
+    "\u4E00\u4E2A",
+    "\u4E0A",
+    "\u4E5F",
+    "\u5F88",
+    "\u5230",
+    "\u8BF4",
+    "\u8981",
+    "\u53BB",
+    "\u4F60",
+    "\u4F1A",
+    "\u7740",
+    "\u6CA1\u6709",
+    "\u770B",
+    "\u597D",
+    "the",
+    "a",
+    "an",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "do",
+    "does",
+    "did",
+    "will",
+    "would",
+    "could",
+    "should",
+    "may",
+    "might",
+    "can",
+    "to",
+    "of",
+    "in",
+    "for",
+    "on",
+    "with"
+  ]);
+  const words = text.toLowerCase().replace(/[^\w\u4e00-\u9fff]/g, " ").split(/\s+/).filter((w) => w.length > 1 && !stopWords.has(w));
+  return [...new Set(words)];
+}
+
+// src/memory/dedup.ts
+function detectDuplicate(name, content, existingEntries) {
+  if (existingEntries.length === 0) {
+    return { isDuplicate: false, action: "create" };
+  }
+  const contentLower = content.toLowerCase().trim();
+  const contentKeywords = extractKeywords2(contentLower);
+  let bestMatch = null;
+  let bestSimilarity = 0;
+  for (const entry of existingEntries) {
+    if (entry.name === name) continue;
+    const similarity = calculateSimilarity(contentLower, entry.content.toLowerCase(), contentKeywords, entry);
+    if (similarity > bestSimilarity) {
+      bestSimilarity = similarity;
+      bestMatch = entry;
+    }
+  }
+  if (bestSimilarity > 0.85 && bestMatch) {
+    return {
+      isDuplicate: true,
+      duplicateOf: bestMatch.name,
+      similarity: bestSimilarity,
+      action: "skip"
+    };
+  }
+  if (bestSimilarity > 0.6 && bestMatch) {
+    return {
+      isDuplicate: true,
+      duplicateOf: bestMatch.name,
+      similarity: bestSimilarity,
+      action: "merge"
+    };
+  }
+  return { isDuplicate: false, action: "create" };
+}
+function mergeMemories(existing, newContent) {
+  const existingLines = existing.content.split("\n").filter((l) => l.trim());
+  const newLines = newContent.split("\n").filter((l) => l.trim());
+  const mergedSet = /* @__PURE__ */ new Set([...existingLines, ...newLines]);
+  const mergedContent = Array.from(mergedSet).join("\n");
+  return {
+    content: mergedContent,
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    confidence: Math.min(1, existing.confidence + 0.1),
+    // 合并后置信度略升
+    source: "merge"
+  };
+}
+function calculateSimilarity(content1, content2, keywords1, entry2) {
+  if (content1 === content2) return 1;
+  if (content2.includes(content1) || content1.includes(content2)) return 0.9;
+  const keywords2 = extractKeywords2(content2);
+  if (keywords1.length === 0 || keywords2.length === 0) return 0;
+  const overlap = keywords1.filter((k) => keywords2.includes(k));
+  const unionSize = (/* @__PURE__ */ new Set([...keywords1, ...keywords2])).size;
+  const jaccardSimilarity = overlap.length / unionSize;
+  let tagBonus = 0;
+  if (entry2.tags && entry2.tags.length > 0) {
+    const content1Tags = extractTags(content1);
+    const tagOverlap = content1Tags.filter((t) => entry2.tags.includes(t));
+    if (tagOverlap.length > 0) {
+      tagBonus = 0.1;
+    }
+  }
+  const typeBonus = 0.05;
+  return Math.min(1, jaccardSimilarity + tagBonus + typeBonus);
+}
+function extractKeywords2(text) {
+  const stopWords = /* @__PURE__ */ new Set([
+    "\u7684",
+    "\u4E86",
+    "\u662F",
+    "\u5728",
+    "\u6211",
+    "\u6709",
+    "\u548C",
+    "\u5C31",
+    "\u4E0D",
+    "\u4EBA",
+    "\u90FD",
+    "\u4E00",
+    "\u4E00\u4E2A",
+    "\u4E0A",
+    "\u4E5F",
+    "\u5F88",
+    "\u5230",
+    "\u8BF4",
+    "\u8981",
+    "\u53BB",
+    "\u4F60",
+    "\u4F1A",
+    "\u7740",
+    "\u6CA1\u6709",
+    "\u770B",
+    "\u597D",
+    "the",
+    "a",
+    "an",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "do",
+    "does",
+    "did",
+    "will",
+    "would",
+    "could",
+    "should",
+    "may",
+    "might",
+    "can",
+    "to",
+    "of",
+    "in",
+    "for",
+    "on",
+    "with"
+  ]);
+  return text.toLowerCase().replace(/[^\w\u4e00-\u9fff]/g, " ").split(/\s+/).filter((w) => w.length > 1 && !stopWords.has(w));
+}
+function extractTags(text) {
+  const tags = [];
+  const patterns = [
+    [/flutter/i, "flutter"],
+    [/dart/i, "dart"],
+    [/ios/i, "ios"],
+    [/android/i, "android"],
+    [/react\s*native/i, "react-native"],
+    [/api/i, "api"],
+    [/数据库|database|sqlite|supabase/i, "database"],
+    [/状态管理|state\s*management|riverpod|bloc|provider/i, "state-management"],
+    [/测试|test/i, "testing"],
+    [/部署|deploy|ci\/cd/i, "deployment"],
+    [/性能|performance/i, "performance"],
+    [/安全|security/i, "security"],
+    [/ui|界面|布局|layout/i, "ui"],
+    [/架构|architecture/i, "architecture"]
+  ];
+  for (const [pattern, tag] of patterns) {
+    if (pattern.test(text)) tags.push(tag);
+  }
+  return tags;
+}
+
+// src/memory/compress.ts
+function compressMemories(entries, options) {
+  const maxEntries = options?.maxEntries || 100;
+  const expireDays = options?.expireDays || 30;
+  const minAccessCount = options?.minAccessCount || 0;
+  const removed = [];
+  let compressed = [...entries];
+  compressed = expireOldMemories(compressed, expireDays, removed);
+  compressed = expireLowValueMemories(compressed, minAccessCount, removed);
+  compressed = mergeSimilarMemories(compressed, removed);
+  if (compressed.length > maxEntries) {
+    compressed = evictByPriority(compressed, maxEntries, removed);
+  }
+  const summary = generateCompressSummary(entries.length, compressed.length, removed);
+  return { compressed, removed, summary };
+}
+function expireOldMemories(entries, expireDays, removed) {
+  const cutoff = /* @__PURE__ */ new Date();
+  cutoff.setDate(cutoff.getDate() - expireDays);
+  return entries.filter((entry) => {
+    const lastAccess = new Date(entry.lastAccessedAt || entry.updatedAt);
+    if (lastAccess < cutoff && entry.accessCount === 0) {
+      removed.push(entry.name);
+      return false;
+    }
+    return true;
+  });
+}
+function expireLowValueMemories(entries, minAccessCount, removed) {
+  return entries.filter((entry) => {
+    if (!entry.stable && entry.accessCount < minAccessCount && entry.confidence < 0.4) {
+      removed.push(entry.name);
+      return false;
+    }
+    return true;
+  });
+}
+function mergeSimilarMemories(entries, removed) {
+  const merged = [];
+  const processed = /* @__PURE__ */ new Set();
+  for (let i = 0; i < entries.length; i++) {
+    if (processed.has(entries[i].name)) continue;
+    let current = entries[i];
+    const similar = [];
+    for (let j = i + 1; j < entries.length; j++) {
+      if (processed.has(entries[j].name)) continue;
+      if (entries[j].type !== current.type) continue;
+      const similarity = calculateContentSimilarity(current.content, entries[j].content);
+      if (similarity > 0.5) {
+        similar.push(entries[j]);
+      }
+    }
+    if (similar.length > 0) {
+      const toMerge = [current, ...similar];
+      current = mergeEntries(toMerge);
+      for (const entry of similar) {
+        processed.add(entry.name);
+        removed.push(entry.name);
+      }
+    }
+    processed.add(current.name);
+    merged.push(current);
+  }
+  return merged;
+}
+function evictByPriority(entries, maxEntries, removed) {
+  const scored = entries.map((entry) => ({
+    entry,
+    score: calculatePriorityScore(entry)
+  }));
+  scored.sort((a, b) => b.score - a.score);
+  const kept = scored.slice(0, maxEntries);
+  const evicted = scored.slice(maxEntries);
+  for (const { entry } of evicted) {
+    removed.push(entry.name);
+  }
+  return kept.map((s) => s.entry);
+}
+function calculatePriorityScore(entry) {
+  let score = 0;
+  score += entry.confidence * 40;
+  score += Math.min(30, entry.accessCount * 5);
+  score += entry.stable ? 15 : 0;
+  const typeWeights = {
+    user: 15,
+    project: 12,
+    feedback: 10,
+    reference: 8
+  };
+  score += typeWeights[entry.type] || 5;
+  return score;
+}
+function mergeEntries(entries) {
+  const sorted = [...entries].sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
+  const base = sorted[0];
+  const allLines = entries.flatMap((e) => e.content.split("\n").filter((l) => l.trim()));
+  const uniqueLines = [...new Set(allLines)];
+  const mergedContent = uniqueLines.join("\n");
+  const allTags = [...new Set(entries.flatMap((e) => e.tags || []))];
+  const maxConfidence = Math.max(...entries.map((e) => e.confidence));
+  const totalAccess = entries.reduce((sum, e) => sum + e.accessCount, 0);
+  return {
+    ...base,
+    content: mergedContent,
+    tags: allTags,
+    confidence: maxConfidence,
+    accessCount: totalAccess,
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    source: "merge"
+  };
+}
+function calculateContentSimilarity(content1, content2) {
+  const words1 = new Set(content1.toLowerCase().split(/\s+/).filter((w) => w.length > 1));
+  const words2 = new Set(content2.toLowerCase().split(/\s+/).filter((w) => w.length > 1));
+  if (words1.size === 0 || words2.size === 0) return 0;
+  let overlap = 0;
+  for (const word of words1) {
+    if (words2.has(word)) overlap++;
+  }
+  const union = (/* @__PURE__ */ new Set([...words1, ...words2])).size;
+  return overlap / union;
+}
+function generateCompressSummary(before, after, removed) {
+  const diff = before - after;
+  if (diff === 0) {
+    return `\u8BB0\u5FC6\u6570\u91CF ${before} \u6761\uFF0C\u65E0\u9700\u538B\u7F29`;
+  }
+  return `\u538B\u7F29\u5B8C\u6210\uFF1A${before} \u2192 ${after} \u6761\uFF08\u51CF\u5C11 ${diff} \u6761\uFF09\u3002\u79FB\u9664\u9879\uFF1A${removed.join("\u3001")}`;
+}
+
+// src/memory/manager.ts
+var MEMORY_DIR = join12(homedir6(), ".flutter-forge", "memory");
+var INDEX_FILE = join12(MEMORY_DIR, "MEMORY.md");
+var MemoryManager = class {
+  entries = /* @__PURE__ */ new Map();
+  initialized = false;
+  threshold;
+  constructor(config) {
+    this.threshold = { ...DEFAULT_THRESHOLD, ...config };
+  }
+  // ─── 初始化 ────────────────────────────────────────────
+  init() {
+    if (this.initialized) return;
+    this.initialized = true;
+    if (!existsSync7(MEMORY_DIR)) {
+      mkdirSync6(MEMORY_DIR, { recursive: true });
+    }
+    const files = readdirSync4(MEMORY_DIR).filter((f) => f.endsWith(".md") && f !== "MEMORY.md");
+    for (const file of files) {
+      try {
+        const filePath = join12(MEMORY_DIR, file);
+        const content = readFileSync7(filePath, "utf-8");
+        const entry = this.parseMemoryFile(file, content);
+        if (entry) {
+          this.entries.set(entry.name, entry);
+        }
+      } catch {
+      }
+    }
+  }
+  // ─── 查询 ──────────────────────────────────────────────
+  getAll() {
+    this.init();
+    return Array.from(this.entries.values());
+  }
+  getByType(type) {
+    this.init();
+    return this.getAll().filter((e) => e.type === type);
+  }
+  get(name) {
+    this.init();
+    return this.entries.get(name);
+  }
+  // ─── 召回（增强版） ────────────────────────────────────
+  /**
+   * 按需召回记忆
+   * 支持：关键词匹配 + 类型过滤 + 标签过滤 + 置信度过滤 + 多种排序
+   */
+  recall(options = {}) {
+    this.init();
+    let entries = this.getAll();
+    if (options.type) {
+      entries = entries.filter((e) => e.type === options.type);
+    }
+    if (options.tags && options.tags.length > 0) {
+      entries = entries.filter(
+        (e) => e.tags && options.tags.some((t) => e.tags.includes(t))
+      );
+    }
+    const minConf = options.minConfidence ?? 0;
+    if (minConf > 0) {
+      entries = entries.filter((e) => e.confidence >= minConf);
+    }
+    let results = entries.map((entry) => {
+      const score = this.calculateRelevanceScore(entry, options.query);
+      return {
+        entry,
+        score,
+        matchReason: this.getMatchReason(entry, options.query)
+      };
+    });
+    switch (options.sortBy) {
+      case "recency":
+        results.sort(
+          (a, b) => new Date(b.entry.updatedAt).getTime() - new Date(a.entry.updatedAt).getTime()
+        );
+        break;
+      case "frequency":
+        results.sort((a, b) => b.entry.accessCount - a.entry.accessCount);
+        break;
+      case "relevance":
+      default:
+        results.sort((a, b) => b.score - a.score);
+        break;
+    }
+    if (options.limit) {
+      results = results.slice(0, options.limit);
+    }
+    for (const result of results) {
+      this.recordAccess(result.entry.name);
+    }
+    return results;
+  }
+  /**
+   * 简单搜索（向后兼容）
+   */
+  search(query) {
+    return this.recall({ query, sortBy: "relevance" }).map((r) => r.entry);
+  }
+  /**
+   * 计算相关性分数
+   */
+  calculateRelevanceScore(entry, query) {
+    if (!query) {
+      return entry.confidence * 0.7 + Math.min(0.3, entry.accessCount * 0.05);
+    }
+    const queryLower = query.toLowerCase();
+    const contentLower = entry.content.toLowerCase();
+    const nameLower = entry.name.toLowerCase();
+    const descLower = entry.description.toLowerCase();
+    let score = 0;
+    if (nameLower.includes(queryLower)) score += 0.4;
+    if (descLower.includes(queryLower)) score += 0.2;
+    if (contentLower.includes(queryLower)) score += 0.2;
+    const queryWords = queryLower.split(/\s+/).filter((w) => w.length > 1);
+    const matchedWords = queryWords.filter(
+      (w) => contentLower.includes(w) || nameLower.includes(w) || descLower.includes(w)
+    );
+    if (queryWords.length > 0) {
+      score += matchedWords.length / queryWords.length * 0.2;
+    }
+    score *= 0.5 + entry.confidence * 0.5;
+    return Math.min(1, score);
+  }
+  /**
+   * 获取匹配原因
+   */
+  getMatchReason(entry, query) {
+    if (!query) return "\u9ED8\u8BA4\u6392\u5E8F";
+    const queryLower = query.toLowerCase();
+    const reasons = [];
+    if (entry.name.toLowerCase().includes(queryLower)) reasons.push("\u540D\u79F0\u5339\u914D");
+    if (entry.description.toLowerCase().includes(queryLower)) reasons.push("\u63CF\u8FF0\u5339\u914D");
+    if (entry.content.toLowerCase().includes(queryLower)) reasons.push("\u5185\u5BB9\u5339\u914D");
+    return reasons.length > 0 ? reasons.join("+") : "\u5173\u952E\u8BCD\u5339\u914D";
+  }
+  /**
+   * 记录访问
+   */
+  recordAccess(name) {
+    const entry = this.entries.get(name);
+    if (entry) {
+      entry.accessCount++;
+      entry.lastAccessedAt = (/* @__PURE__ */ new Date()).toISOString();
+      this.saveEntryFile(entry);
+    }
+  }
+  // ─── 写入（增强版） ────────────────────────────────────
+  /**
+   * 带门槛检查的写入
+   */
+  save(name, type, description, content) {
+    this.init();
+    const thresholdResult = checkThreshold(name, type, content, this.getAll(), this.threshold);
+    const dedupResult = detectDuplicate(name, content, this.getAll());
+    if (dedupResult.action === "skip") {
+      return {
+        entry: null,
+        action: "skipped",
+        message: `\u4E0E\u8BB0\u5FC6 "${dedupResult.duplicateOf}" \u9AD8\u5EA6\u91CD\u590D\uFF08${(dedupResult.similarity * 100).toFixed(0)}%\uFF09\uFF0C\u8DF3\u8FC7`
+      };
+    }
+    if (dedupResult.action === "merge" && dedupResult.duplicateOf) {
+      const existing = this.entries.get(dedupResult.duplicateOf);
+      if (existing) {
+        const merged = mergeMemories(existing, content);
+        Object.assign(existing, merged);
+        this.saveEntryFile(existing);
+        this.updateIndex();
+        return {
+          entry: existing,
+          action: "merged",
+          message: `\u5DF2\u5408\u5E76\u5230\u8BB0\u5FC6 "${dedupResult.duplicateOf}"\uFF08\u76F8\u4F3C\u5EA6 ${(dedupResult.similarity * 100).toFixed(0)}%\uFF09`
+        };
+      }
+    }
+    const confidence = thresholdResult.confidence;
+    const stable = confidence >= this.threshold.minConfidence;
+    const entry = this.createEntry(name, type, description, content, confidence, stable);
+    if (this.entries.size >= this.threshold.maxEntries) {
+      this.autoCompress();
+    }
+    this.entries.set(name, entry);
+    this.saveEntryFile(entry);
+    this.updateIndex();
+    return {
+      entry,
+      action: "created",
+      message: stable ? `\u5DF2\u4FDD\u5B58\uFF08\u7F6E\u4FE1\u5EA6 ${confidence.toFixed(2)}\uFF0C\u7A33\u5B9A\uFF09` : `\u5DF2\u4FDD\u5B58\u4E3A\u4E0D\u7A33\u5B9A\u8BB0\u5FC6\uFF08\u7F6E\u4FE1\u5EA6 ${confidence.toFixed(2)}\uFF09\uFF0C\u9700\u8981\u66F4\u591A\u9A8C\u8BC1`
+    };
+  }
+  /**
+   * 直接写入（跳过门槛检查，用于用户明确要求的记忆）
+   */
+  saveDirect(name, type, description, content) {
+    this.init();
+    const existing = this.entries.get(name);
+    if (existing) {
+      existing.content = content;
+      existing.description = description;
+      existing.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+      existing.confidence = 1;
+      existing.stable = true;
+      this.saveEntryFile(existing);
+      this.updateIndex();
+      return existing;
+    }
+    const entry = this.createEntry(name, type, description, content, 1, true);
+    this.entries.set(name, entry);
+    this.saveEntryFile(entry);
+    this.updateIndex();
+    return entry;
+  }
+  // ─── 删除 ──────────────────────────────────────────────
+  delete(name) {
+    this.init();
+    const entry = this.entries.get(name);
+    if (!entry) return false;
+    try {
+      if (existsSync7(entry.filePath)) {
+        unlinkSync(entry.filePath);
+      }
+    } catch {
+    }
+    this.entries.delete(name);
+    this.updateIndex();
+    return true;
+  }
+  // ─── 压缩 ──────────────────────────────────────────────
+  /**
+   * 手动触发压缩
+   */
+  compress(options) {
+    this.init();
+    const result = compressMemories(this.getAll(), {
+      maxEntries: options?.maxEntries || this.threshold.maxEntries,
+      expireDays: options?.expireDays || 30
+    });
+    this.applyCompressResult(result);
+    return result;
+  }
+  /**
+   * 自动压缩（写入时触发）
+   */
+  autoCompress() {
+    const result = compressMemories(this.getAll(), {
+      maxEntries: this.threshold.maxEntries - 10,
+      // 留出空间
+      expireDays: 30
+    });
+    this.applyCompressResult(result);
+  }
+  /**
+   * 应用压缩结果
+   */
+  applyCompressResult(result) {
+    for (const name of result.removed) {
+      const entry = this.entries.get(name);
+      if (entry && existsSync7(entry.filePath)) {
+        try {
+          unlinkSync(entry.filePath);
+        } catch {
+        }
+      }
+      this.entries.delete(name);
+    }
+    for (const entry of result.compressed) {
+      this.entries.set(entry.name, entry);
+      this.saveEntryFile(entry);
+    }
+    this.updateIndex();
+  }
+  // ─── 内部方法 ──────────────────────────────────────────
+  createEntry(name, type, description, content, confidence, stable) {
+    const fileName = `${type}_${name.replace(/[^a-zA-Z0-9_-]/g, "_")}.md`;
+    const filePath = join12(MEMORY_DIR, fileName);
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    return {
+      name,
+      description,
+      type,
+      content,
+      filePath,
+      createdAt: now,
+      updatedAt: now,
+      confidence,
+      accessCount: 0,
+      lastAccessedAt: now,
+      tags: this.extractTags(content),
+      source: "user_input",
+      stable
+    };
+  }
+  extractTags(text) {
+    const tags = [];
+    const patterns = [
+      [/flutter/i, "flutter"],
+      [/dart/i, "dart"],
+      [/ios/i, "ios"],
+      [/android/i, "android"],
+      [/api/i, "api"],
+      [/数据库|database|sqlite/i, "database"],
+      [/状态管理|riverpod|bloc/i, "state-management"],
+      [/测试|test/i, "testing"],
+      [/ui|界面|布局/i, "ui"],
+      [/架构|architecture/i, "architecture"]
+    ];
+    for (const [pattern, tag] of patterns) {
+      if (pattern.test(text)) tags.push(tag);
+    }
+    return tags;
+  }
+  saveEntryFile(entry) {
+    const fileContent = [
+      "---",
+      `name: ${entry.name}`,
+      `description: ${entry.description}`,
+      `type: ${entry.type}`,
+      `confidence: ${entry.confidence}`,
+      `stable: ${entry.stable}`,
+      `accessCount: ${entry.accessCount}`,
+      `source: ${entry.source}`,
+      `tags: [${entry.tags.join(", ")}]`,
+      "---",
+      "",
+      entry.content
+    ].join("\n");
+    writeFileSync6(entry.filePath, fileContent, "utf-8");
+  }
+  updateIndex() {
+    const lines = ["# MEMORY.md", "", "> \u8BB0\u5FC6\u7CFB\u7EDF\u7D22\u5F15\uFF0C\u81EA\u52A8\u7EF4\u62A4", ""];
+    const byType = {
+      user: [],
+      project: [],
+      feedback: [],
+      reference: []
+    };
+    for (const entry of this.entries.values()) {
+      byType[entry.type].push(entry);
+    }
+    const typeLabels = {
+      user: "\u7528\u6237\u4FE1\u606F",
+      project: "\u9879\u76EE\u4FE1\u606F",
+      feedback: "\u7528\u6237\u53CD\u9988",
+      reference: "\u53C2\u8003\u8D44\u6599"
+    };
+    for (const [type, entries] of Object.entries(byType)) {
+      if (entries.length === 0) continue;
+      lines.push(`## ${typeLabels[type]}`);
+      for (const e of entries) {
+        const file = e.filePath.split("/").pop() || e.filePath;
+        const stableTag = e.stable ? "" : " \u26A0\uFE0F";
+        const confTag = ` [${(e.confidence * 100).toFixed(0)}%]`;
+        lines.push(`- [${e.name}](${file}) \u2014 ${e.description}${confTag}${stableTag}`);
+      }
+      lines.push("");
+    }
+    writeFileSync6(INDEX_FILE, lines.join("\n"), "utf-8");
+  }
+  parseMemoryFile(fileName, content) {
+    const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    if (!match) return null;
+    const metaStr = match[1];
+    const body = match[2].trim();
+    const name = metaStr.match(/name:\s*(.+)/)?.[1]?.trim() || fileName.replace(".md", "");
+    const description = metaStr.match(/description:\s*(.+)/)?.[1]?.trim() || "";
+    const type = metaStr.match(/type:\s*(\w+)/)?.[1] || "user";
+    const confidence = parseFloat(metaStr.match(/confidence:\s*([\d.]+)/)?.[1] || "0.5");
+    const stable = metaStr.match(/stable:\s*(true|false)/)?.[1] === "true";
+    const accessCount = parseInt(metaStr.match(/accessCount:\s*(\d+)/)?.[1] || "0", 10);
+    const source = metaStr.match(/source:\s*(\w+)/)?.[1] || "user_input";
+    const tagsStr = metaStr.match(/tags:\s*\[(.+?)\]/)?.[1] || "";
+    const tags = tagsStr.split(",").map((t) => t.trim()).filter(Boolean);
+    return {
+      name,
+      description,
+      type,
+      content: body,
+      filePath: join12(MEMORY_DIR, fileName),
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      confidence,
+      accessCount,
+      lastAccessedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      tags,
+      source,
+      stable
+    };
+  }
+  // ─── 上下文注入 ────────────────────────────────────────
+  getContextString() {
+    this.init();
+    if (this.entries.size === 0) return "";
+    const lines = ["## \u8BB0\u5FC6\u7CFB\u7EDF"];
+    const userMemories = this.getByType("user");
+    if (userMemories.length > 0) {
+      lines.push("### \u7528\u6237\u4FE1\u606F");
+      for (const m of userMemories) {
+        const stableTag = m.stable ? "" : " [\u5F85\u9A8C\u8BC1]";
+        lines.push(`- ${m.description}: ${m.content.split("\n")[0]}${stableTag}`);
+      }
+    }
+    const projectMemories = this.getByType("project");
+    if (projectMemories.length > 0) {
+      lines.push("### \u9879\u76EE\u4FE1\u606F");
+      for (const m of projectMemories) {
+        lines.push(`- ${m.description}: ${m.content.split("\n")[0]}`);
+      }
+    }
+    const feedbackMemories = this.getByType("feedback");
+    if (feedbackMemories.length > 0) {
+      lines.push("### \u7528\u6237\u53CD\u9988");
+      for (const m of feedbackMemories) {
+        lines.push(`- ${m.content.split("\n")[0]}`);
+      }
+    }
+    return lines.join("\n");
+  }
+  // ─── 统计 ──────────────────────────────────────────────
+  getStats() {
+    this.init();
+    const all = this.getAll();
+    const byType = {
+      user: 0,
+      project: 0,
+      feedback: 0,
+      reference: 0
+    };
+    let totalConfidence = 0;
+    let totalAccess = 0;
+    let stable = 0;
+    for (const entry of all) {
+      byType[entry.type]++;
+      totalConfidence += entry.confidence;
+      totalAccess += entry.accessCount;
+      if (entry.stable) stable++;
+    }
+    return {
+      total: all.length,
+      byType,
+      stable,
+      unstable: all.length - stable,
+      avgConfidence: all.length > 0 ? totalConfidence / all.length : 0,
+      totalAccess
+    };
+  }
+};
+var memoryManager = new MemoryManager();
+
+// src/tools/memory.ts
+var saveMemoryTool = {
+  definition: {
+    name: "save_memory",
+    description: "\u4FDD\u5B58\u8BB0\u5FC6\u5230\u8DE8\u4F1A\u8BDD\u6301\u4E45\u5316\u5B58\u50A8\u3002\u7528\u4E8E\u8BB0\u4F4F\u7528\u6237\u504F\u597D\u3001\u9879\u76EE\u77E5\u8BC6\u3001\u91CD\u8981\u51B3\u7B56\u7B49\u3002",
+    parameters: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "\u8BB0\u5FC6\u540D\u79F0\uFF08\u7B80\u77ED\u6807\u8BC6\uFF0C\u5982 user_role\u3001project_arch\uFF09"
+        },
+        type: {
+          type: "string",
+          description: "\u8BB0\u5FC6\u7C7B\u578B\uFF1Auser\uFF08\u7528\u6237\u4FE1\u606F\uFF09\u3001project\uFF08\u9879\u76EE\u4FE1\u606F\uFF09\u3001feedback\uFF08\u53CD\u9988\u7EA0\u6B63\uFF09\u3001reference\uFF08\u53C2\u8003\u8D44\u6599\uFF09"
+        },
+        description: {
+          type: "string",
+          description: "\u4E00\u884C\u63CF\u8FF0\uFF0C\u7528\u4E8E\u7D22\u5F15\u548C\u68C0\u7D22"
+        },
+        content: {
+          type: "string",
+          description: "\u8BB0\u5FC6\u5185\u5BB9\uFF08Markdown \u683C\u5F0F\uFF09"
+        }
+      },
+      required: ["name", "type", "description", "content"]
+    }
+  },
+  async execute(args) {
+    const { name, type, description, content } = args;
+    if (!name || !type || !description || !content) {
+      return { success: false, output: "", error: "\u7F3A\u5C11\u5FC5\u586B\u53C2\u6570" };
+    }
+    const validTypes = ["user", "project", "feedback", "reference"];
+    if (!validTypes.includes(type)) {
+      return { success: false, output: "", error: `\u65E0\u6548\u7684\u8BB0\u5FC6\u7C7B\u578B: ${type}\uFF0C\u53EF\u9009: ${validTypes.join(", ")}` };
+    }
+    try {
+      const result = memoryManager.save(name, type, description, content);
+      if (result.action === "blocked" || result.action === "skipped") {
+        return { success: true, output: result.message };
+      }
+      return {
+        success: true,
+        output: result.message
+      };
+    } catch (error) {
+      return { success: false, output: "", error: `\u4FDD\u5B58\u5931\u8D25: ${error instanceof Error ? error.message : String(error)}` };
+    }
+  }
+};
+var readMemoryTool = {
+  definition: {
+    name: "read_memory",
+    description: "\u8BFB\u53D6\u8BB0\u5FC6\u3002\u53EF\u6309\u540D\u79F0\u3001\u7C7B\u578B\u641C\u7D22\uFF0C\u6216\u5217\u51FA\u6240\u6709\u8BB0\u5FC6\u3002",
+    parameters: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "\u641C\u7D22\u5173\u952E\u8BCD\uFF08\u53EF\u9009\uFF0C\u4E0D\u586B\u5219\u5217\u51FA\u6240\u6709\u8BB0\u5FC6\u7D22\u5F15\uFF09"
+        },
+        type: {
+          type: "string",
+          description: "\u6309\u7C7B\u578B\u8FC7\u6EE4\uFF1Auser\u3001project\u3001feedback\u3001reference\uFF08\u53EF\u9009\uFF09"
+        },
+        name: {
+          type: "string",
+          description: "\u6309\u540D\u79F0\u7CBE\u786E\u8BFB\u53D6\uFF08\u53EF\u9009\uFF09"
+        }
+      },
+      required: []
+    }
+  },
+  async execute(args) {
+    const { query, type, name } = args;
+    try {
+      if (name) {
+        const entry = memoryManager.get(name);
+        if (!entry) {
+          return { success: false, output: "", error: `\u8BB0\u5FC6\u4E0D\u5B58\u5728: ${name}` };
+        }
+        const stableTag = entry.stable ? "\u2713 \u7A33\u5B9A" : "\u26A0\uFE0F \u5F85\u9A8C\u8BC1";
+        const confPct = (entry.confidence * 100).toFixed(0);
+        return {
+          success: true,
+          output: `# ${entry.name}
+
+**\u7C7B\u578B**: ${entry.type} | **\u63CF\u8FF0**: ${entry.description} | **\u7F6E\u4FE1\u5EA6**: ${confPct}% | ${stableTag} | **\u8BBF\u95EE\u6B21\u6570**: ${entry.accessCount}
+
+${entry.content}`
+        };
+      }
+      if (type) {
+        const entries2 = memoryManager.getByType(type);
+        if (entries2.length === 0) {
+          return { success: true, output: `\u65E0 ${type} \u7C7B\u578B\u7684\u8BB0\u5FC6` };
+        }
+        const lines2 = entries2.map((e) => {
+          const stableTag = e.stable ? "\u2713" : "\u26A0\uFE0F";
+          return `- ${stableTag} **${e.name}** [${(e.confidence * 100).toFixed(0)}%]: ${e.description}`;
+        });
+        return { success: true, output: lines2.join("\n") };
+      }
+      if (query) {
+        const results = memoryManager.recall({ query, limit: 10 });
+        if (results.length === 0) {
+          return { success: true, output: `\u672A\u627E\u5230\u4E0E "${query}" \u76F8\u5173\u7684\u8BB0\u5FC6` };
+        }
+        const lines2 = results.map((r) => {
+          const e = r.entry;
+          const stableTag = e.stable ? "\u2713" : "\u26A0\uFE0F";
+          return `- ${stableTag} **${e.name}** (${e.type}) [${(r.score * 100).toFixed(0)}%]: ${e.description} \u2014 ${r.matchReason}`;
+        });
+        return { success: true, output: lines2.join("\n") };
+      }
+      const entries = memoryManager.getAll();
+      if (entries.length === 0) {
+        return { success: true, output: "\u6682\u65E0\u8BB0\u5FC6" };
+      }
+      const lines = entries.map((e) => {
+        const stableTag = e.stable ? "\u2713" : "\u26A0\uFE0F";
+        return `- ${stableTag} **${e.name}** (${e.type}) [${(e.confidence * 100).toFixed(0)}%]: ${e.description}`;
+      });
+      const stats = memoryManager.getStats();
+      lines.push(`
+**\u7EDF\u8BA1**: \u5171 ${stats.total} \u6761 | \u7A33\u5B9A ${stats.stable} | \u5F85\u9A8C\u8BC1 ${stats.unstable} | \u5E73\u5747\u7F6E\u4FE1\u5EA6 ${(stats.avgConfidence * 100).toFixed(0)}%`);
+      return { success: true, output: lines.join("\n") };
+    } catch (error) {
+      return { success: false, output: "", error: `\u8BFB\u53D6\u5931\u8D25: ${error instanceof Error ? error.message : String(error)}` };
+    }
+  }
+};
+var compressMemoryTool = {
+  definition: {
+    name: "compress_memory",
+    description: "\u538B\u7F29\u8BB0\u5FC6\uFF1A\u5408\u5E76\u76F8\u4F3C\u6761\u76EE\u3001\u6DD8\u6C70\u8FC7\u671F/\u4F4E\u4EF7\u503C\u8BB0\u5FC6\u3002\u5F53\u8BB0\u5FC6\u6570\u91CF\u8F83\u591A\u65F6\u81EA\u52A8\u8C03\u7528\u3002",
+    parameters: {
+      type: "object",
+      properties: {
+        expireDays: {
+          type: "number",
+          description: "\u8FC7\u671F\u5929\u6570\uFF08\u8D85\u8FC7\u6B64\u5929\u6570\u4E14\u672A\u88AB\u8BBF\u95EE\u7684\u8BB0\u5FC6\u5C06\u88AB\u6DD8\u6C70\uFF0C\u9ED8\u8BA4 30\uFF09"
+        }
+      },
+      required: []
+    }
+  },
+  async execute(args) {
+    const expireDays = args.expireDays ? parseInt(args.expireDays, 10) : 30;
+    try {
+      const result = memoryManager.compress({ expireDays });
+      return {
+        success: true,
+        output: result.summary
+      };
+    } catch (error) {
+      return { success: false, output: "", error: `\u538B\u7F29\u5931\u8D25: ${error instanceof Error ? error.message : String(error)}` };
+    }
+  }
+};
+var deleteMemoryTool = {
+  definition: {
+    name: "delete_memory",
+    description: "\u5220\u9664\u6307\u5B9A\u540D\u79F0\u7684\u8BB0\u5FC6",
+    parameters: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "\u8981\u5220\u9664\u7684\u8BB0\u5FC6\u540D\u79F0"
+        }
+      },
+      required: ["name"]
+    }
+  },
+  async execute(args) {
+    const { name } = args;
+    if (!name) {
+      return { success: false, output: "", error: "\u7F3A\u5C11\u8BB0\u5FC6\u540D\u79F0" };
+    }
+    const deleted = memoryManager.delete(name);
+    if (!deleted) {
+      return { success: false, output: "", error: `\u8BB0\u5FC6\u4E0D\u5B58\u5728: ${name}` };
+    }
+    return { success: true, output: `\u5DF2\u5220\u9664\u8BB0\u5FC6: ${name}` };
+  }
+};
+
 // src/tools/index.ts
 function registerAllTools() {
   toolRegistry.register(readFileTool);
@@ -4029,8 +5980,15 @@ function registerAllTools() {
   toolRegistry.register(editFileTool);
   toolRegistry.register(listFilesTool);
   toolRegistry.register(searchFilesTool);
+  toolRegistry.register(globTool);
+  toolRegistry.register(grepTool);
+  toolRegistry.register(lsTool);
   toolRegistry.register(runCommandTool);
   toolRegistry.register(runCommandWithOutputTool);
+  toolRegistry.register(saveMemoryTool);
+  toolRegistry.register(readMemoryTool);
+  toolRegistry.register(deleteMemoryTool);
+  toolRegistry.register(compressMemoryTool);
   toolRegistry.register(scanProjectTool);
   toolRegistry.register(detectProjectStateTool);
   toolRegistry.register(validateOutputTool);
@@ -4074,7 +6032,9 @@ function renderHelp() {
     ["/security", "\u67E5\u770B\u5B89\u5168\u68C0\u67E5\u914D\u7F6E"],
     ["/learn", "\u5207\u6362\u5B66\u4E60\u6A21\u5F0F"],
     ["/review", "\u67E5\u770B\u4EE3\u7801\u5BA1\u67E5\u914D\u7F6E"],
+    ["/memory", "\u67E5\u770B\u5DF2\u4FDD\u5B58\u7684\u8BB0\u5FC6"],
     ["/hook", "\u67E5\u770B\u5DF2\u6CE8\u518C\u94A9\u5B50"],
+    ["/trace", "\u67E5\u770B\u6700\u8FD1\u4E00\u6B21\u6267\u884C\u7684 Trace \u6458\u8981"],
     ["/exit", "\u9000\u51FA\u7A0B\u5E8F"]
   ];
   const lines = [
@@ -4106,59 +6066,6 @@ function renderSuccess(message) {
 }
 function renderAssistantStart() {
   return chalk3.green("\n\u25B8 ");
-}
-function renderMarkdown(text) {
-  const lines = text.split("\n");
-  const result = [];
-  let inCodeBlock = false;
-  let codeLang = "";
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
-    if (line.trimStart().startsWith("```")) {
-      if (inCodeBlock) {
-        result.push(chalk3.dim("\u2514" + "\u2500".repeat(40)));
-        inCodeBlock = false;
-      } else {
-        codeLang = line.trimStart().slice(3).trim();
-        const label = codeLang ? ` ${chalk3.dim(codeLang)}` : "";
-        result.push(chalk3.dim("\u250C" + "\u2500".repeat(40)) + label);
-        inCodeBlock = true;
-      }
-      continue;
-    }
-    if (inCodeBlock) {
-      result.push(chalk3.dim("\u2502 ") + chalk3.green(line));
-      continue;
-    }
-    if (/^#{1,3}\s/.test(line)) {
-      const level = line.match(/^(#{1,3})/)[1].length;
-      const text2 = line.replace(/^#{1,3}\s+/, "");
-      if (level === 1) result.push(chalk3.bold.cyan(text2));
-      else if (level === 2) result.push(chalk3.bold.blue(text2));
-      else result.push(chalk3.bold.white(text2));
-      continue;
-    }
-    line = line.replace(/\*\*(.+?)\*\*/g, (_, t) => chalk3.bold(t));
-    line = line.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, (_, t) => chalk3.italic(t));
-    line = line.replace(/`([^`]+)`/g, (_, t) => chalk3.bgGray.white(` ${t} `));
-    line = line.replace(/~~(.+?)~~/g, (_, t) => chalk3.dim.strikethrough(t));
-    if (/^\s*[-*+]\s/.test(line)) {
-      line = line.replace(/^(\s*)([-*+])\s/, `$1${chalk3.cyan("\u2022")} `);
-    }
-    if (/^\s*\d+\.\s/.test(line)) {
-      line = line.replace(/^(\s*)(\d+)\.\s/, `$1${chalk3.cyan("$2.")} `);
-    }
-    if (/^\s*>\s/.test(line)) {
-      line = line.replace(/^(\s*)>\s/, chalk3.dim("\u2502 "));
-      line = chalk3.dim(line);
-    }
-    if (/^[-*_]{3,}\s*$/.test(line.trim())) {
-      line = chalk3.dim("\u2500".repeat(40));
-    }
-    result.push(line);
-  }
-  if (inCodeBlock) result.push(chalk3.dim("\u2514" + "\u2500".repeat(40)));
-  return result.join("\n");
 }
 function truncate(str, maxLen) {
   if (str.length <= maxLen) return str;
@@ -4231,6 +6138,10 @@ async function handleCommand(input, configManager2, contextManager2, aiClient, o
       return handleReviewCommand(args, orchestrator);
     case "/hook":
       return handleHookCommand(args, orchestrator);
+    case "/memory":
+      return handleMemoryCommand();
+    case "/trace":
+      return handleTraceCommand(orchestrator);
     default:
       return { handled: true, output: renderError(`\u672A\u77E5\u547D\u4EE4: ${command}
 \u8F93\u5165 /help \u67E5\u770B\u53EF\u7528\u547D\u4EE4`) };
@@ -4413,6 +6324,30 @@ function handleReviewCommand(args, orchestrator) {
     `  ${chalk4.dim("\u6700\u5927\u95EE\u9898\u6570:")} ${config.maxIssues}`
   ].join("\n") };
 }
+function handleMemoryCommand() {
+  const entries = memoryManager.getAll();
+  if (entries.length === 0) {
+    return { handled: true, output: chalk4.dim("\n\u6682\u65E0\u8BB0\u5FC6") };
+  }
+  const typeLabels = {
+    user: chalk4.blue("\u7528\u6237"),
+    project: chalk4.green("\u9879\u76EE"),
+    feedback: chalk4.yellow("\u53CD\u9988"),
+    reference: chalk4.magenta("\u53C2\u8003")
+  };
+  const lines = [chalk4.bold("\n\u8BB0\u5FC6\u7CFB\u7EDF:")];
+  const byType = {};
+  for (const e of entries) {
+    (byType[e.type] ??= []).push(e);
+  }
+  for (const [type, items] of Object.entries(byType)) {
+    lines.push(`  ${typeLabels[type] || type}:`);
+    for (const e of items) {
+      lines.push(`    ${chalk4.cyan(e.name)} \u2014 ${chalk4.dim(e.description)}`);
+    }
+  }
+  return { handled: true, output: lines.join("\n") };
+}
 function handleHookCommand(args, orchestrator) {
   if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
   const hooks = orchestrator.getHookManager().getHooks();
@@ -4425,9 +6360,17 @@ function handleHookCommand(args, orchestrator) {
     })
   ].join("\n") };
 }
-
-// src/cli/repl.ts
-import ora from "ora";
+function handleTraceCommand(orchestrator) {
+  if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
+  const tracer = orchestrator.getTracer();
+  if (!tracer) {
+    return { handled: true, output: chalk4.dim("\n\u65E0\u6D3B\u8DC3\u7684 Trace \u4F1A\u8BDD\uFF08\u6267\u884C\u4E00\u6B21\u4EFB\u52A1\u540E\u53EF\u67E5\u770B\uFF09") };
+  }
+  const session = tracer.getSession();
+  const stats = tracer.getStats();
+  const summary = generateSummary(session, stats);
+  return { handled: true, output: "\n" + formatSummary(summary) };
+}
 
 // src/version.ts
 var VERSION = "0.5.0";
@@ -4454,10 +6397,41 @@ async function startREPL() {
     toolRegistry,
     config.project.root
   );
+  contextManager.setSummarizer(async (messages) => {
+    const text = messages.map((m) => `[${m.role}] ${m.content.slice(0, 200)}`).join("\n");
+    const result = await aiClient.generate(
+      `\u8BF7\u7528\u4E2D\u6587\u5C06\u4EE5\u4E0B\u5BF9\u8BDD\u5386\u53F2\u538B\u7F29\u4E3A\u4E00\u6BB5\u7B80\u660E\u6458\u8981\uFF0C\u4FDD\u7559\u5173\u952E\u4FE1\u606F\uFF08\u7528\u6237\u9700\u6C42\u3001\u51B3\u7B56\u3001\u4EE3\u7801\u53D8\u66F4\u3001\u6587\u4EF6\u8DEF\u5F84\uFF09\uFF1A
+
+${text}`,
+      "\u4F60\u662F\u4E00\u4E2A\u5BF9\u8BDD\u6458\u8981\u5668\u3002\u53EA\u8F93\u51FA\u6458\u8981\uFF0C\u4E0D\u8981\u6DFB\u52A0\u989D\u5916\u8BF4\u660E\u3002",
+      void 0,
+      1
+    );
+    return result.text;
+  });
+  const memoryContext = memoryManager.getContextString();
   contextManager.setSystemPrompt(
     `\u4F60\u662F Flutter Forge\uFF0C\u4E00\u4E2A\u4E13\u4E1A\u7684 Flutter \u5F00\u53D1\u52A9\u624B\u3002\u4F60\u5E2E\u52A9\u7528\u6237\u5B8C\u6210 Flutter \u9879\u76EE\u7684\u5F00\u53D1\u4EFB\u52A1\uFF0C\u5305\u62EC\u9700\u6C42\u5206\u6790\u3001\u65B9\u6848\u8BBE\u8BA1\u3001\u4EE3\u7801\u5B9E\u73B0\u548C\u9A8C\u8BC1\u3002
 \u4F60\u9075\u5FAA\u7ED3\u6784\u5316\u5DE5\u4F5C\u6D41\uFF1AS1 \u9700\u6C42\u5206\u6790 \u2192 S2 \u65B9\u6848\u8BBE\u8BA1 \u2192 S3 \u4EFB\u52A1\u62C6\u5206\uFF08\u53EF\u9009\uFF09\u2192 S4 \u5B9E\u73B0 \u2192 S5 \u9A8C\u8BC1\u3002
-\u4F60\u53EF\u4EE5\u4F7F\u7528\u5DE5\u5177\u6765\u8BFB\u5199\u6587\u4EF6\u3001\u6267\u884C\u547D\u4EE4\u3001\u626B\u63CF\u9879\u76EE\u7B49\u3002
+\u4F60\u53EF\u4EE5\u4F7F\u7528\u5DE5\u5177\u6765\u8BFB\u5199\u6587\u4EF6\u3001\u6267\u884C\u547D\u4EE4\u3001\u626B\u63CF\u9879\u76EE\u3001\u641C\u7D22\u4EE3\u7801\u7B49\u3002
+\u53EF\u7528\u5DE5\u5177\uFF1A
+- read_file: \u8BFB\u53D6\u6587\u4EF6\u5185\u5BB9\uFF08\u652F\u6301\u884C\u53F7\u8303\u56F4\uFF09
+- write_file: \u5199\u5165\u6587\u4EF6
+- edit_file: \u7F16\u8F91\u6587\u4EF6\uFF08\u66FF\u6362\u6307\u5B9A\u6587\u672C\uFF09
+- list_files: \u5217\u51FA\u76EE\u5F55\u5185\u5BB9
+- search_files: \u641C\u7D22\u6587\u4EF6\u5185\u5BB9\uFF08\u6B63\u5219\uFF09
+- glob: \u6309\u6A21\u5F0F\u641C\u7D22\u6587\u4EF6\uFF08\u5982 **/*.dart\uFF09
+- grep: \u5728\u6587\u4EF6\u4E2D\u641C\u7D22\u5185\u5BB9\uFF08\u6B63\u5219\u3001\u652F\u6301\u4E0A\u4E0B\u6587\u884C\uFF09
+- ls: \u6811\u5F62\u5217\u51FA\u76EE\u5F55\u7ED3\u6784
+- run_command: \u6267\u884C shell \u547D\u4EE4
+- save_memory: \u4FDD\u5B58\u8BB0\u5FC6\uFF08\u7528\u6237\u504F\u597D\u3001\u9879\u76EE\u77E5\u8BC6\u3001\u91CD\u8981\u51B3\u7B56\uFF09\uFF0C\u4F1A\u81EA\u52A8\u68C0\u67E5\u5199\u5165\u95E8\u69DB\u548C\u53BB\u91CD
+- read_memory: \u8BFB\u53D6/\u641C\u7D22\u8BB0\u5FC6\uFF08\u652F\u6301\u8BED\u4E49\u53EC\u56DE\uFF0C\u8FD4\u56DE\u7F6E\u4FE1\u5EA6\u548C\u7A33\u5B9A\u6027\u6807\u8BB0\uFF09
+- delete_memory: \u5220\u9664\u8BB0\u5FC6
+- compress_memory: \u538B\u7F29\u8BB0\u5FC6\uFF08\u5408\u5E76\u76F8\u4F3C\u6761\u76EE\u3001\u6DD8\u6C70\u8FC7\u671F\u8BB0\u5FC6\uFF09
+\u91CD\u8981\uFF1A\u5148\u7528 glob/grep/ls \u63A2\u7D22\u9879\u76EE\u7ED3\u6784\uFF0C\u518D\u8FDB\u884C\u5F00\u53D1\u3002
+\u5F53\u4E86\u89E3\u5230\u7528\u6237\u504F\u597D\u3001\u9879\u76EE\u67B6\u6784\u3001\u91CD\u8981\u51B3\u7B56\u65F6\uFF0C\u4E3B\u52A8\u7528 save_memory \u4FDD\u5B58\u3002
+\u8BB0\u5FC6\u6709\u7F6E\u4FE1\u5EA6\u6807\u8BB0\uFF1A\u7A33\u5B9A\u8BB0\u5FC6\u53EF\u76F4\u63A5\u4F7F\u7528\uFF0C\u5F85\u9A8C\u8BC1\u8BB0\u5FC6\u9700\u8981\u66F4\u591A\u786E\u8BA4\u3002
+${memoryContext ? "\n" + memoryContext : ""}
 \u8BF7\u7528\u4E2D\u6587\u56DE\u590D\u3002`
   );
   console.log(renderBanner(VERSION, currentModel.name, config.project.root));
@@ -4469,7 +6443,7 @@ async function startREPL() {
   function printInputBar() {
     const w = process.stdout.columns || 80;
     const modelName = aiClient.getModel() || configManager.get().models.default;
-    const pct = Math.min(100, Math.round(contextManager.getLength() / 100 * 100));
+    const pct = contextManager.getContextPercent();
     const pctColor = pct > 80 ? chalk5.red : pct > 50 ? chalk5.yellow : chalk5.green;
     const sep = chalk5.dim("\u2500".repeat(w));
     const left = ` ${chalk5.yellow(modelName)}`;
@@ -4520,21 +6494,28 @@ async function startREPL() {
         rl.prompt();
         return;
       }
-      let spinner = null;
       try {
-        spinner = ora({ text: chalk5.dim("\u601D\u8003\u4E2D..."), spinner: "dots", color: "cyan", discardStdin: false }).start();
-        const agentResult = await orchestrator.execute(input);
-        if (spinner.isSpinning) spinner.stop();
         process.stdout.write(renderAssistantStart());
-        if (agentResult.success) {
-          if (agentResult.output) {
-            console.log(renderMarkdown(agentResult.output));
+        let fullText = "";
+        for await (const event of orchestrator.executeStream(input)) {
+          if (event.type === "text") {
+            process.stdout.write(event.content);
+            fullText += event.content;
+          } else if (event.type === "tool-call") {
+            try {
+              const call = JSON.parse(event.content);
+              const argsPreview = Object.entries(call.args || {}).map(([k, v]) => `${k}=${chalk5.dim(truncate(String(v), 40))}`).join(", ");
+              console.log(chalk5.yellow(`
+\u26A1 ${call.name}`) + (argsPreview ? chalk5.dim(` \u2192 ${argsPreview})`) : ""));
+            } catch {
+              console.log(chalk5.yellow(`
+\u26A1 ${event.content}`));
+            }
+          } else if (event.type === "tool-result") {
           }
-        } else {
-          console.log(renderError(agentResult.error || "\u6267\u884C\u5931\u8D25"));
         }
+        if (fullText) console.log("");
       } catch (execError) {
-        if (spinner?.isSpinning) spinner.stop();
         console.log(renderError(execError instanceof Error ? execError.message : String(execError)));
       }
       try {

@@ -131,8 +131,14 @@ export class AIClient {
       stopWhen: maxSteps ? stepCountIs(maxSteps) : undefined,
     });
 
-    for await (const chunk of result.textStream) {
-      yield { type: 'text', content: chunk };
+    for await (const event of result.fullStream) {
+      if (event.type === 'text-delta') {
+        yield { type: 'text', content: (event as any).text ?? (event as any).textDelta ?? '' };
+      } else if (event.type === 'tool-call') {
+        yield { type: 'tool-call', content: JSON.stringify({ name: event.toolName, args: (event as any).args ?? (event as any).input ?? {} }) };
+      } else if (event.type === 'tool-result') {
+        yield { type: 'tool-result', content: JSON.stringify({ name: event.toolName, result: (event as any).result ?? (event as any).output ?? '' }) };
+      }
     }
   }
 
@@ -191,8 +197,14 @@ export class AIClient {
       stopWhen: maxSteps ? stepCountIs(maxSteps) : undefined,
     });
 
-    for await (const chunk of result.textStream) {
-      yield { type: 'text', content: chunk };
+    for await (const event of result.fullStream) {
+      if (event.type === 'text-delta') {
+        yield { type: 'text', content: (event as any).text ?? (event as any).textDelta ?? '' };
+      } else if (event.type === 'tool-call') {
+        yield { type: 'tool-call', content: JSON.stringify({ name: event.toolName, args: (event as any).args ?? (event as any).input ?? {} }) };
+      } else if (event.type === 'tool-result') {
+        yield { type: 'tool-result', content: JSON.stringify({ name: event.toolName, result: (event as any).result ?? (event as any).output ?? '' }) };
+      }
     }
   }
 }

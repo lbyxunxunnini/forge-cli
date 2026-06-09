@@ -29,7 +29,9 @@ export function renderHelp(): string {
     ['/security', '查看安全检查配置'],
     ['/learn', '切换学习模式'],
     ['/review', '查看代码审查配置'],
+    ['/memory', '查看已保存的记忆'],
     ['/hook', '查看已注册钩子'],
+    ['/trace', '查看最近一次执行的 Trace 摘要'],
     ['/exit', '退出程序'],
   ];
 

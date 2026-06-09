@@ -17,21 +17,21 @@ const AGENT_CONFIGS: Record<AgentRole, Omit<AgentConfig, 'systemPrompt'>> = {
     role: 'requirement_analyst',
     name: '需求分析师',
     description: '目标冻结、范围确认、验收标准、约束定义',
-    allowedTools: ['read_file', 'list_files', 'search_files', 'scan_project', 'detect_project_state'],
+    allowedTools: ['read_file', 'list_files', 'search_files', 'glob', 'grep', 'ls', 'scan_project', 'detect_project_state', 'save_memory', 'read_memory'],
     forbiddenTools: ['write_file', 'edit_file', 'run_command'],
   },
   ui_designer: {
     role: 'ui_designer',
     name: 'UI 设计师',
     description: '视觉方案、交互设计、样式规范',
-    allowedTools: ['read_file', 'list_files', 'search_files', 'scan_project'],
+    allowedTools: ['read_file', 'list_files', 'search_files', 'glob', 'grep', 'ls', 'scan_project', 'save_memory', 'read_memory'],
     forbiddenTools: ['write_file', 'edit_file', 'run_command'],
   },
   architecture_designer: {
     role: 'architecture_designer',
     name: '架构设计师',
     description: '架构设计、模块划分、技术选型',
-    allowedTools: ['read_file', 'list_files', 'search_files', 'scan_project', 'detect_project_state'],
+    allowedTools: ['read_file', 'list_files', 'search_files', 'glob', 'grep', 'ls', 'scan_project', 'detect_project_state', 'save_memory', 'read_memory'],
     forbiddenTools: ['write_file', 'edit_file', 'run_command'],
   },
   page_engineer: {
@@ -45,7 +45,7 @@ const AGENT_CONFIGS: Record<AgentRole, Omit<AgentConfig, 'systemPrompt'>> = {
     role: 'verify_agent',
     name: '验证工程师',
     description: '功能验证、测试执行、质量检查',
-    allowedTools: ['read_file', 'list_files', 'search_files', 'run_command', 'validate_output', 'validate_docs_sync'],
+    allowedTools: ['read_file', 'list_files', 'search_files', 'glob', 'grep', 'ls', 'run_command', 'validate_output', 'validate_docs_sync', 'save_memory', 'read_memory'],
     forbiddenTools: ['write_file', 'edit_file'],
   },
 };
