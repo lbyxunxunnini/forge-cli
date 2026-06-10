@@ -18,6 +18,7 @@ import type { AgentRole, AgentResult, AgentContext } from './types.js';
 import { Tracer, initTracer, clearTracer, getTracer } from '../utils/trace.js';
 import { ToolRetryExecutor } from '../utils/retry.js';
 import { generateSummary, formatSummary } from '../utils/summary.js';
+import { workflowRegistry, WorkflowExecutor, WorkflowStore } from '../workflows/index.js';
 
 export class AgentOrchestrator {
   private controller: ControllerAgent;
@@ -25,6 +26,7 @@ export class AgentOrchestrator {
   private sessionInitialized = false;
   private tracer: Tracer | null = null;
   private toolRetry: ToolRetryExecutor;
+  private workflowExecutor: WorkflowExecutor;
 
   constructor(
     private aiClient: AIClient,
@@ -45,8 +47,12 @@ export class AgentOrchestrator {
     // 初始化工具重试执行器
     this.toolRetry = new ToolRetryExecutor({ maxAttempts: 2 });
 
-    // 初始化插件管理器
+    // 初始化工作流执行器
+    this.workflowExecutor = new WorkflowExecutor(aiClient, contextManager, toolRegistry);
+
+    // 初始化插件管理器和工作流注册表
     this.initPluginManager();
+    this.initWorkflowRegistry();
   }
 
   // 初始化插件管理器
@@ -59,11 +65,22 @@ export class AgentOrchestrator {
     }
   }
 
+  // 初始化工作流注册表
+  private initWorkflowRegistry(): void {
+    try {
+      workflowRegistry.init(this.projectRoot);
+      const workflows = workflowRegistry.getAll();
+      if (workflows.length > 0) {
+        forgeLogger.logInfo(`[workflow] 已注册 ${workflows.length} 个工作流`);
+      }
+    } catch (error) {
+      forgeLogger.logError(`工作流注册表初始化失败: ${error}`);
+    }
+  }
+
   // 执行用户输入
   async execute(userInput: string): Promise<AgentResult> {
-    const startTime = Date.now();
-
-    // 初始化 tracer（使用 session ID）
+    // 初始化 tracer
     const session = sessionManager.get();
     const traceId = session?.id || `orch-${Date.now()}`;
     this.tracer = initTracer(traceId, { consoleOutput: false });
@@ -71,121 +88,32 @@ export class AgentOrchestrator {
     this.toolRetry = new ToolRetryExecutor({ maxAttempts: 2 }, this.tracer);
 
     try {
-      // 先让大模型判断：是否需要进入工作流
-      this.tracer.traceLLMCall('classifier', 1, 0);
-      const classifyStart = Date.now();
-      const isProjectTask = await this.classifyTask(userInput);
-      this.tracer.traceLLMResponse(
-        isProjectTask ? '是' : '否',
-        0,
-        Date.now() - classifyStart
-      );
-
-      if (isProjectTask === null) {
-        this.tracer.traceError(new Error('模型不可用'), 'classifyTask');
+      // ─── 1. 触发词匹配 → 外部工作流（纯字符串匹配，不调 LLM） ───
+      const matchedWorkflow = workflowRegistry.match(userInput);
+      if (matchedWorkflow) {
+        this.tracer.record('state_change', { to: 'workflow', workflow: matchedWorkflow.manifest.name });
+        forgeLogger.logInfo(`[workflow] 匹配到工作流: ${matchedWorkflow.manifest.name}`);
+        const result = await this.workflowExecutor.execute(matchedWorkflow, this.projectRoot, userInput);
         this.finishTrace();
         return {
-          success: false,
-          output: '',
-          error: '模型不可用，请检查 API 配置（/model）',
+          success: result.success,
+          output: result.output,
+          needsUserInput: result.needsUserInput,
+          error: result.error,
         };
       }
 
-      if (!isProjectTask) {
-        this.tracer.record('state_change', { from: 'classify', to: 'direct_response', reason: '非项目任务' });
-        const result = await this.directResponse(userInput);
+      // ─── 2. 暂停态检测：有工作流在等确认，且输入匹配 resumeKeys ───
+      const resumed = await this.tryResumeWorkflow(userInput);
+      if (resumed) {
+        this.tracer.record('state_change', { to: 'workflow_resume' });
         this.finishTrace();
-        return result;
+        return resumed;
       }
 
-      // ─── 以下为项目任务的完整工作流 ───
-
-      // 执行 PromptSubmit 钩子
-      const promptHookResult = await hookManager.execute('PromptSubmit', {
-        event: 'PromptSubmit',
-        userPrompt: userInput,
-      });
-
-      if (promptHookResult.action === 'block') {
-        this.tracer.traceWarning('PromptSubmit hook blocked', { message: promptHookResult.message });
-        this.finishTrace();
-        return {
-          success: false,
-          output: '',
-          error: promptHookResult.message || '操作被钩子阻止',
-        };
-      }
-
-      // 安全检查
-      const securityResult = securityChecker.checkCode(userInput);
-      if (!securityResult.passed && securityResult.score < 50) {
-        this.tracer.traceWarning(`安全检查警告 (分数: ${securityResult.score})`);
-        forgeLogger.logWarning(`安全检查警告 (分数: ${securityResult.score})`);
-      }
-
-      // 初始化 session（如果需要）
-      if (!this.sessionInitialized) {
-        sessionManager.init(this.context.projectRoot, userInput);
-        this.sessionInitialized = true;
-
-        // 执行 SessionStart 钩子
-        await hookManager.execute('SessionStart', {
-          event: 'SessionStart',
-          sessionState: sessionManager.get() as unknown as Record<string, unknown>,
-        });
-      }
-
-      // 更新 session 状态
-      sessionManager.setState('executing');
-      sessionManager.addHistory('user_input', 'user', userInput);
-
-      // 检查是否需要中断（ff-a 模式）
-      if (autonomousMode.isEnabled() && !autonomousMode.canAutoProceed(userInput)) {
-        this.tracer.traceWarning('高风险操作，等待用户确认');
-        forgeLogger.logWaiting('检测到高风险操作，等待用户确认');
-        sessionManager.waitForInput();
-        this.finishTrace();
-        return {
-          success: true,
-          output: '[f-forge] 检测到高风险操作，请确认是否继续',
-          needsUserInput: true,
-        };
-      }
-
-      // 路由判断
-      const targetAgent = this.controller.route(userInput);
-      this.tracer.record('state_change', { from: 'classify', to: 'route', agent: targetAgent });
-
-      // 更新上下文（先更新阶段，再检查门禁）
-      const prevPhase = this.context.currentPhase;
-      this.updateContext(targetAgent);
-      if (this.context.currentPhase !== prevPhase) {
-        this.tracer.tracePhaseAdvance(prevPhase, this.context.currentPhase);
-      }
-
-      sessionManager.setActiveAgent(targetAgent);
-      sessionManager.setPhase(this.context.currentPhase);
-
-      // 日志：进入 controller
-      forgeLogger.enterController();
-      forgeLogger.logPhase(this.context.currentPhase);
-
-      // 调度执行
-      const dispatchStart = Date.now();
-      const result = await this.controller.dispatch(targetAgent, userInput, this.context);
-      this.tracer.record('state_change', {
-        from: 'dispatch',
-        to: result.success ? 'success' : 'failed',
-        agent: targetAgent,
-        duration: Date.now() - dispatchStart,
-      });
-
-      // 处理结果
-      this.processResult(result);
-
-      // 记录结果到 session
-      sessionManager.addHistory('agent_result', targetAgent, result.output);
-
+      // ─── 3. 无工作流匹配 → 直接回答（带工具） ───
+      this.tracer.record('state_change', { to: 'direct_response' });
+      const result = await this.directResponse(userInput);
       this.finishTrace();
       return result;
     } catch (error: unknown) {
@@ -194,6 +122,45 @@ export class AgentOrchestrator {
       this.finishTrace();
       throw err;
     }
+  }
+
+  /** 直接启动指定工作流（不经过触发词匹配，供 /flutter-forge 命令使用） */
+  async executeWorkflow(workflowName: string, userInput: string): Promise<AgentResult> {
+    const workflow = workflowRegistry.get(workflowName);
+    if (!workflow) {
+      return { success: false, output: '', error: `工作流不存在: ${workflowName}` };
+    }
+
+    const result = await this.workflowExecutor.execute(workflow, this.projectRoot, userInput);
+    return {
+      success: result.success,
+      output: result.output,
+      needsUserInput: result.needsUserInput,
+      error: result.error,
+    };
+  }
+
+  /**
+   * 暂停态检测：如果有工作流 session 在等待确认，且用户输入匹配 resumeKeys，
+   * 自动恢复工作流（用户可以给修改意见，也可以直接确认）
+   */
+  private async tryResumeWorkflow(userInput: string): Promise<AgentResult | null> {
+    const workflows = workflowRegistry.getAll();
+    for (const workflow of workflows) {
+      const store = new WorkflowStore(workflow.manifest.name, this.projectRoot);
+      const resumable = store.findResumableSession(userInput);
+      if (resumable) {
+        forgeLogger.logInfo(`[workflow] 暂停态恢复: ${resumable.id} (匹配: ${userInput})`);
+        const result = await this.workflowExecutor.execute(workflow, this.projectRoot, userInput);
+        return {
+          success: result.success,
+          output: result.output,
+          needsUserInput: result.needsUserInput,
+          error: result.error,
+        };
+      }
+    }
+    return null;
   }
 
   // 非工作流任务：直接回答（带上下文和工具）
@@ -247,10 +214,8 @@ export class AgentOrchestrator {
     }
   }
 
-  // 流式执行（完整流程：分类 → 路由 → 流式输出）
+  // 流式执行
   async *executeStream(userInput: string): AsyncGenerator<{ type: 'text' | 'tool-call' | 'tool-result'; content: string }> {
-    const startTime = Date.now();
-
     // 初始化 tracer
     const session = sessionManager.get();
     const traceId = session?.id || `stream-${Date.now()}`;
@@ -258,79 +223,29 @@ export class AgentOrchestrator {
     this.tracer.record('user_input', { input: userInput });
 
     try {
-      // 先判断是否需要进入工作流
-      this.tracer.traceLLMCall('classifier', 1, 0);
-      const classifyStart = Date.now();
-      const isProjectTask = await this.classifyTask(userInput);
-      this.tracer.traceLLMResponse(isProjectTask ? '是' : '否', 0, Date.now() - classifyStart);
-
-      if (isProjectTask === null) {
-        this.tracer.traceError(new Error('模型不可用'), 'classifyTask');
-        this.finishTrace();
-        yield { type: 'text', content: '模型不可用，请检查 API 配置（/model）' };
-        return;
-      }
-
-      if (!isProjectTask) {
-        this.tracer.record('state_change', { from: 'classify', to: 'direct_response' });
-        yield* this.directResponseStream(userInput);
+      // ─── 1. 触发词匹配 → 外部工作流 ───
+      const matchedWorkflow = workflowRegistry.match(userInput);
+      if (matchedWorkflow) {
+        this.tracer.record('state_change', { to: 'workflow', workflow: matchedWorkflow.manifest.name });
+        forgeLogger.logInfo(`[workflow] 匹配到工作流: ${matchedWorkflow.manifest.name}`);
+        const result = await this.workflowExecutor.execute(matchedWorkflow, this.projectRoot, userInput);
+        yield { type: 'text' as const, content: result.output };
         this.finishTrace();
         return;
       }
 
-      // ─── 项目工作流 ───
-
-      // PromptSubmit 钩子
-      const promptHookResult = await hookManager.execute('PromptSubmit', {
-        event: 'PromptSubmit',
-        userPrompt: userInput,
-      });
-      if (promptHookResult.action === 'block') {
-        this.tracer.traceWarning('PromptSubmit hook blocked');
+      // ─── 2. 暂停态检测 ───
+      const resumed = await this.tryResumeWorkflow(userInput);
+      if (resumed) {
+        this.tracer.record('state_change', { to: 'workflow_resume' });
+        yield { type: 'text' as const, content: resumed.output };
         this.finishTrace();
-        yield { type: 'text', content: promptHookResult.message || '操作被钩子阻止' };
         return;
       }
 
-      // 初始化 session
-      if (!this.sessionInitialized) {
-        sessionManager.init(this.context.projectRoot, userInput);
-        this.sessionInitialized = true;
-        await hookManager.execute('SessionStart', {
-          event: 'SessionStart',
-          sessionState: sessionManager.get() as unknown as Record<string, unknown>,
-        });
-      }
-
-      sessionManager.setState('executing');
-      sessionManager.addHistory('user_input', 'user', userInput);
-
-      // 路由判断
-      const targetAgent = this.controller.route(userInput);
-      this.tracer.record('state_change', { from: 'classify', to: 'route', agent: targetAgent });
-
-      const prevPhase = this.context.currentPhase;
-      this.updateContext(targetAgent);
-      if (this.context.currentPhase !== prevPhase) {
-        this.tracer.tracePhaseAdvance(prevPhase, this.context.currentPhase);
-      }
-
-      sessionManager.setActiveAgent(targetAgent);
-      sessionManager.setPhase(this.context.currentPhase);
-
-      forgeLogger.enterController();
-      forgeLogger.logPhase(this.context.currentPhase);
-
-      yield* this.controller.executeStream(userInput, this.context);
-
-      this.tracer.record('state_change', {
-        from: 'stream',
-        to: 'complete',
-        agent: targetAgent,
-        duration: Date.now() - startTime,
-      });
-
-      sessionManager.addHistory('stream_complete', targetAgent, '');
+      // ─── 3. 无工作流匹配 → 直接回答 ───
+      this.tracer.record('state_change', { to: 'direct_response' });
+      yield* this.directResponseStream(userInput);
       this.finishTrace();
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));

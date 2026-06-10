@@ -1,0 +1,127 @@
+name: flutter-forge
+version: 0.3.3
+description: Flutter 结构化协作工作流 — 角色隔离、阶段门禁、质量评估
+
+triggers:
+  - "ff-"
+  - "ff-fast"
+  - "ff-a"
+  - "ff a"
+
+roles:
+  - name: requirement_analyst
+    description: 目标冻结、范围确认、验收标准、约束定义
+    allowedTools:
+      - read_file
+      - list_files
+      - search_files
+      - glob
+      - grep
+      - ls
+      - scan_project
+      - detect_project_state
+      - save_memory
+      - read_memory
+      - run_command_with_output
+    forbiddenTools:
+      - write_file
+      - edit_file
+      - run_command
+    promptFile: requirement_analyst.md
+
+  - name: ui_designer
+    description: 视觉方案、交互设计、样式规范
+    allowedTools:
+      - read_file
+      - list_files
+      - search_files
+      - glob
+      - grep
+      - ls
+      - scan_project
+      - save_memory
+      - read_memory
+      - run_command_with_output
+    forbiddenTools:
+      - write_file
+      - edit_file
+      - run_command
+    promptFile: ui_designer.md
+
+  - name: architecture_designer
+    description: 架构设计、模块划分、技术选型
+    allowedTools:
+      - read_file
+      - list_files
+      - search_files
+      - glob
+      - grep
+      - ls
+      - scan_project
+      - detect_project_state
+      - save_memory
+      - read_memory
+      - run_command_with_output
+    forbiddenTools:
+      - write_file
+      - edit_file
+      - run_command
+    promptFile: architecture_designer.md
+
+  - name: page_engineer
+    description: 代码实现、文件读写、命令执行
+    allowedTools:
+      - "*"
+    forbiddenTools: []
+    promptFile: page_engineer.md
+    outputFormat: free
+
+  - name: verify_agent
+    description: 功能验证、测试执行、质量检查
+    allowedTools:
+      - read_file
+      - list_files
+      - search_files
+      - glob
+      - grep
+      - ls
+      - run_command
+      - validate_output
+      - save_memory
+      - read_memory
+    forbiddenTools:
+      - write_file
+      - edit_file
+    promptFile: verify_agent.md
+
+phases:
+  execution:
+    - S0
+    - S1
+    - S2
+    - S3
+    - S4
+    - S5
+    - S6
+  cocreation:
+    - C0
+    - C1
+    - C2
+    - C3
+
+scripts:
+  classify: classify_task.sh
+  session: ff_session.sh
+  controller: controller.py
+  gate_check: gate_check.py
+  guardrails_check: check_project_guardrails.sh
+  guardrails_init: init_project_guardrails.py
+  project_detect: detect_project_root_state.py
+  flutter_scan: flutter_stack_scan.py
+  snapshot: project_snapshot.py
+  doctor: doctor.sh
+
+hooks:
+  pre_write: hook_check_project_guardrails.sh
+
+references: references/

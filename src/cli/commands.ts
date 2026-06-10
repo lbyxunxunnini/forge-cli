@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import type { ConfigManager } from '../config/manager.js';
 import type { ContextManager } from '../llm/context.js';
 import type { AIClient } from '../llm/client-v2.js';
+import { workflowRegistry } from '../workflows/index.js';
 import type { AgentOrchestrator } from '../agents/index.js';
 import { renderHelp, renderStatus, renderSuccess, renderError } from './renderer.js';
 import { memoryManager } from '../memory/manager.js';
@@ -124,6 +125,9 @@ export async function handleCommand(
       return handleSearchCommand(args);
     case '/state':
       return handleStateCommand(args);
+    case '/flutter-forge':
+    case '/ff':
+      return await handleWorkflowCommand(args, orchestrator);
     default:
       return { handled: true, output: renderError(`未知命令: ${command}\n输入 /help 查看可用命令`) };
   }
@@ -1126,4 +1130,67 @@ function handleStateCommand(args: string[]): CommandResult {
     default:
       return { handled: true, output: renderError(`未知子命令: ${subCommand}`) }
   }
+}
+
+// ─── /flutter-forge ────────────────────────────────────────
+
+async function handleWorkflowCommand(
+  args: string[],
+  orchestrator?: AgentOrchestrator
+): Promise<CommandResult> {
+  const workflows = workflowRegistry.getAll();
+
+  // 无参数：列出所有工作流
+  if (args.length === 0) {
+    if (workflows.length === 0) {
+      return { handled: true, output: chalk.dim('未安装任何工作流。将工作流放到 ~/.forge-cli/workflows/ 目录即可。') };
+    }
+
+    const lines = [chalk.bold('\n已安装工作流：')];
+    for (const wf of workflows) {
+      const triggers = wf.manifest.triggers.join(', ');
+      lines.push(`  ${chalk.cyan(wf.manifest.name)} v${wf.manifest.version} — ${wf.manifest.description}`);
+      lines.push(`    触发词: ${chalk.dim(triggers)}`);
+      lines.push(`    角色: ${chalk.dim(wf.manifest.roles.map(r => r.name).join(', '))}`);
+    }
+    lines.push('');
+    lines.push(chalk.dim('使用方式: 输入触发词直接进入，或 /flutter-forge <名称> 手动启动'));
+    return { handled: true, output: lines.join('\n') };
+  }
+
+  // 有参数：启动指定工作流
+  const workflowName = args[0];
+  const workflow = workflowRegistry.get(workflowName);
+
+  if (!workflow) {
+    // 尝试模糊匹配
+    const fuzzy = workflows.find(w =>
+      w.manifest.name.includes(workflowName) ||
+      w.manifest.triggers.some(t => t.includes(workflowName))
+    );
+    if (fuzzy) {
+      return startWorkflow(fuzzy, args.slice(1).join(' '), orchestrator);
+    }
+    return { handled: true, output: renderError(`工作流不存在: ${workflowName}\n可用: ${workflows.map(w => w.manifest.name).join(', ')}`) };
+  }
+
+  return startWorkflow(workflow, args.slice(1).join(' '), orchestrator);
+}
+
+async function startWorkflow(
+  workflow: import('../workflows/index.js').Workflow,
+  userPrompt: string,
+  orchestrator?: AgentOrchestrator
+): Promise<CommandResult> {
+  if (!orchestrator) {
+    return { handled: true, output: renderError('Orchestrator 未初始化') };
+  }
+
+  // 直接调用 executeWorkflow，不经过触发词匹配
+  const result = await orchestrator.executeWorkflow(workflow.manifest.name, userPrompt || '');
+
+  return {
+    handled: true,
+    output: result.output || chalk.dim(`[workflow] ${workflow.manifest.name} 执行完成`),
+  };
 }
