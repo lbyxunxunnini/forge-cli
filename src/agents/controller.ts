@@ -17,7 +17,7 @@ export class ControllerAgent extends BaseAgent {
     super('controller', aiClient, contextManager, toolRegistry);
   }
 
-  // 路由判断（仅 Flutter 任务会进入此方法）
+  // 路由判断（仅项目任务会进入此方法）
   route(userInput: string): AgentRole {
     const input = userInput.toLowerCase().trim();
 

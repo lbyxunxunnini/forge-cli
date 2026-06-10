@@ -124,7 +124,7 @@ export class MCPClient extends EventEmitter {
         protocolVersion: '2024-11-05',
         capabilities: {},
         clientInfo: {
-          name: 'flutter-forge',
+          name: 'forge-cli',
           version: '0.4.0',
         },
       }).then(() => {

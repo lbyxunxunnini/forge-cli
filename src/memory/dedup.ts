@@ -136,20 +136,21 @@ function extractKeywords(text: string): string[] {
 function extractTags(text: string): string[] {
   const tags: string[] = [];
   const patterns: [RegExp, string][] = [
-    [/flutter/i, 'flutter'],
-    [/dart/i, 'dart'],
-    [/ios/i, 'ios'],
-    [/android/i, 'android'],
-    [/react\s*native/i, 'react-native'],
+    [/typescript|ts/i, 'typescript'],
+    [/javascript|js/i, 'javascript'],
+    [/python/i, 'python'],
+    [/java/i, 'java'],
+    [/react/i, 'react'],
+    [/vue/i, 'vue'],
     [/api/i, 'api'],
-    [/数据库|database|sqlite|supabase/i, 'database'],
-    [/状态管理|state\s*management|riverpod|bloc|provider/i, 'state-management'],
+    [/数据库|database|sqlite/i, 'database'],
     [/测试|test/i, 'testing'],
     [/部署|deploy|ci\/cd/i, 'deployment'],
     [/性能|performance/i, 'performance'],
     [/安全|security/i, 'security'],
     [/ui|界面|布局|layout/i, 'ui'],
     [/架构|architecture/i, 'architecture'],
+    [/配置|config/i, 'config'],
   ];
 
   for (const [pattern, tag] of patterns) {

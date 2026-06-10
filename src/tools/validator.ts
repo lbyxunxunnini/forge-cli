@@ -7,7 +7,7 @@ const SCRIPTS_DIR = join(import.meta.dirname, '..', '..', 'scripts');
 export const validateOutputTool: Tool = {
   definition: {
     name: 'validate_output',
-    description: '验证输出是否符合 flutter-forge 规范（日志前缀、阶段标记等）',
+    description: '验证输出是否符合规范（日志前缀、阶段标记等）',
     parameters: {
       type: 'object',
       properties: {
@@ -15,9 +15,9 @@ export const validateOutputTool: Tool = {
           type: 'string',
           description: '待验证的输出文本',
         },
-        require_s4: {
+        require_stage: {
           type: 'boolean',
-          description: '是否要求包含 S4 阶段标记',
+          description: '是否要求包含阶段标记',
         },
         require_complete: {
           type: 'boolean',

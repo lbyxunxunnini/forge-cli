@@ -1,4 +1,4 @@
-export type ProjectState = 'empty_new' | 'flutter_existing' | 'non_flutter';
+export type ProjectState = 'empty_new' | 'existing' | 'unknown';
 
 export type TaskMode =
   | 'direct'       // 直通模式

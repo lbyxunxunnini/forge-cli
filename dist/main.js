@@ -1,14 +1,1069 @@
 #!/usr/bin/env node
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
   get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
 }) : x)(function(x) {
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/cli/theme.ts
+import chalk4 from "chalk";
+function getTheme() {
+  return currentTheme;
+}
+function getThemeName() {
+  return currentThemeName;
+}
+function setTheme(name) {
+  currentThemeName = name;
+  currentTheme = themes[name];
+}
+function getAvailableThemes() {
+  return Object.keys(themes);
+}
+var darkTheme, lightTheme, ansiTheme, themes, currentThemeName, currentTheme;
+var init_theme = __esm({
+  "src/cli/theme.ts"() {
+    "use strict";
+    darkTheme = {
+      claude: chalk4.hex("#E8A0BF"),
+      // 粉紫色
+      claudeShimmer: chalk4.hex("#F0C0D0"),
+      // 浅粉紫
+      text: chalk4.white,
+      inverseText: chalk4.black,
+      subtle: chalk4.gray,
+      inactive: chalk4.dim.gray,
+      success: chalk4.green,
+      error: chalk4.red,
+      warning: chalk4.yellow,
+      promptBorder: chalk4.hex("#E8A0BF"),
+      promptBorderShimmer: chalk4.hex("#F0C0D0"),
+      background: chalk4.bgBlack,
+      permission: chalk4.hex("#FFD700"),
+      // 金色
+      planMode: chalk4.hex("#87CEEB"),
+      // 天蓝色
+      ide: chalk4.hex("#98FB98"),
+      // 浅绿色
+      userMessageBackground: chalk4.bgHex("#1A1A2E"),
+      bashMessageBackgroundColor: chalk4.bgHex("#16213E"),
+      fastMode: chalk4.hex("#FF6B6B"),
+      // 红色
+      fastModeShimmer: chalk4.hex("#FF8E8E"),
+      // 浅红色
+      diffAdded: chalk4.green,
+      diffRemoved: chalk4.red,
+      diffAddedDimmed: chalk4.dim.green,
+      diffRemovedDimmed: chalk4.dim.red
+    };
+    lightTheme = {
+      claude: chalk4.hex("#8B5CF6"),
+      // 紫色
+      claudeShimmer: chalk4.hex("#A78BFA"),
+      // 浅紫色
+      text: chalk4.black,
+      inverseText: chalk4.white,
+      subtle: chalk4.gray,
+      inactive: chalk4.dim.gray,
+      success: chalk4.green,
+      error: chalk4.red,
+      warning: chalk4.yellow,
+      promptBorder: chalk4.hex("#8B5CF6"),
+      promptBorderShimmer: chalk4.hex("#A78BFA"),
+      background: chalk4.bgWhite,
+      permission: chalk4.hex("#D97706"),
+      // 橙色
+      planMode: chalk4.hex("#2563EB"),
+      // 蓝色
+      ide: chalk4.hex("#059669"),
+      // 绿色
+      userMessageBackground: chalk4.bgHex("#F3F4F6"),
+      bashMessageBackgroundColor: chalk4.bgHex("#E5E7EB"),
+      fastMode: chalk4.hex("#DC2626"),
+      // 红色
+      fastModeShimmer: chalk4.hex("#EF4444"),
+      // 浅红色
+      diffAdded: chalk4.green,
+      diffRemoved: chalk4.red,
+      diffAddedDimmed: chalk4.dim.green,
+      diffRemovedDimmed: chalk4.dim.red
+    };
+    ansiTheme = {
+      claude: chalk4.cyan,
+      claudeShimmer: chalk4.cyanBright,
+      text: chalk4.white,
+      inverseText: chalk4.black,
+      subtle: chalk4.gray,
+      inactive: chalk4.dim,
+      success: chalk4.green,
+      error: chalk4.red,
+      warning: chalk4.yellow,
+      promptBorder: chalk4.cyan,
+      promptBorderShimmer: chalk4.cyanBright,
+      background: chalk4.bgBlack,
+      permission: chalk4.yellow,
+      planMode: chalk4.blue,
+      ide: chalk4.green,
+      userMessageBackground: chalk4.bgBlue,
+      bashMessageBackgroundColor: chalk4.bgCyan,
+      fastMode: chalk4.red,
+      fastModeShimmer: chalk4.redBright,
+      diffAdded: chalk4.green,
+      diffRemoved: chalk4.red,
+      diffAddedDimmed: chalk4.dim,
+      diffRemovedDimmed: chalk4.dim
+    };
+    themes = {
+      dark: darkTheme,
+      light: lightTheme,
+      "light-daltonized": lightTheme,
+      // 简化实现
+      "dark-daltonized": darkTheme,
+      // 简化实现
+      "light-ansi": ansiTheme,
+      "dark-ansi": ansiTheme
+    };
+    currentThemeName = "dark";
+    currentTheme = darkTheme;
+  }
+});
+
+// src/cli/structured-edit.ts
+var structured_edit_exports = {};
+__export(structured_edit_exports, {
+  DiffGenerator: () => DiffGenerator,
+  LintChecker: () => LintChecker,
+  TestRunner: () => TestRunner,
+  createDiffGenerator: () => createDiffGenerator,
+  createLintChecker: () => createLintChecker,
+  createTestRunner: () => createTestRunner,
+  default: () => structured_edit_default,
+  diffGenerator: () => diffGenerator,
+  lintChecker: () => lintChecker,
+  testRunner: () => testRunner
+});
+function createDiffGenerator() {
+  return new DiffGenerator();
+}
+function createLintChecker() {
+  return new LintChecker();
+}
+function createTestRunner() {
+  return new TestRunner();
+}
+var DiffGenerator, LintChecker, TestRunner, diffGenerator, lintChecker, testRunner, structured_edit_default;
+var init_structured_edit = __esm({
+  "src/cli/structured-edit.ts"() {
+    "use strict";
+    init_theme();
+    DiffGenerator = class {
+      /**
+       * 生成文件 Diff
+       */
+      generateDiff(oldContent, newContent, filePath) {
+        const oldLines = oldContent.split("\n");
+        const newLines = newContent.split("\n");
+        const hunks = this.computeDiff(oldLines, newLines);
+        let type = "modify";
+        if (oldContent === "") {
+          type = "add";
+        } else if (newContent === "") {
+          type = "remove";
+        }
+        return {
+          filePath,
+          hunks,
+          oldContent,
+          newContent,
+          type
+        };
+      }
+      /**
+       * 计算 Diff
+       */
+      computeDiff(oldLines, newLines) {
+        const hunks = [];
+        let currentHunk = null;
+        const maxLines = Math.max(oldLines.length, newLines.length);
+        let oldIndex = 0;
+        let newIndex = 0;
+        while (oldIndex < oldLines.length || newIndex < newLines.length) {
+          const oldLine = oldLines[oldIndex];
+          const newLine = newLines[newIndex];
+          if (oldIndex >= oldLines.length) {
+            if (!currentHunk) {
+              currentHunk = {
+                oldStart: oldIndex + 1,
+                oldLines: 0,
+                newStart: newIndex + 1,
+                newLines: 0,
+                lines: []
+              };
+            }
+            currentHunk.lines.push({
+              type: "add",
+              content: newLine,
+              newLineNumber: newIndex + 1
+            });
+            currentHunk.newLines++;
+            newIndex++;
+          } else if (newIndex >= newLines.length) {
+            if (!currentHunk) {
+              currentHunk = {
+                oldStart: oldIndex + 1,
+                oldLines: 0,
+                newStart: newIndex + 1,
+                newLines: 0,
+                lines: []
+              };
+            }
+            currentHunk.lines.push({
+              type: "remove",
+              content: oldLine,
+              oldLineNumber: oldIndex + 1
+            });
+            currentHunk.oldLines++;
+            oldIndex++;
+          } else if (oldLine === newLine) {
+            if (currentHunk) {
+              currentHunk.lines.push({
+                type: "context",
+                content: oldLine,
+                oldLineNumber: oldIndex + 1,
+                newLineNumber: newIndex + 1
+              });
+              currentHunk.oldLines++;
+              currentHunk.newLines++;
+              if (currentHunk.lines.filter((l) => l.type !== "context").length === 0) {
+                hunks.push(currentHunk);
+                currentHunk = null;
+              }
+            }
+            oldIndex++;
+            newIndex++;
+          } else {
+            if (!currentHunk) {
+              currentHunk = {
+                oldStart: oldIndex + 1,
+                oldLines: 0,
+                newStart: newIndex + 1,
+                newLines: 0,
+                lines: []
+              };
+            }
+            currentHunk.lines.push({
+              type: "remove",
+              content: oldLine,
+              oldLineNumber: oldIndex + 1
+            });
+            currentHunk.lines.push({
+              type: "add",
+              content: newLine,
+              newLineNumber: newIndex + 1
+            });
+            currentHunk.oldLines++;
+            currentHunk.newLines++;
+            oldIndex++;
+            newIndex++;
+          }
+        }
+        if (currentHunk) {
+          hunks.push(currentHunk);
+        }
+        return hunks;
+      }
+      /**
+       * 渲染 Diff
+       */
+      renderDiff(diff) {
+        const theme = getTheme();
+        const lines = [];
+        lines.push(theme.claude(`--- ${diff.filePath}`));
+        lines.push(theme.claude(`+++ ${diff.filePath}`));
+        for (const hunk of diff.hunks) {
+          lines.push(theme.subtle(`@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`));
+          for (const line of hunk.lines) {
+            switch (line.type) {
+              case "add":
+                lines.push(theme.success(`+ ${line.content}`));
+                break;
+              case "remove":
+                lines.push(theme.error(`- ${line.content}`));
+                break;
+              case "context":
+                lines.push(`  ${line.content}`);
+                break;
+            }
+          }
+        }
+        return lines.join("\n");
+      }
+      /**
+       * 统计 Diff
+       */
+      getStats(diff) {
+        let additions = 0;
+        let deletions = 0;
+        for (const hunk of diff.hunks) {
+          for (const line of hunk.lines) {
+            if (line.type === "add") additions++;
+            if (line.type === "remove") deletions++;
+          }
+        }
+        return {
+          additions,
+          deletions,
+          changes: additions + deletions
+        };
+      }
+    };
+    LintChecker = class {
+      /**
+       * 检查 TypeScript 代码
+       */
+      checkTypeScript(content, filePath) {
+        const results = [];
+        const lines = content.split("\n");
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const lineNum = i + 1;
+          if (line.includes("console.log")) {
+            results.push({
+              filePath,
+              line: lineNum,
+              column: line.indexOf("console.log") + 1,
+              severity: "warning",
+              message: "Avoid using console.log in production code",
+              rule: "no-console"
+            });
+          }
+          if (line.includes(": any")) {
+            results.push({
+              filePath,
+              line: lineNum,
+              column: line.indexOf(": any") + 1,
+              severity: "warning",
+              message: 'Avoid using "any" type',
+              rule: "no-any"
+            });
+          }
+          if (line.match(/(?:const|let|var)\s+\w+\s*=/) && !line.includes("//")) {
+          }
+          if (line.trim().endsWith(";") && !line.trim().startsWith("//")) {
+          }
+        }
+        return results;
+      }
+      /**
+       * 检查 Dart 代码
+       */
+      checkDart(content, filePath) {
+        const results = [];
+        const lines = content.split("\n");
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const lineNum = i + 1;
+          if (line.includes("print(")) {
+            results.push({
+              filePath,
+              line: lineNum,
+              column: line.indexOf("print(") + 1,
+              severity: "warning",
+              message: "Avoid using print in production code",
+              rule: "avoid_print"
+            });
+          }
+          if (line.includes("dynamic ")) {
+            results.push({
+              filePath,
+              line: lineNum,
+              column: line.indexOf("dynamic ") + 1,
+              severity: "info",
+              message: "Consider using a more specific type",
+              rule: "avoid_dynamic"
+            });
+          }
+        }
+        return results;
+      }
+      /**
+       * 渲染 Lint 结果
+       */
+      renderResults(results) {
+        const theme = getTheme();
+        const lines = [];
+        if (results.length === 0) {
+          lines.push(theme.success("\u2713 No issues found"));
+          return lines.join("\n");
+        }
+        const byFile = /* @__PURE__ */ new Map();
+        for (const result of results) {
+          const fileResults = byFile.get(result.filePath) || [];
+          fileResults.push(result);
+          byFile.set(result.filePath, fileResults);
+        }
+        for (const [filePath, fileResults] of byFile) {
+          lines.push(theme.text.bold(`
+${filePath}`));
+          for (const result of fileResults) {
+            const severityIcon = this.getSeverityIcon(result.severity);
+            const severityColor = this.getSeverityColor(result.severity);
+            const location = `${result.line}:${result.column}`;
+            const rule = result.rule ? theme.subtle(` (${result.rule})`) : "";
+            lines.push(`  ${severityColor(severityIcon)} ${theme.subtle(location)} ${result.message}${rule}`);
+          }
+        }
+        const errorCount = results.filter((r) => r.severity === "error").length;
+        const warningCount = results.filter((r) => r.severity === "warning").length;
+        const infoCount = results.filter((r) => r.severity === "info").length;
+        lines.push("");
+        lines.push(theme.text.bold("Summary:"));
+        if (errorCount > 0) lines.push(theme.error(`  ${errorCount} error(s)`));
+        if (warningCount > 0) lines.push(theme.warning(`  ${warningCount} warning(s)`));
+        if (infoCount > 0) lines.push(theme.subtle(`  ${infoCount} info(s)`));
+        return lines.join("\n");
+      }
+      getSeverityIcon(severity) {
+        switch (severity) {
+          case "error":
+            return "\u2717";
+          case "warning":
+            return "\u26A0";
+          case "info":
+            return "\u2139";
+          case "hint":
+            return "\u{1F4A1}";
+        }
+      }
+      getSeverityColor(severity) {
+        const theme = getTheme();
+        switch (severity) {
+          case "error":
+            return theme.error;
+          case "warning":
+            return theme.warning;
+          case "info":
+            return theme.subtle;
+          case "hint":
+            return theme.subtle;
+        }
+      }
+    };
+    TestRunner = class {
+      /**
+       * 解析 Jest 输出
+       */
+      parseJestOutput(output) {
+        const tests = [];
+        const lines = output.split("\n");
+        let currentTest = null;
+        for (const line of lines) {
+          const passMatch = line.match(/✓\s+(.+?)\s+\((\d+)\s*ms\)/);
+          const failMatch = line.match(/✗\s+(.+?)(?:\s+\((\d+)\s*ms\))?/);
+          const skipMatch = line.match(/○\s+(.+?)/);
+          if (passMatch) {
+            tests.push({
+              name: passMatch[1],
+              status: "passed",
+              duration: parseInt(passMatch[2])
+            });
+          } else if (failMatch) {
+            currentTest = {
+              name: failMatch[1],
+              status: "failed",
+              duration: failMatch[2] ? parseInt(failMatch[2]) : void 0
+            };
+          } else if (skipMatch) {
+            tests.push({
+              name: skipMatch[1],
+              status: "skipped"
+            });
+          } else if (currentTest && line.trim().startsWith("Error:")) {
+            currentTest.error = line.trim();
+            tests.push(currentTest);
+            currentTest = null;
+          }
+        }
+        if (currentTest) {
+          tests.push(currentTest);
+        }
+        const passed = tests.filter((t) => t.status === "passed").length;
+        const failed = tests.filter((t) => t.status === "failed").length;
+        const skipped = tests.filter((t) => t.status === "skipped").length;
+        return {
+          name: "Test Suite",
+          tests,
+          passed,
+          failed,
+          skipped
+        };
+      }
+      /**
+       * 解析 Dart/Flutter test 输出
+       */
+      parseDartTestOutput(output) {
+        const tests = [];
+        const lines = output.split("\n");
+        for (const line of lines) {
+          const passMatch = line.match(/✓\s+(.+?)(?:\s+(\d+)ms)?/);
+          const failMatch = line.match(/✗\s+(.+?)(?:\s+(\d+)ms)?/);
+          const skipMatch = line.match(/○\s+(.+?)/);
+          if (passMatch) {
+            tests.push({
+              name: passMatch[1],
+              status: "passed",
+              duration: passMatch[2] ? parseInt(passMatch[2]) : void 0
+            });
+          } else if (failMatch) {
+            tests.push({
+              name: failMatch[1],
+              status: "failed",
+              duration: failMatch[2] ? parseInt(failMatch[2]) : void 0
+            });
+          } else if (skipMatch) {
+            tests.push({
+              name: skipMatch[1],
+              status: "skipped"
+            });
+          }
+        }
+        const passed = tests.filter((t) => t.status === "passed").length;
+        const failed = tests.filter((t) => t.status === "failed").length;
+        const skipped = tests.filter((t) => t.status === "skipped").length;
+        return {
+          name: "Dart Test Suite",
+          tests,
+          passed,
+          failed,
+          skipped
+        };
+      }
+      /**
+       * 渲染测试结果
+       */
+      renderResults(suite) {
+        const theme = getTheme();
+        const lines = [];
+        lines.push(theme.text.bold(`
+${suite.name}`));
+        lines.push(theme.inactive("\u2500".repeat(40)));
+        for (const test of suite.tests) {
+          const icon = this.getStatusIcon(test.status);
+          const color = this.getStatusColor(test.status);
+          const duration = test.duration ? theme.subtle(` (${test.duration}ms)`) : "";
+          lines.push(`  ${color(icon)} ${test.name}${duration}`);
+          if (test.error) {
+            lines.push(theme.error(`    ${test.error}`));
+          }
+        }
+        lines.push("");
+        lines.push(theme.text.bold("Summary:"));
+        lines.push(theme.success(`  \u2713 ${suite.passed} passed`));
+        if (suite.failed > 0) {
+          lines.push(theme.error(`  \u2717 ${suite.failed} failed`));
+        }
+        if (suite.skipped > 0) {
+          lines.push(theme.subtle(`  \u25CB ${suite.skipped} skipped`));
+        }
+        return lines.join("\n");
+      }
+      getStatusIcon(status) {
+        switch (status) {
+          case "passed":
+            return "\u2713";
+          case "failed":
+            return "\u2717";
+          case "skipped":
+            return "\u25CB";
+          case "pending":
+            return "\u25CC";
+        }
+      }
+      getStatusColor(status) {
+        const theme = getTheme();
+        switch (status) {
+          case "passed":
+            return theme.success;
+          case "failed":
+            return theme.error;
+          case "skipped":
+            return theme.subtle;
+          case "pending":
+            return theme.warning;
+        }
+      }
+    };
+    diffGenerator = createDiffGenerator();
+    lintChecker = createLintChecker();
+    testRunner = createTestRunner();
+    structured_edit_default = {
+      DiffGenerator,
+      LintChecker,
+      TestRunner,
+      createDiffGenerator,
+      createLintChecker,
+      createTestRunner,
+      diffGenerator,
+      lintChecker,
+      testRunner
+    };
+  }
+});
+
+// src/cli/tree-sitter-parser.ts
+var tree_sitter_parser_exports = {};
+__export(tree_sitter_parser_exports, {
+  TreeSitterParserManager: () => TreeSitterParserManager,
+  createTreeSitterParserManager: () => createTreeSitterParserManager,
+  default: () => tree_sitter_parser_default,
+  treeSitterParserManager: () => treeSitterParserManager
+});
+function createTreeSitterParserManager() {
+  return new TreeSitterParserManager();
+}
+var TreeSitterParserManager, treeSitterParserManager, tree_sitter_parser_default;
+var init_tree_sitter_parser = __esm({
+  "src/cli/tree-sitter-parser.ts"() {
+    "use strict";
+    TreeSitterParserManager = class {
+      parser = null;
+      languages = /* @__PURE__ */ new Map();
+      initialized = false;
+      /**
+       * 初始化解析器
+       */
+      async initialize() {
+        if (this.initialized) return;
+        try {
+          const TreeSitter = __require("tree-sitter");
+          this.parser = new TreeSitter();
+          await this.loadLanguages();
+          this.initialized = true;
+        } catch (error) {
+          console.error("\u521D\u59CB\u5316 tree-sitter \u5931\u8D25:", error);
+          throw error;
+        }
+      }
+      /**
+       * 加载语言 grammar
+       */
+      async loadLanguages() {
+        const languageConfigs = [
+          {
+            name: "typescript",
+            extensions: [".ts", ".tsx"],
+            module: "tree-sitter-typescript",
+            nodeTypes: {
+              function: ["function_declaration", "arrow_function", "function"],
+              class: ["class_declaration", "class"],
+              method: ["method_definition", "method"],
+              variable: ["variable_declaration", "lexical_declaration", "variable"],
+              import: ["import_statement", "import"],
+              export: ["export_statement", "export"],
+              interface: ["interface_declaration", "interface"],
+              type: ["type_alias_declaration", "type"],
+              enum: ["enum_declaration", "enum"],
+              parameter: ["required_parameter", "optional_parameter", "parameter"],
+              return_type: ["type_annotation", "return_type"]
+            }
+          },
+          {
+            name: "javascript",
+            extensions: [".js", ".jsx"],
+            module: "tree-sitter-javascript",
+            nodeTypes: {
+              function: ["function_declaration", "arrow_function", "function"],
+              class: ["class_declaration", "class"],
+              method: ["method_definition", "method"],
+              variable: ["variable_declaration", "lexical_declaration", "variable"],
+              import: ["import_statement", "import"],
+              export: ["export_statement", "export"],
+              interface: [],
+              type: [],
+              enum: [],
+              parameter: ["required_parameter", "optional_parameter", "parameter"],
+              return_type: []
+            }
+          },
+          {
+            name: "java",
+            extensions: [".java"],
+            module: "tree-sitter-java",
+            nodeTypes: {
+              function: ["method_declaration", "constructor_declaration"],
+              class: ["class_declaration"],
+              method: ["method_declaration"],
+              variable: ["field_declaration", "local_variable_declaration"],
+              import: ["import_declaration"],
+              export: [],
+              interface: ["interface_declaration"],
+              type: [],
+              enum: ["enum_declaration"],
+              parameter: ["formal_parameter"],
+              return_type: ["type"]
+            }
+          },
+          {
+            name: "swift",
+            extensions: [".swift"],
+            module: "tree-sitter-swift",
+            nodeTypes: {
+              function: ["function_declaration"],
+              class: ["class_declaration"],
+              method: ["function_declaration"],
+              variable: ["property_declaration", "variable_declaration"],
+              import: ["import_declaration"],
+              export: [],
+              interface: ["protocol_declaration"],
+              type: ["type_alias_declaration"],
+              enum: ["enum_declaration"],
+              parameter: ["parameter"],
+              return_type: ["type_annotation"]
+            }
+          },
+          {
+            name: "dart",
+            extensions: [".dart"],
+            module: "tree-sitter-dart",
+            nodeTypes: {
+              function: ["function_declaration", "method_declaration"],
+              class: ["class_declaration"],
+              method: ["method_declaration"],
+              variable: ["field_declaration", "variable_declaration"],
+              import: ["import_specification"],
+              export: [],
+              interface: [],
+              type: ["type_alias"],
+              enum: ["enum_declaration"],
+              parameter: ["formal_parameter"],
+              return_type: ["type_annotation"]
+            }
+          },
+          {
+            name: "python",
+            extensions: [".py"],
+            module: "tree-sitter-python",
+            nodeTypes: {
+              function: ["function_definition"],
+              class: ["class_definition"],
+              method: ["function_definition"],
+              variable: ["assignment", "augmented_assignment"],
+              import: ["import_statement", "import_from_statement"],
+              export: [],
+              interface: [],
+              type: [],
+              enum: [],
+              parameter: ["parameters", "default_parameter", "typed_parameter"],
+              return_type: ["type"]
+            }
+          },
+          {
+            name: "go",
+            extensions: [".go"],
+            module: "tree-sitter-go",
+            nodeTypes: {
+              function: ["function_declaration", "method_declaration"],
+              class: ["type_declaration"],
+              method: ["method_declaration"],
+              variable: ["var_declaration", "short_var_declaration"],
+              import: ["import_declaration"],
+              export: [],
+              interface: ["interface_type"],
+              type: ["type_declaration"],
+              enum: [],
+              parameter: ["parameter_declaration"],
+              return_type: ["type"]
+            }
+          },
+          {
+            name: "rust",
+            extensions: [".rs"],
+            module: "tree-sitter-rust",
+            nodeTypes: {
+              function: ["function_item"],
+              class: ["impl_item", "struct_item"],
+              method: ["function_item"],
+              variable: ["let_declaration", "const_item", "static_item"],
+              import: ["use_declaration"],
+              export: [],
+              interface: ["trait_item"],
+              type: ["type_alias"],
+              enum: ["enum_item"],
+              parameter: ["parameter"],
+              return_type: ["type"]
+            }
+          },
+          {
+            name: "ruby",
+            extensions: [".rb"],
+            module: "tree-sitter-ruby",
+            nodeTypes: {
+              function: ["method", "singleton_method"],
+              class: ["class"],
+              method: ["method"],
+              variable: ["assignment"],
+              import: ["call"],
+              export: [],
+              interface: [],
+              type: [],
+              enum: [],
+              parameter: ["method_parameters", "block_parameters"],
+              return_type: []
+            }
+          },
+          {
+            name: "php",
+            extensions: [".php"],
+            module: "tree-sitter-php",
+            nodeTypes: {
+              function: ["function_definition", "method_declaration"],
+              class: ["class_declaration"],
+              method: ["method_declaration"],
+              variable: ["property_declaration", "simple_parameter"],
+              import: [],
+              export: [],
+              interface: ["interface_declaration"],
+              type: [],
+              enum: ["enum_declaration"],
+              parameter: ["simple_parameter"],
+              return_type: ["type_list"]
+            }
+          },
+          {
+            name: "kotlin",
+            extensions: [".kt", ".kts"],
+            module: "tree-sitter-kotlin",
+            nodeTypes: {
+              function: ["function_declaration"],
+              class: ["class_declaration"],
+              method: ["function_declaration"],
+              variable: ["property_declaration", "variable_declaration"],
+              import: ["import_header"],
+              export: [],
+              interface: ["class_declaration"],
+              type: ["type_alias"],
+              enum: ["class_declaration"],
+              parameter: ["parameter", "value_parameter"],
+              return_type: ["type_reference"]
+            }
+          },
+          {
+            name: "c",
+            extensions: [".c", ".h"],
+            module: "tree-sitter-c",
+            nodeTypes: {
+              function: ["function_definition"],
+              class: ["struct_specifier"],
+              method: ["function_definition"],
+              variable: ["declaration"],
+              import: ["preproc_include"],
+              export: [],
+              interface: [],
+              type: ["type_definition"],
+              enum: ["enum_specifier"],
+              parameter: ["parameter_declaration"],
+              return_type: ["type"]
+            }
+          },
+          {
+            name: "cpp",
+            extensions: [".cpp", ".cc", ".cxx", ".hpp", ".hxx"],
+            module: "tree-sitter-cpp",
+            nodeTypes: {
+              function: ["function_definition"],
+              class: ["class_specifier"],
+              method: ["function_definition"],
+              variable: ["declaration"],
+              import: ["preproc_include"],
+              export: [],
+              interface: [],
+              type: ["type_definition", "alias_declaration"],
+              enum: ["enum_specifier"],
+              parameter: ["parameter_declaration"],
+              return_type: ["type"]
+            }
+          }
+        ];
+        for (const config of languageConfigs) {
+          try {
+            const grammar = __require(config.module);
+            this.languages.set(config.name, {
+              ...config,
+              grammar: grammar.default || grammar
+            });
+          } catch (error) {
+            console.warn(`\u672A\u5B89\u88C5 ${config.name} \u7684 tree-sitter grammar`);
+          }
+        }
+      }
+      /**
+       * 获取支持的语言
+       */
+      getSupportedLanguages() {
+        return Array.from(this.languages.keys());
+      }
+      /**
+       * 根据文件扩展名获取语言
+       */
+      getLanguageByExtension(ext) {
+        for (const [lang, config] of this.languages) {
+          if (config.extensions.includes(ext)) {
+            return lang;
+          }
+        }
+        return null;
+      }
+      /**
+       * 解析代码
+       */
+      parseCode(code, language) {
+        if (!this.parser || !this.initialized) {
+          throw new Error("\u89E3\u6790\u5668\u672A\u521D\u59CB\u5316");
+        }
+        const config = this.languages.get(language);
+        if (!config) {
+          throw new Error(`\u4E0D\u652F\u6301\u7684\u8BED\u8A00: ${language}`);
+        }
+        this.parser.setLanguage(config.grammar);
+        return this.parser.parse(code);
+      }
+      /**
+       * 提取 AST 节点
+       */
+      extractASTNodes(tree, language, filePath) {
+        const config = this.languages.get(language);
+        if (!config) return [];
+        const nodes = [];
+        const cursor = tree.rootNode.walk();
+        this.traverseCursor(cursor, config, filePath, nodes);
+        return nodes;
+      }
+      /**
+       * 遍历游标
+       */
+      traverseCursor(cursor, config, filePath, nodes) {
+        const nodeType = cursor.nodeType;
+        const nodeText = cursor.nodeText;
+        const startPos = cursor.startPosition;
+        const endPos = cursor.endPosition;
+        let astType = null;
+        if (config.nodeTypes.function.includes(nodeType)) {
+          astType = "function";
+        } else if (config.nodeTypes.class.includes(nodeType)) {
+          astType = "class";
+        } else if (config.nodeTypes.method.includes(nodeType)) {
+          astType = "method";
+        } else if (config.nodeTypes.variable.includes(nodeType)) {
+          astType = "variable";
+        } else if (config.nodeTypes.import.includes(nodeType)) {
+          astType = "import";
+        } else if (config.nodeTypes.interface.includes(nodeType)) {
+          astType = "interface";
+        } else if (config.nodeTypes.type.includes(nodeType)) {
+          astType = "type";
+        } else if (config.nodeTypes.enum.includes(nodeType)) {
+          astType = "enum";
+        }
+        if (astType) {
+          const name = this.extractNodeName(cursor, config, astType);
+          const metadata = this.extractMetadata(cursor, config, astType);
+          nodes.push({
+            type: astType,
+            name: name || nodeText.slice(0, 50),
+            filePath,
+            startLine: startPos.row + 1,
+            endLine: endPos.row + 1,
+            startColumn: startPos.column,
+            endColumn: endPos.column,
+            metadata
+          });
+        }
+        if (cursor.gotoFirstChild()) {
+          do {
+            this.traverseCursor(cursor, config, filePath, nodes);
+          } while (cursor.gotoNextSibling());
+          cursor.gotoParent();
+        }
+      }
+      /**
+       * 提取节点名称
+       */
+      extractNodeName(cursor, config, astType) {
+        const text = cursor.nodeText;
+        if (astType === "function" || astType === "method") {
+          const match = text.match(/(?:function|func|def|fn)\s+(\w+)/);
+          if (match) return match[1];
+        }
+        if (astType === "class") {
+          const match = text.match(/(?:class|struct|interface)\s+(\w+)/);
+          if (match) return match[1];
+        }
+        if (astType === "variable") {
+          const match = text.match(/(?:const|let|var|final|val|int|String|bool)\s+(\w+)/);
+          if (match) return match[1];
+        }
+        return null;
+      }
+      /**
+       * 提取元数据
+       */
+      extractMetadata(cursor, config, astType) {
+        const metadata = {};
+        const text = cursor.nodeText;
+        if (astType === "function" || astType === "method") {
+          const paramMatch = text.match(/\(([^)]*)\)/);
+          if (paramMatch) {
+            metadata.parameters = paramMatch[1].split(",").map((p) => p.trim()).filter(Boolean);
+          }
+          metadata.isAsync = text.includes("async") || text.includes("Future");
+        }
+        if (astType === "function" || astType === "method") {
+          const returnMatch = text.match(/(?:->|:)\s*(\w+)/);
+          if (returnMatch) {
+            metadata.returnType = returnMatch[1];
+          }
+        }
+        metadata.isExported = text.includes("export") || text.includes("public");
+        metadata.isAbstract = text.includes("abstract");
+        if (astType === "variable") {
+          metadata.isConstant = text.includes("const") || text.includes("final");
+        }
+        return metadata;
+      }
+    };
+    treeSitterParserManager = createTreeSitterParserManager();
+    tree_sitter_parser_default = {
+      TreeSitterParserManager,
+      createTreeSitterParserManager,
+      treeSitterParserManager
+    };
+  }
+});
 
 // src/cli/repl.ts
 import * as readline2 from "readline";
-import chalk5 from "chalk";
+import chalk6 from "chalk";
 
 // src/config/manager.ts
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
@@ -17,23 +1072,45 @@ import { homedir } from "os";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
 // src/config/types.ts
-var DEFAULT_CONFIG = {
-  provider: {
+var PROVIDER_PRESETS = {
+  "deepseek": {
     name: "deepseek",
     base_url: "https://api.deepseek.com",
-    api_key: "",
     models: ["deepseek-v4-flash", "deepseek-v4-pro"]
   },
-  models: {
-    default: "deepseek-v4-flash"
+  "infini-ai": {
+    name: "infini-ai",
+    base_url: "https://cloud.infini-ai.com/maas/coding/v1",
+    models: ["deepseek-v3.2", "kimi-k2.5", "minimax-m2.7", "glm-5.1", "glm-5"]
   },
+  "xiaomi": {
+    name: "xiaomi",
+    base_url: "https://token-plan-cn.xiaomimimo.com/v1",
+    models: ["mimo-v2.5-pro", "mimo-v2.5"]
+  },
+  "xoai": {
+    name: "xoai",
+    base_url: "https://code-api.x-aio.com/v1",
+    models: ["Qwen3.5-397B-A17B", "MiniMax-M2.5", "Qwen3.5-Flash", "DeepSeek-V4-Flash", "Qwen3-Coder-Next", "Kimi-K2.5", "GLM-5.1"]
+  }
+};
+var MAX_CUSTOM_PROVIDERS = 3;
+var DEFAULT_PROVIDER = "deepseek";
+var DEFAULT_MODEL = "deepseek-v4-flash";
+var DEFAULT_CONFIG = {
+  providers: {},
+  defaults: {
+    provider: DEFAULT_PROVIDER,
+    model: DEFAULT_MODEL
+  },
+  custom_providers: {},
   project: {
     root: "."
   }
 };
 
 // src/config/manager.ts
-var MODULE_NAME = "flutter-forge";
+var MODULE_NAME = "forge-cli";
 var CONFIG_DIR = join(homedir(), `.${MODULE_NAME}`);
 var CONFIG_FILE = join(CONFIG_DIR, "config.yaml");
 var ConfigManager = class {
@@ -62,76 +1139,188 @@ var ConfigManager = class {
   get() {
     return this.config;
   }
-  // 获取 provider 配置
-  getProvider() {
-    return this.config.provider;
-  }
-  // 获取当前默认模型的完整配置（含 provider 的 base_url 和 api_key）
-  getModel(name) {
-    const modelName = name || this.config.models.default;
-    if (!this.config.provider.models.includes(modelName)) {
-      throw new Error(`Model "${modelName}" not available`);
+  // ─── Provider 查询 ─────────────────────────────────────────
+  // 获取所有 provider（预设 + 自定义）
+  getAllProviders() {
+    const result = [];
+    for (const [key, preset] of Object.entries(PROVIDER_PRESETS)) {
+      const saved = this.config.providers[key];
+      result.push({
+        key,
+        info: {
+          base_url: saved?.base_url || preset.base_url,
+          api_key: saved?.api_key || "",
+          models: saved?.models || preset.models,
+          selected: saved?.selected || ""
+        },
+        isPreset: true
+      });
     }
+    for (const [key, cp] of Object.entries(this.config.custom_providers)) {
+      const saved = this.config.providers[key];
+      result.push({
+        key,
+        info: {
+          base_url: saved?.base_url || cp.base_url,
+          api_key: saved?.api_key || cp.api_key,
+          models: saved?.models || cp.models,
+          selected: saved?.selected || ""
+        },
+        isPreset: false
+      });
+    }
+    return result;
+  }
+  // 获取指定 provider
+  getProvider(key) {
+    if (PROVIDER_PRESETS[key]) {
+      const preset = PROVIDER_PRESETS[key];
+      const saved = this.config.providers[key];
+      return {
+        base_url: saved?.base_url || preset.base_url,
+        api_key: saved?.api_key || "",
+        models: saved?.models || preset.models,
+        selected: saved?.selected || ""
+      };
+    }
+    const cp = this.config.custom_providers[key];
+    if (cp) {
+      const saved = this.config.providers[key];
+      return {
+        base_url: saved?.base_url || cp.base_url,
+        api_key: saved?.api_key || cp.api_key,
+        models: saved?.models || cp.models,
+        selected: saved?.selected || ""
+      };
+    }
+    return null;
+  }
+  // 获取当前默认 provider key
+  getDefaultProvider() {
+    return this.config.defaults.provider;
+  }
+  // 获取当前默认模型的完整配置
+  getModel(providerKey, modelName) {
+    const pk = providerKey || this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    if (!info) {
+      throw new Error(`Provider "${pk}" not found`);
+    }
+    const mn = modelName || info.selected || this.config.defaults.model || info.models[0];
+    const apiKey = process.env.FORGE_API_KEY || info.api_key;
+    const baseUrl = process.env.FORGE_BASE_URL || info.base_url;
     return {
-      name: modelName,
-      base_url: this.config.provider.base_url,
-      api_key: this.config.provider.api_key
+      name: mn,
+      base_url: baseUrl,
+      api_key: apiKey,
+      provider_key: pk
     };
   }
-  // 获取所有可用模型
-  getAvailableModels() {
-    return this.config.provider.models;
-  }
-  // 设置 provider API Key（所有模型共享）
-  setApiKey(apiKey) {
-    this.config.provider.api_key = apiKey;
-  }
-  // 设置 provider base_url
-  setBaseUrl(url) {
-    this.config.provider.base_url = url;
-  }
-  // 设置默认模型
-  setDefaultModel(name) {
-    if (!this.config.provider.models.includes(name)) {
-      throw new Error(`Model "${name}" not available`);
+  // ─── Provider 设置 ─────────────────────────────────────────
+  // 设置 provider API Key
+  setApiKey(providerKey, apiKey) {
+    if (!this.config.providers[providerKey]) {
+      this.config.providers[providerKey] = { base_url: "", api_key: "", models: [], selected: "" };
     }
-    this.config.models.default = name;
+    this.config.providers[providerKey].api_key = apiKey;
   }
-  // 设置项目根目录
+  // 设置 provider 选择的模型
+  setSelectedModel(providerKey, modelName) {
+    if (!this.config.providers[providerKey]) {
+      this.config.providers[providerKey] = { base_url: "", api_key: "", models: [], selected: "" };
+    }
+    this.config.providers[providerKey].selected = modelName;
+    this.config.defaults.provider = providerKey;
+    this.config.defaults.model = modelName;
+  }
+  // 添加自定义 provider
+  addCustomProvider(key, config) {
+    const customCount = Object.keys(this.config.custom_providers).length;
+    if (customCount >= MAX_CUSTOM_PROVIDERS) {
+      throw new Error(`\u6700\u591A\u652F\u6301 ${MAX_CUSTOM_PROVIDERS} \u4E2A\u81EA\u5B9A\u4E49 provider`);
+    }
+    this.config.custom_providers[key] = config;
+    this.config.providers[key] = {
+      base_url: config.base_url,
+      api_key: config.api_key,
+      models: config.models,
+      selected: ""
+    };
+  }
+  // 删除自定义 provider
+  removeCustomProvider(key) {
+    delete this.config.custom_providers[key];
+    delete this.config.providers[key];
+    if (this.config.defaults.provider === key) {
+      this.config.defaults.provider = DEFAULT_PROVIDER;
+      this.config.defaults.model = DEFAULT_MODEL;
+    }
+  }
+  // ─── 废弃兼容 ─────────────────────────────────────────────
+  getProvider_legacy() {
+    const pk = this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    return {
+      name: pk,
+      base_url: info?.base_url || "",
+      api_key: info?.api_key || "",
+      models: info?.models || []
+    };
+  }
+  setBaseUrl(url) {
+    const pk = this.config.defaults.provider;
+    if (!this.config.providers[pk]) {
+      this.config.providers[pk] = { base_url: "", api_key: "", models: [], selected: "" };
+    }
+    this.config.providers[pk].base_url = url;
+  }
+  setDefaultModel(name) {
+    const pk = this.config.defaults.provider;
+    if (!this.config.providers[pk]) {
+      this.config.providers[pk] = { base_url: "", api_key: "", models: [], selected: "" };
+    }
+    this.config.providers[pk].selected = name;
+    this.config.defaults.model = name;
+  }
   setProjectRoot(root) {
     this.config.project.root = resolve(root);
   }
   getConfigPath() {
     return this.configPath;
   }
-  // API Key 是否已配置
+  // 当前默认 provider 是否已配置 API Key
   isConfigured() {
-    return !!this.config.provider.api_key;
+    const pk = this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    return !!(info?.api_key || process.env.FORGE_API_KEY);
   }
-  // 获取已配置的模型列表（有 API Key 的）
+  // 获取可用模型列表
+  getAvailableModels() {
+    const pk = this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    return info?.models || [];
+  }
   getConfiguredModels() {
-    if (!this.config.provider.api_key) return [];
-    return this.config.provider.models.map((name) => ({
+    const pk = this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    if (!info || !info.api_key && !process.env.FORGE_API_KEY) return [];
+    return info.models.map((name) => ({
       name,
-      base_url: this.config.provider.base_url,
-      api_key: this.config.provider.api_key
+      base_url: info.base_url,
+      api_key: info.api_key,
+      provider_key: pk
     }));
   }
+  // ─── 合并配置 ─────────────────────────────────────────────
   mergeConfig(overrides) {
     const defaults = structuredClone(DEFAULT_CONFIG);
-    const provider = {
-      name: overrides.provider?.name || defaults.provider.name,
-      base_url: overrides.provider?.base_url || defaults.provider.base_url,
-      api_key: overrides.provider?.api_key || defaults.provider.api_key,
-      models: overrides.provider?.models || defaults.provider.models
-    };
-    let defaultModel = overrides.models?.default || defaults.models.default;
-    if (!provider.models.includes(defaultModel)) {
-      defaultModel = provider.models[0];
-    }
     return {
-      provider,
-      models: { default: defaultModel },
+      providers: overrides.providers || defaults.providers,
+      defaults: {
+        provider: overrides.defaults?.provider || defaults.defaults.provider,
+        model: overrides.defaults?.model || defaults.defaults.model
+      },
+      custom_providers: overrides.custom_providers || defaults.custom_providers,
       project: { root: overrides.project?.root || defaults.project.root }
     };
   }
@@ -340,19 +1529,22 @@ function createCompatFetch() {
 var AIClient = class {
   provider;
   modelName;
+  providerKey;
   constructor(config) {
+    this.providerKey = config.provider_key || "";
     this.provider = createOpenAI({
       apiKey: config.api_key,
       baseURL: config.base_url,
-      fetch: createCompatFetch()
+      fetch: this.providerKey === "deepseek" ? createCompatFetch() : void 0
     });
     this.modelName = config.name;
   }
   setModel(config) {
+    this.providerKey = config.provider_key || "";
     this.provider = createOpenAI({
       apiKey: config.api_key,
       baseURL: config.base_url,
-      fetch: createCompatFetch()
+      fetch: this.providerKey === "deepseek" ? createCompatFetch() : void 0
     });
     this.modelName = config.name;
   }
@@ -549,7 +1741,7 @@ var AgentRegistry = class {
     }
   }
   getControllerPrompt() {
-    return `\u4F60\u662F Flutter Forge \u7684\u4E3B\u63A7 Agent\uFF0C\u8D1F\u8D23\u8DEF\u7531\u5224\u65AD\u3001\u9636\u6BB5\u63A8\u8FDB\u3001\u5B50 Agent \u8C03\u5EA6\u548C\u72B6\u6001\u7BA1\u7406\u3002
+    return `\u4F60\u662F Forge CLI \u7684\u4E3B\u63A7 Agent\uFF0C\u8D1F\u8D23\u8DEF\u7531\u5224\u65AD\u3001\u9636\u6BB5\u63A8\u8FDB\u3001\u5B50 Agent \u8C03\u5EA6\u548C\u72B6\u6001\u7BA1\u7406\u3002
 
 ## \u6838\u5FC3\u804C\u8D23
 
@@ -592,7 +1784,7 @@ var AgentRegistry = class {
       page_engineer: "\u9875\u9762\u5DE5\u7A0B\u5E08",
       verify_agent: "\u9A8C\u8BC1\u5DE5\u7A0B\u5E08"
     };
-    return `\u4F60\u662F Flutter Forge \u7684${names[role]}\uFF0C\u8D1F\u8D23\u6267\u884C\u7279\u5B9A\u9636\u6BB5\u7684\u4EFB\u52A1\u3002`;
+    return `\u4F60\u662F Forge CLI \u7684${names[role]}\uFF0C\u8D1F\u8D23\u6267\u884C\u7279\u5B9A\u9636\u6BB5\u7684\u4EFB\u52A1\u3002`;
   }
   get(role) {
     return this.configs.get(role);
@@ -719,7 +1911,7 @@ var ControllerAgent = class extends BaseAgent {
   constructor(aiClient, contextManager2, toolRegistry2) {
     super("controller", aiClient, contextManager2, toolRegistry2);
   }
-  // 路由判断（仅 Flutter 任务会进入此方法）
+  // 路由判断（仅项目任务会进入此方法）
   route(userInput) {
     const input = userInput.toLowerCase().trim();
     if (this.isRequirementStart(input)) {
@@ -837,7 +2029,7 @@ import { readFileSync as readFileSync3, writeFileSync as writeFileSync2, existsS
 import { join as join3, resolve as resolve2 } from "path";
 import { homedir as homedir2 } from "os";
 import { parse as parseYaml2, stringify as stringifyYaml2 } from "yaml";
-var SESSION_DIR = join3(homedir2(), ".flutter-forge", "sessions");
+var SESSION_DIR = join3(homedir2(), ".forge-cli", "sessions");
 var SessionManager = class {
   session = null;
   sessionPath = null;
@@ -1340,8 +2532,8 @@ import { readFileSync as readFileSync4, writeFileSync as writeFileSync3, existsS
 import { join as join4 } from "path";
 import { homedir as homedir3 } from "os";
 import { parse as parseYaml3, stringify as stringifyYaml3 } from "yaml";
-var HOOKS_DIR = join4(homedir3(), ".flutter-forge", "hooks");
-var PROJECT_HOOKS_DIR = ".flutter-forge/hooks";
+var HOOKS_DIR = join4(homedir3(), ".forge-cli", "hooks");
+var PROJECT_HOOKS_DIR = ".forge-cli/hooks";
 var HookManager = class {
   hooks = /* @__PURE__ */ new Map();
   builtinHooks = [];
@@ -1570,8 +2762,8 @@ import { readFileSync as readFileSync5, existsSync as existsSync4, readdirSync a
 import { join as join5 } from "path";
 import { homedir as homedir4 } from "os";
 import { parse as parseYaml4 } from "yaml";
-var PLUGINS_DIR = join5(homedir4(), ".flutter-forge", "plugins");
-var PROJECT_PLUGINS_DIR = ".flutter-forge/plugins";
+var PLUGINS_DIR = join5(homedir4(), ".forge-cli", "plugins");
+var PROJECT_PLUGINS_DIR = ".forge-cli/plugins";
 var PluginLoader = class {
   loadedPlugins = /* @__PURE__ */ new Map();
   // 加载所有插件
@@ -2037,7 +3229,7 @@ var MCPClient = class extends EventEmitter {
         protocolVersion: "2024-11-05",
         capabilities: {},
         clientInfo: {
-          name: "flutter-forge",
+          name: "forge-cli",
           version: "0.4.0"
         }
       }).then(() => {
@@ -3097,7 +4289,7 @@ import { homedir as homedir5 } from "os";
 var DEFAULT_CONFIG2 = {
   enabled: true,
   persistToDisk: true,
-  dir: join6(homedir5(), ".flutter-forge", "traces"),
+  dir: join6(homedir5(), ".forge-cli", "traces"),
   maxEvents: 500,
   consoleOutput: false
 };
@@ -3498,13 +4690,13 @@ var AgentOrchestrator = class {
     try {
       this.tracer.traceLLMCall("classifier", 1, 0);
       const classifyStart = Date.now();
-      const isFlutterTask = await this.classifyTask(userInput);
+      const isProjectTask = await this.classifyTask(userInput);
       this.tracer.traceLLMResponse(
-        isFlutterTask ? "\u662F" : "\u5426",
+        isProjectTask ? "\u662F" : "\u5426",
         0,
         Date.now() - classifyStart
       );
-      if (isFlutterTask === null) {
+      if (isProjectTask === null) {
         this.tracer.traceError(new Error("\u6A21\u578B\u4E0D\u53EF\u7528"), "classifyTask");
         this.finishTrace();
         return {
@@ -3513,8 +4705,8 @@ var AgentOrchestrator = class {
           error: "\u6A21\u578B\u4E0D\u53EF\u7528\uFF0C\u8BF7\u68C0\u67E5 API \u914D\u7F6E\uFF08/model\uFF09"
         };
       }
-      if (!isFlutterTask) {
-        this.tracer.record("state_change", { from: "classify", to: "direct_response", reason: "\u975E Flutter \u4EFB\u52A1" });
+      if (!isProjectTask) {
+        this.tracer.record("state_change", { from: "classify", to: "direct_response", reason: "\u975E\u9879\u76EE\u4EFB\u52A1" });
         const result2 = await this.directResponse(userInput);
         this.finishTrace();
         return result2;
@@ -3641,15 +4833,15 @@ var AgentOrchestrator = class {
     try {
       this.tracer.traceLLMCall("classifier", 1, 0);
       const classifyStart = Date.now();
-      const isFlutterTask = await this.classifyTask(userInput);
-      this.tracer.traceLLMResponse(isFlutterTask ? "\u662F" : "\u5426", 0, Date.now() - classifyStart);
-      if (isFlutterTask === null) {
+      const isProjectTask = await this.classifyTask(userInput);
+      this.tracer.traceLLMResponse(isProjectTask ? "\u662F" : "\u5426", 0, Date.now() - classifyStart);
+      if (isProjectTask === null) {
         this.tracer.traceError(new Error("\u6A21\u578B\u4E0D\u53EF\u7528"), "classifyTask");
         this.finishTrace();
         yield { type: "text", content: "\u6A21\u578B\u4E0D\u53EF\u7528\uFF0C\u8BF7\u68C0\u67E5 API \u914D\u7F6E\uFF08/model\uFF09" };
         return;
       }
-      if (!isFlutterTask) {
+      if (!isProjectTask) {
         this.tracer.record("state_change", { from: "classify", to: "direct_response" });
         yield* this.directResponseStream(userInput);
         this.finishTrace();
@@ -4002,33 +5194,7 @@ var SCRIPTS_DIR = join7(import.meta.dirname, "..", "..", "scripts");
 var scanProjectTool = {
   definition: {
     name: "scan_project",
-    description: "\u626B\u63CF Flutter \u9879\u76EE\u7ED3\u6784\uFF0C\u8BC6\u522B\u6280\u672F\u6808\u3001\u76EE\u5F55\u7ED3\u6784\u3001\u72B6\u6001\u7BA1\u7406\u65B9\u6848\u7B49",
-    parameters: {
-      type: "object",
-      properties: {
-        project_root: {
-          type: "string",
-          description: "Flutter \u9879\u76EE\u6839\u76EE\u5F55\u8DEF\u5F84"
-        }
-      },
-      required: ["project_root"]
-    }
-  },
-  async execute(args) {
-    const { project_root } = args;
-    const scriptPath = join7(SCRIPTS_DIR, "flutter_stack_scan.py");
-    const result = await executePython(scriptPath, [project_root]);
-    return {
-      success: result.exitCode === 0,
-      output: result.stdout,
-      error: result.exitCode !== 0 ? result.stderr : void 0
-    };
-  }
-};
-var detectProjectStateTool = {
-  definition: {
-    name: "detect_project_state",
-    description: "\u68C0\u6D4B\u9879\u76EE\u6839\u76EE\u5F55\u72B6\u6001\uFF1Aempty_new\uFF08\u7A7A\u76EE\u5F55\uFF09\u3001flutter_existing\uFF08Flutter \u9879\u76EE\uFF09\u3001non_flutter\uFF08\u5176\u4ED6\uFF09",
+    description: "\u626B\u63CF\u9879\u76EE\u7ED3\u6784\uFF0C\u8BC6\u522B\u6280\u672F\u6808\u3001\u76EE\u5F55\u7ED3\u6784\u3001\u4F9D\u8D56\u5173\u7CFB\u7B49",
     parameters: {
       type: "object",
       properties: {
@@ -4042,7 +5208,33 @@ var detectProjectStateTool = {
   },
   async execute(args) {
     const { project_root } = args;
-    const scriptPath = join7(SCRIPTS_DIR, "detect_project_root_state.py");
+    const scriptPath = join7(SCRIPTS_DIR, "scan_project.py");
+    const result = await executePython(scriptPath, [project_root]);
+    return {
+      success: result.exitCode === 0,
+      output: result.stdout,
+      error: result.exitCode !== 0 ? result.stderr : void 0
+    };
+  }
+};
+var detectProjectStateTool = {
+  definition: {
+    name: "detect_project_state",
+    description: "\u68C0\u6D4B\u9879\u76EE\u6839\u76EE\u5F55\u72B6\u6001\uFF1Aempty_new\uFF08\u7A7A\u76EE\u5F55\uFF09\u3001existing\uFF08\u5DF2\u6709\u9879\u76EE\uFF09\u3001unknown\uFF08\u672A\u77E5\uFF09",
+    parameters: {
+      type: "object",
+      properties: {
+        project_root: {
+          type: "string",
+          description: "\u9879\u76EE\u6839\u76EE\u5F55\u8DEF\u5F84"
+        }
+      },
+      required: ["project_root"]
+    }
+  },
+  async execute(args) {
+    const { project_root } = args;
+    const scriptPath = join7(SCRIPTS_DIR, "detect_project_state.py");
     const result = await executePython(scriptPath, [project_root]);
     return {
       success: result.exitCode === 0,
@@ -4058,7 +5250,7 @@ var SCRIPTS_DIR2 = join8(import.meta.dirname, "..", "..", "scripts");
 var validateOutputTool = {
   definition: {
     name: "validate_output",
-    description: "\u9A8C\u8BC1\u8F93\u51FA\u662F\u5426\u7B26\u5408 flutter-forge \u89C4\u8303\uFF08\u65E5\u5FD7\u524D\u7F00\u3001\u9636\u6BB5\u6807\u8BB0\u7B49\uFF09",
+    description: "\u9A8C\u8BC1\u8F93\u51FA\u662F\u5426\u7B26\u5408\u89C4\u8303\uFF08\u65E5\u5FD7\u524D\u7F00\u3001\u9636\u6BB5\u6807\u8BB0\u7B49\uFF09",
     parameters: {
       type: "object",
       properties: {
@@ -4066,9 +5258,9 @@ var validateOutputTool = {
           type: "string",
           description: "\u5F85\u9A8C\u8BC1\u7684\u8F93\u51FA\u6587\u672C"
         },
-        require_s4: {
+        require_stage: {
           type: "boolean",
-          description: "\u662F\u5426\u8981\u6C42\u5305\u542B S4 \u9636\u6BB5\u6807\u8BB0"
+          description: "\u662F\u5426\u8981\u6C42\u5305\u542B\u9636\u6BB5\u6807\u8BB0"
         },
         require_complete: {
           type: "boolean",
@@ -5182,20 +6374,21 @@ function extractKeywords2(text) {
 function extractTags(text) {
   const tags = [];
   const patterns = [
-    [/flutter/i, "flutter"],
-    [/dart/i, "dart"],
-    [/ios/i, "ios"],
-    [/android/i, "android"],
-    [/react\s*native/i, "react-native"],
+    [/typescript|ts/i, "typescript"],
+    [/javascript|js/i, "javascript"],
+    [/python/i, "python"],
+    [/java/i, "java"],
+    [/react/i, "react"],
+    [/vue/i, "vue"],
     [/api/i, "api"],
-    [/数据库|database|sqlite|supabase/i, "database"],
-    [/状态管理|state\s*management|riverpod|bloc|provider/i, "state-management"],
+    [/数据库|database|sqlite/i, "database"],
     [/测试|test/i, "testing"],
     [/部署|deploy|ci\/cd/i, "deployment"],
     [/性能|performance/i, "performance"],
     [/安全|security/i, "security"],
     [/ui|界面|布局|layout/i, "ui"],
-    [/架构|architecture/i, "architecture"]
+    [/架构|architecture/i, "architecture"],
+    [/配置|config/i, "config"]
   ];
   for (const [pattern, tag] of patterns) {
     if (pattern.test(text)) tags.push(tag);
@@ -5336,7 +6529,7 @@ function generateCompressSummary(before, after, removed) {
 }
 
 // src/memory/manager.ts
-var MEMORY_DIR = join12(homedir6(), ".flutter-forge", "memory");
+var MEMORY_DIR = join12(homedir6(), ".forge-cli", "memory");
 var INDEX_FILE = join12(MEMORY_DIR, "MEMORY.md");
 var MemoryManager = class {
   entries = /* @__PURE__ */ new Map();
@@ -5631,16 +6824,17 @@ var MemoryManager = class {
   extractTags(text) {
     const tags = [];
     const patterns = [
-      [/flutter/i, "flutter"],
-      [/dart/i, "dart"],
-      [/ios/i, "ios"],
-      [/android/i, "android"],
+      [/typescript|ts/i, "typescript"],
+      [/javascript|js/i, "javascript"],
+      [/python/i, "python"],
+      [/java/i, "java"],
       [/api/i, "api"],
       [/数据库|database|sqlite/i, "database"],
-      [/状态管理|riverpod|bloc/i, "state-management"],
       [/测试|test/i, "testing"],
       [/ui|界面|布局/i, "ui"],
-      [/架构|architecture/i, "architecture"]
+      [/架构|architecture/i, "architecture"],
+      [/配置|config/i, "config"],
+      [/部署|deploy/i, "deploy"]
     ];
     for (const [pattern, tag] of patterns) {
       if (pattern.test(text)) tags.push(tag);
@@ -6000,14 +7194,14 @@ function registerAllTools() {
 
 // src/cli/commands.ts
 import * as readline from "readline";
-import chalk4 from "chalk";
+import chalk5 from "chalk";
 
 // src/cli/renderer.ts
 import chalk3 from "chalk";
 function renderBanner(version, model, projectRoot) {
   const lines = [
     chalk3.cyan("\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557"),
-    chalk3.cyan("\u2551") + chalk3.bold("  Flutter Forge ") + chalk3.dim(`v${version}`) + "                    " + chalk3.cyan("\u2551"),
+    chalk3.cyan("\u2551") + chalk3.bold("  Forge CLI ") + chalk3.dim(`v${version}`) + "                         " + chalk3.cyan("\u2551"),
     chalk3.cyan("\u2551") + chalk3.dim("  \u6A21\u578B: ") + chalk3.yellow(model) + " ".repeat(Math.max(0, 30 - model.length)) + chalk3.cyan("\u2551"),
     chalk3.cyan("\u2551") + chalk3.dim("  \u9879\u76EE: ") + chalk3.white(truncate(projectRoot, 28)) + " ".repeat(Math.max(0, 30 - Math.min(projectRoot.length, 28))) + chalk3.cyan("\u2551"),
     chalk3.cyan("\u2551") + chalk3.dim("  \u8F93\u5165 /help \u67E5\u770B\u547D\u4EE4") + "                  " + chalk3.cyan("\u2551"),
@@ -6035,6 +7229,16 @@ function renderHelp() {
     ["/memory", "\u67E5\u770B\u5DF2\u4FDD\u5B58\u7684\u8BB0\u5FC6"],
     ["/hook", "\u67E5\u770B\u5DF2\u6CE8\u518C\u94A9\u5B50"],
     ["/trace", "\u67E5\u770B\u6700\u8FD1\u4E00\u6B21\u6267\u884C\u7684 Trace \u6458\u8981"],
+    ["/theme", "\u5207\u6362\u4E3B\u9898"],
+    ["/git", "Git \u64CD\u4F5C\uFF1Astatus/log/branch/add/commit/diff/remote"],
+    ["/diff", "\u67E5\u770B Diff\uFF1A/diff <old> <new> \u6216 /diff --staged"],
+    ["/lint", "Lint \u68C0\u67E5\uFF1A/lint \u6216 /lint <file>"],
+    ["/test", "\u8FD0\u884C\u6D4B\u8BD5\uFF1A/test \u6216 /test <args>"],
+    ["/ast", "\u67E5\u770B\u6587\u4EF6\u7ED3\u6784\uFF1A/ast <file> \u6216 /ast --init"],
+    ["/symbol", "\u641C\u7D22\u7B26\u53F7\uFF1A/symbol <query> \u6216 /sym <query>"],
+    ["/fetch", "\u83B7\u53D6\u7F51\u9875\uFF1A/fetch <url> \u6216 /web <url>"],
+    ["/search", "\u7F51\u7EDC\u641C\u7D22\uFF1A/search <query> \u6216 /s <query>"],
+    ["/state", "\u72B6\u6001\u673A\u7BA1\u7406\uFF1A/state status/history/graph/snapshot/restore/reset"],
     ["/exit", "\u9000\u51FA\u7A0B\u5E8F"]
   ];
   const lines = [
@@ -6073,6 +7277,1823 @@ function truncate(str, maxLen) {
 }
 
 // src/cli/commands.ts
+init_theme();
+
+// src/cli/git.ts
+init_theme();
+import { execSync, exec as exec3 } from "child_process";
+var GitManager = class {
+  cwd;
+  constructor(cwd) {
+    this.cwd = cwd || process.cwd();
+  }
+  /**
+   * 执行 Git 命令
+   */
+  exec(command) {
+    try {
+      return execSync(`git ${command}`, {
+        cwd: this.cwd,
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"]
+      }).trim();
+    } catch (error) {
+      throw new Error(`Git command failed: ${error.message}`);
+    }
+  }
+  /**
+   * 异步执行 Git 命令
+   */
+  execAsync(command) {
+    return new Promise((resolve8, reject) => {
+      exec3(`git ${command}`, {
+        cwd: this.cwd,
+        encoding: "utf-8"
+      }, (error, stdout, stderr) => {
+        if (error) {
+          reject(new Error(`Git command failed: ${stderr || error.message}`));
+        } else {
+          resolve8(stdout.trim());
+        }
+      });
+    });
+  }
+  /**
+   * 检查是否是 Git 仓库
+   */
+  isRepository() {
+    try {
+      this.exec("rev-parse --git-dir");
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  /**
+   * 获取当前分支
+   */
+  getCurrentBranch() {
+    return this.exec("rev-parse --abbrev-ref HEAD");
+  }
+  /**
+   * 获取 Git 状态
+   */
+  getStatus() {
+    const branch = this.getCurrentBranch();
+    let upstream;
+    let ahead = 0;
+    let behind = 0;
+    try {
+      upstream = this.exec(`rev-parse --abbrev-ref ${branch}@{upstream}`);
+      const aheadBehind = this.exec(`rev-list --left-right --count ${branch}...${upstream}`).split("	");
+      ahead = parseInt(aheadBehind[0]) || 0;
+      behind = parseInt(aheadBehind[1]) || 0;
+    } catch {
+    }
+    const statusOutput = this.exec("status --porcelain");
+    const staged = [];
+    const unstaged = [];
+    const untracked = [];
+    for (const line of statusOutput.split("\n")) {
+      if (!line.trim()) continue;
+      const indexStatus = line[0];
+      const workTreeStatus = line[1];
+      const filePath = line.slice(3);
+      if (indexStatus !== " " && indexStatus !== "?") {
+        staged.push({
+          path: filePath,
+          status: this.parseFileStatus(indexStatus),
+          staged: true
+        });
+      }
+      if (workTreeStatus !== " " && workTreeStatus !== "?") {
+        unstaged.push({
+          path: filePath,
+          status: this.parseFileStatus(workTreeStatus),
+          staged: false
+        });
+      }
+      if (indexStatus === "?" && workTreeStatus === "?") {
+        untracked.push(filePath);
+      }
+    }
+    return {
+      branch,
+      upstream,
+      ahead,
+      behind,
+      staged,
+      unstaged,
+      untracked
+    };
+  }
+  /**
+   * 解析文件状态
+   */
+  parseFileStatus(status) {
+    switch (status) {
+      case "A":
+        return "added";
+      case "M":
+        return "modified";
+      case "D":
+        return "deleted";
+      case "R":
+        return "renamed";
+      case "C":
+        return "copied";
+      case "U":
+        return "unmerged";
+      default:
+        return "modified";
+    }
+  }
+  /**
+   * 获取提交历史
+   */
+  async getLog(count = 10) {
+    const output = await this.execAsync(
+      `log --oneline --format="%H|%h|%an|%ai|%s" -n ${count}`
+    );
+    return output.split("\n").filter(Boolean).map((line) => {
+      const [hash, shortHash, author, date, message] = line.split("|");
+      return { hash, shortHash, author, date, message };
+    });
+  }
+  /**
+   * 获取分支列表
+   */
+  getBranches() {
+    const output = this.exec("branch -vv");
+    const currentBranch = this.getCurrentBranch();
+    return output.split("\n").filter(Boolean).map((line) => {
+      const isCurrent = line.startsWith("*");
+      const match = line.match(/^\*?\s+(\S+)\s+(\S+)\s+(?:\[(.+?)\])?\s*(.*)$/);
+      if (!match) {
+        return {
+          name: line.replace(/^\*?\s+/, "").split(/\s+/)[0],
+          current: isCurrent
+        };
+      }
+      return {
+        name: match[1],
+        current: isCurrent,
+        upstream: match[3]
+      };
+    });
+  }
+  /**
+   * 获取远程仓库列表
+   */
+  getRemotes() {
+    const output = this.exec("remote -v");
+    const remotes = [];
+    const seen = /* @__PURE__ */ new Set();
+    for (const line of output.split("\n").filter(Boolean)) {
+      const match = line.match(/^(\S+)\s+(\S+)\s+\((\w+)\)$/);
+      if (match && !seen.has(match[1])) {
+        remotes.push({ name: match[1], url: match[2] });
+        seen.add(match[1]);
+      }
+    }
+    return remotes;
+  }
+  /**
+   * 暂存文件
+   */
+  stage(files) {
+    if (files.length === 0) return;
+    this.exec(`add ${files.map((f) => `"${f}"`).join(" ")}`);
+  }
+  /**
+   * 暂存所有文件
+   */
+  stageAll() {
+    this.exec("add -A");
+  }
+  /**
+   * 取消暂存文件
+   */
+  unstage(files) {
+    if (files.length === 0) return;
+    this.exec(`reset HEAD ${files.map((f) => `"${f}"`).join(" ")}`);
+  }
+  /**
+   * 提交
+   */
+  commit(message) {
+    return this.exec(`commit -m "${message.replace(/"/g, '\\"')}"`);
+  }
+  /**
+   * 创建分支
+   */
+  createBranch(name) {
+    this.exec(`branch ${name}`);
+  }
+  /**
+   * 切换分支
+   */
+  checkout(branch) {
+    this.exec(`checkout ${branch}`);
+  }
+  /**
+   * 合并分支
+   */
+  merge(branch) {
+    return this.exec(`merge ${branch}`);
+  }
+  /**
+   * 拉取
+   */
+  pull() {
+    return this.exec("pull");
+  }
+  /**
+   * 推送
+   */
+  push() {
+    return this.exec("push");
+  }
+  /**
+   * 获取文件 Diff
+   */
+  getDiff(file, staged = false) {
+    const stagedFlag = staged ? "--staged" : "";
+    const fileArg = file ? `-- "${file}"` : "";
+    return this.exec(`diff ${stagedFlag} ${fileArg}`);
+  }
+  /**
+   * 获取文件内容（指定版本）
+   */
+  getFileAtRevision(filePath, revision = "HEAD") {
+    return this.exec(`show ${revision}:"${filePath}"`);
+  }
+  /**
+   * 获取当前文件内容
+   */
+  getFileContent(filePath) {
+    try {
+      return this.exec(`show HEAD:"${filePath}"`);
+    } catch {
+      const fs = __require("fs");
+      const path = __require("path");
+      return fs.readFileSync(path.join(this.cwd, filePath), "utf-8");
+    }
+  }
+  /**
+   * 渲染 Git 状态
+   */
+  renderStatus(status) {
+    const theme = getTheme();
+    const lines = [];
+    lines.push(theme.text.bold("\u5206\u652F\u4FE1\u606F:"));
+    lines.push(`  ${theme.claude("\u5F53\u524D\u5206\u652F:")} ${theme.text(status.branch)}`);
+    if (status.upstream) {
+      lines.push(`  ${theme.claude("\u4E0A\u6E38\u5206\u652F:")} ${theme.text(status.upstream)}`);
+      if (status.ahead > 0) {
+        lines.push(`  ${theme.warning("\u9886\u5148:")} ${status.ahead} \u4E2A\u63D0\u4EA4`);
+      }
+      if (status.behind > 0) {
+        lines.push(`  ${theme.warning("\u843D\u540E:")} ${status.behind} \u4E2A\u63D0\u4EA4`);
+      }
+    }
+    if (status.staged.length > 0) {
+      lines.push("");
+      lines.push(theme.text.bold("\u5DF2\u6682\u5B58\u7684\u6587\u4EF6:"));
+      for (const file of status.staged) {
+        const icon = this.getStatusIcon(file.status);
+        lines.push(`  ${theme.success(icon)} ${file.path}`);
+      }
+    }
+    if (status.unstaged.length > 0) {
+      lines.push("");
+      lines.push(theme.text.bold("\u672A\u6682\u5B58\u7684\u6587\u4EF6:"));
+      for (const file of status.unstaged) {
+        const icon = this.getStatusIcon(file.status);
+        lines.push(`  ${theme.error(icon)} ${file.path}`);
+      }
+    }
+    if (status.untracked.length > 0) {
+      lines.push("");
+      lines.push(theme.text.bold("\u672A\u8DDF\u8E2A\u7684\u6587\u4EF6:"));
+      for (const file of status.untracked) {
+        lines.push(`  ${theme.subtle("?")} ${file}`);
+      }
+    }
+    if (status.staged.length === 0 && status.unstaged.length === 0 && status.untracked.length === 0) {
+      lines.push("");
+      lines.push(theme.success("\u2713 \u5DE5\u4F5C\u76EE\u5F55\u5E72\u51C0"));
+    }
+    return lines.join("\n");
+  }
+  /**
+   * 渲染提交历史
+   */
+  renderLog(commits) {
+    const theme = getTheme();
+    const lines = [];
+    lines.push(theme.text.bold("\u63D0\u4EA4\u5386\u53F2:"));
+    lines.push(theme.inactive("\u2500".repeat(60)));
+    for (const commit of commits) {
+      const hash = theme.subtle(commit.shortHash);
+      const date = theme.subtle(commit.date.split(" ")[0]);
+      const message = commit.message;
+      lines.push(`${hash} ${date} ${message}`);
+    }
+    return lines.join("\n");
+  }
+  /**
+   * 渲染分支列表
+   */
+  renderBranches(branches) {
+    const theme = getTheme();
+    const lines = [];
+    lines.push(theme.text.bold("\u5206\u652F\u5217\u8868:"));
+    lines.push(theme.inactive("\u2500".repeat(40)));
+    for (const branch of branches) {
+      const prefix = branch.current ? theme.success("* ") : "  ";
+      const upstream = branch.upstream ? theme.subtle(` (${branch.upstream})`) : "";
+      lines.push(`${prefix}${theme.text(branch.name)}${upstream}`);
+    }
+    return lines.join("\n");
+  }
+  /**
+   * 渲染 Diff
+   */
+  renderDiff(diff) {
+    const theme = getTheme();
+    const lines = diff.split("\n");
+    const result = [];
+    for (const line of lines) {
+      if (line.startsWith("+")) {
+        result.push(theme.success(line));
+      } else if (line.startsWith("-")) {
+        result.push(theme.error(line));
+      } else if (line.startsWith("@@")) {
+        result.push(theme.claude(line));
+      } else if (line.startsWith("diff --git")) {
+        result.push(theme.text.bold(line));
+      } else {
+        result.push(line);
+      }
+    }
+    return result.join("\n");
+  }
+  getStatusIcon(status) {
+    switch (status) {
+      case "added":
+        return "+";
+      case "modified":
+        return "~";
+      case "deleted":
+        return "-";
+      case "renamed":
+        return "\u2192";
+      case "copied":
+        return "\u2295";
+      case "unmerged":
+        return "!";
+    }
+  }
+};
+function createGitManager(cwd) {
+  return new GitManager(cwd);
+}
+var gitManager = createGitManager();
+
+// src/cli/commands.ts
+init_structured_edit();
+
+// src/cli/ast-parser.ts
+init_theme();
+var TypeScriptParser = class {
+  /**
+   * 解析 TypeScript 代码
+   */
+  parse(content, filePath) {
+    const lines = content.split("\n");
+    const children = [];
+    children.push(...this.parseImports(lines, filePath));
+    children.push(...this.parseExports(lines, filePath));
+    children.push(...this.parseFunctions(lines, filePath));
+    children.push(...this.parseClasses(lines, filePath));
+    children.push(...this.parseInterfaces(lines, filePath));
+    children.push(...this.parseTypes(lines, filePath));
+    children.push(...this.parseEnums(lines, filePath));
+    children.push(...this.parseVariables(lines, filePath));
+    return {
+      type: "program",
+      name: filePath,
+      filePath,
+      startLine: 1,
+      endLine: lines.length,
+      startColumn: 0,
+      endColumn: 0,
+      children
+    };
+  }
+  /**
+   * 解析导入语句
+   */
+  parseImports(lines, filePath) {
+    const nodes = [];
+    const importRegex = /^import\s+(?:(?:\{([^}]+)\}|(\w+)|\*\s+as\s+(\w+))\s+from\s+)?['"]([^'"]+)['"]/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(importRegex);
+      if (match) {
+        const namedImports = match[1]?.split(",").map((s) => s.trim()) || [];
+        const defaultImport = match[2];
+        const namespaceImport = match[3];
+        const importPath = match[4];
+        const importNames = [...namedImports];
+        if (defaultImport) importNames.unshift(defaultImport);
+        if (namespaceImport) importNames.push(`* as ${namespaceImport}`);
+        nodes.push({
+          type: "import",
+          name: importPath,
+          filePath,
+          startLine: i + 1,
+          endLine: i + 1,
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            importPath,
+            importNames,
+            isDefault: !!defaultImport
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析导出语句
+   */
+  parseExports(lines, filePath) {
+    const nodes = [];
+    const exportRegex = /^export\s+(?:default\s+)?(?:function|class|const|let|var|interface|type|enum)\s+(\w+)/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(exportRegex);
+      if (match) {
+        nodes.push({
+          type: "export",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: i + 1,
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            isExported: true
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析函数
+   */
+  parseFunctions(lines, filePath) {
+    const nodes = [];
+    const functionRegex = /^(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\(([^)]*)\)(?:\s*:\s*(\w+))?/;
+    const arrowFunctionRegex = /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(([^)]*)\)(?:\s*:\s*(\w+))?\s*=>/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      let match = line.match(functionRegex);
+      if (match) {
+        const isAsync = line.includes("async");
+        const parameters = match[2].split(",").map((p) => p.trim()).filter(Boolean);
+        nodes.push({
+          type: "function",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: this.findBlockEnd(lines, i),
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            parameters,
+            returnType: match[3],
+            isAsync,
+            isExported: line.startsWith("export")
+          }
+        });
+        continue;
+      }
+      match = line.match(arrowFunctionRegex);
+      if (match) {
+        const isAsync = line.includes("async");
+        const parameters = match[2].split(",").map((p) => p.trim()).filter(Boolean);
+        nodes.push({
+          type: "function",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: this.findBlockEnd(lines, i),
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            parameters,
+            returnType: match[3],
+            isAsync,
+            isExported: line.startsWith("export")
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析类
+   */
+  parseClasses(lines, filePath) {
+    const nodes = [];
+    const classRegex = /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)(?:\s+extends\s+(\w+))?(?:\s+implements\s+([^{]+))?/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(classRegex);
+      if (match) {
+        const isAbstract = line.includes("abstract");
+        const implementsList = match[3]?.split(",").map((s) => s.trim()).filter(Boolean) || [];
+        nodes.push({
+          type: "class",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: this.findBlockEnd(lines, i),
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            superClass: match[2],
+            implements: implementsList,
+            isAbstract,
+            isExported: line.startsWith("export")
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析接口
+   */
+  parseInterfaces(lines, filePath) {
+    const nodes = [];
+    const interfaceRegex = /^(?:export\s+)?interface\s+(\w+)(?:\s+extends\s+([^{]+))?/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(interfaceRegex);
+      if (match) {
+        nodes.push({
+          type: "interface",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: this.findBlockEnd(lines, i),
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            isExported: line.startsWith("export")
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析类型
+   */
+  parseTypes(lines, filePath) {
+    const nodes = [];
+    const typeRegex = /^(?:export\s+)?type\s+(\w+)\s*=/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(typeRegex);
+      if (match) {
+        nodes.push({
+          type: "type",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: i + 1,
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            isExported: line.startsWith("export")
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析枚举
+   */
+  parseEnums(lines, filePath) {
+    const nodes = [];
+    const enumRegex = /^(?:export\s+)?enum\s+(\w+)/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(enumRegex);
+      if (match) {
+        nodes.push({
+          type: "enum",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: this.findBlockEnd(lines, i),
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            isExported: line.startsWith("export")
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析变量
+   */
+  parseVariables(lines, filePath) {
+    const nodes = [];
+    const variableRegex = /^(?:export\s+)?(?:const|let|var)\s+(\w+)(?:\s*:\s*(\w+))?/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(variableRegex);
+      if (match) {
+        const isConstant = line.includes("const");
+        nodes.push({
+          type: "variable",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: i + 1,
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            dataType: match[2],
+            isConstant,
+            isExported: line.startsWith("export")
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 查找代码块结束位置
+   */
+  findBlockEnd(lines, startLine) {
+    let braceCount = 0;
+    let foundOpen = false;
+    for (let i = startLine; i < lines.length; i++) {
+      const line = lines[i];
+      for (const char of line) {
+        if (char === "{") {
+          braceCount++;
+          foundOpen = true;
+        } else if (char === "}") {
+          braceCount--;
+        }
+      }
+      if (foundOpen && braceCount === 0) {
+        return i + 1;
+      }
+    }
+    return startLine + 1;
+  }
+};
+var DartParser = class {
+  /**
+   * 解析 Dart 代码
+   */
+  parse(content, filePath) {
+    const lines = content.split("\n");
+    const children = [];
+    children.push(...this.parseImports(lines, filePath));
+    children.push(...this.parseClasses(lines, filePath));
+    children.push(...this.parseFunctions(lines, filePath));
+    children.push(...this.parseVariables(lines, filePath));
+    return {
+      type: "program",
+      name: filePath,
+      filePath,
+      startLine: 1,
+      endLine: lines.length,
+      startColumn: 0,
+      endColumn: 0,
+      children
+    };
+  }
+  /**
+   * 解析导入
+   */
+  parseImports(lines, filePath) {
+    const nodes = [];
+    const importRegex = /^import\s+['"]([^'"]+)['"](?:\s+as\s+(\w+))?/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(importRegex);
+      if (match) {
+        nodes.push({
+          type: "import",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: i + 1,
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            importPath: match[1],
+            importNames: match[2] ? [match[2]] : []
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析类
+   */
+  parseClasses(lines, filePath) {
+    const nodes = [];
+    const classRegex = /^(?:abstract\s+)?class\s+(\w+)(?:\s+extends\s+(\w+))?(?:\s+implements\s+([^{]+))?(?:\s+with\s+([^{]+))?/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(classRegex);
+      if (match) {
+        const isAbstract = line.includes("abstract");
+        nodes.push({
+          type: "class",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: this.findBlockEnd(lines, i),
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            superClass: match[2],
+            implements: match[3]?.split(",").map((s) => s.trim()).filter(Boolean),
+            isAbstract
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析函数
+   */
+  parseFunctions(lines, filePath) {
+    const nodes = [];
+    const functionRegex = /^(?:(?:static|abstract|external)\s+)?(?:async\s+)?(?:Future<[^>]+>|void|int|String|bool|double|List|Map|Set|dynamic)?\s+(\w+)\s*\(([^)]*)\)/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(functionRegex);
+      if (match && !line.includes("class ") && !line.includes("if ") && !line.includes("for ")) {
+        const isAsync = line.includes("async");
+        const parameters = match[2].split(",").map((p) => p.trim()).filter(Boolean);
+        nodes.push({
+          type: "function",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: this.findBlockEnd(lines, i),
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            parameters,
+            isAsync
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 解析变量
+   */
+  parseVariables(lines, filePath) {
+    const nodes = [];
+    const variableRegex = /^(?:final|const|var|late\s+)?(?:\w+\s+)?(\w+)\s*(?:=\s*[^;]+)?;/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(variableRegex);
+      if (match && !line.includes("class ") && !line.includes("void ") && !line.includes("Future")) {
+        const isConstant = line.includes("const") || line.includes("final");
+        nodes.push({
+          type: "variable",
+          name: match[1],
+          filePath,
+          startLine: i + 1,
+          endLine: i + 1,
+          startColumn: 0,
+          endColumn: line.length,
+          metadata: {
+            isConstant
+          }
+        });
+      }
+    }
+    return nodes;
+  }
+  /**
+   * 查找代码块结束位置
+   */
+  findBlockEnd(lines, startLine) {
+    let braceCount = 0;
+    let foundOpen = false;
+    for (let i = startLine; i < lines.length; i++) {
+      const line = lines[i];
+      for (const char of line) {
+        if (char === "{") {
+          braceCount++;
+          foundOpen = true;
+        } else if (char === "}") {
+          braceCount--;
+        }
+      }
+      if (foundOpen && braceCount === 0) {
+        return i + 1;
+      }
+    }
+    return startLine + 1;
+  }
+};
+var SymbolSearcher = class {
+  symbols = [];
+  /**
+   * 从 AST 节点提取符号
+   */
+  extractSymbols(node) {
+    const symbols = [];
+    const traverse = (node2) => {
+      if (node2.type !== "program") {
+        symbols.push({
+          name: node2.name,
+          type: node2.type,
+          filePath: node2.filePath,
+          line: node2.startLine,
+          column: node2.startColumn,
+          documentation: node2.metadata?.documentation,
+          dataType: node2.metadata?.returnType || node2.metadata?.dataType,
+          isExported: node2.metadata?.isExported
+        });
+      }
+      if (node2.children) {
+        for (const child of node2.children) {
+          traverse(child);
+        }
+      }
+    };
+    traverse(node);
+    return symbols;
+  }
+  /**
+   * 添加符号到索引
+   */
+  addSymbols(symbols) {
+    this.symbols.push(...symbols);
+  }
+  /**
+   * 搜索符号
+   */
+  search(query, options = {}) {
+    const { limit = 10, type, filePath, exact = false } = options;
+    const lowerQuery = query.toLowerCase();
+    let results = [];
+    for (const symbol of this.symbols) {
+      if (type && symbol.type !== type) continue;
+      if (filePath && !symbol.filePath.includes(filePath)) continue;
+      let score = 0;
+      const lowerName = symbol.name.toLowerCase();
+      if (exact) {
+        if (lowerName !== lowerQuery) continue;
+        score = 100;
+      } else {
+        if (lowerName === lowerQuery) {
+          score = 100;
+        } else if (lowerName.startsWith(lowerQuery)) {
+          score = 80;
+        } else if (lowerName.includes(lowerQuery)) {
+          score = 60;
+        } else if (this.fuzzyMatch(lowerName, lowerQuery)) {
+          score = 40;
+        } else {
+          continue;
+        }
+      }
+      if (symbol.isExported) {
+        score += 10;
+      }
+      results.push({
+        symbol,
+        score,
+        matches: [{
+          line: symbol.line,
+          column: symbol.column
+        }]
+      });
+    }
+    results.sort((a, b) => b.score - a.score);
+    return results.slice(0, limit);
+  }
+  /**
+   * 模糊匹配
+   */
+  fuzzyMatch(text, query) {
+    let queryIndex = 0;
+    for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+      if (text[i] === query[queryIndex]) {
+        queryIndex++;
+      }
+    }
+    return queryIndex === query.length;
+  }
+  /**
+   * 清空符号索引
+   */
+  clear() {
+    this.symbols = [];
+  }
+  /**
+   * 获取符号数量
+   */
+  count() {
+    return this.symbols.length;
+  }
+};
+var ASTManager = class {
+  tsParser;
+  dartParser;
+  searcher;
+  astCache = /* @__PURE__ */ new Map();
+  treeSitterManager = null;
+  useTreeSitter = false;
+  constructor() {
+    this.tsParser = new TypeScriptParser();
+    this.dartParser = new DartParser();
+    this.searcher = new SymbolSearcher();
+  }
+  /**
+   * 初始化 tree-sitter 解析器
+   */
+  async initializeTreeSitter() {
+    try {
+      const { treeSitterParserManager: treeSitterParserManager2 } = (init_tree_sitter_parser(), __toCommonJS(tree_sitter_parser_exports));
+      this.treeSitterManager = treeSitterParserManager2;
+      await this.treeSitterManager.initialize();
+      this.useTreeSitter = true;
+      return true;
+    } catch (error) {
+      console.warn("tree-sitter \u521D\u59CB\u5316\u5931\u8D25\uFF0C\u4F7F\u7528\u6B63\u5219\u89E3\u6790\u5668:", error);
+      this.useTreeSitter = false;
+      return false;
+    }
+  }
+  /**
+   * 解析文件
+   */
+  parseFile(content, filePath) {
+    const cacheKey = `${filePath}:${content.length}`;
+    if (this.astCache.has(cacheKey)) {
+      return this.astCache.get(cacheKey);
+    }
+    const ext = filePath.split(".").pop()?.toLowerCase();
+    let ast;
+    if (this.useTreeSitter && this.treeSitterManager) {
+      const language = this.treeSitterManager.getLanguageByExtension(ext || "");
+      if (language) {
+        try {
+          const tree = this.treeSitterManager.parseCode(content, language);
+          if (tree) {
+            const nodes = this.treeSitterManager.extractASTNodes(tree, language, filePath);
+            ast = {
+              type: "program",
+              name: filePath,
+              filePath,
+              startLine: 1,
+              endLine: content.split("\n").length,
+              startColumn: 0,
+              endColumn: 0,
+              children: nodes
+            };
+          } else {
+            ast = this.parseWithRegex(content, filePath, ext);
+          }
+        } catch (error) {
+          ast = this.parseWithRegex(content, filePath, ext);
+        }
+      } else {
+        ast = this.parseWithRegex(content, filePath, ext);
+      }
+    } else {
+      ast = this.parseWithRegex(content, filePath, ext);
+    }
+    this.astCache.set(cacheKey, ast);
+    const symbols = this.searcher.extractSymbols(ast);
+    this.searcher.addSymbols(symbols);
+    return ast;
+  }
+  /**
+   * 使用正则解析器
+   */
+  parseWithRegex(content, filePath, ext) {
+    if (ext === "dart") {
+      return this.dartParser.parse(content, filePath);
+    } else {
+      return this.tsParser.parse(content, filePath);
+    }
+  }
+  /**
+   * 搜索符号
+   */
+  searchSymbol(query, options) {
+    return this.searcher.search(query, options);
+  }
+  /**
+   * 获取文件结构
+   */
+  getFileStructure(filePath, content) {
+    const ast = this.parseFile(content, filePath);
+    return this.renderAST(ast);
+  }
+  /**
+   * 渲染 AST
+   */
+  renderAST(node, indent = 0) {
+    const theme = getTheme();
+    const lines = [];
+    const prefix = "  ".repeat(indent);
+    if (node.type !== "program") {
+      const icon = this.getNodeIcon(node.type);
+      const name = theme.claude(node.name);
+      const location = theme.subtle(`:${node.startLine}`);
+      const typeInfo = node.metadata?.returnType || node.metadata?.dataType || "";
+      let line = `${prefix}${icon} ${name}`;
+      if (typeInfo) {
+        line += theme.subtle(`: ${typeInfo}`);
+      }
+      line += location;
+      lines.push(line);
+    }
+    if (node.children) {
+      for (const child of node.children) {
+        lines.push(this.renderAST(child, indent + 1));
+      }
+    }
+    return lines.join("\n");
+  }
+  /**
+   * 获取节点图标
+   */
+  getNodeIcon(type) {
+    switch (type) {
+      case "function":
+        return "\u0192";
+      case "class":
+        return "\u24B8";
+      case "method":
+        return "\u24DC";
+      case "property":
+        return "\u24DF";
+      case "variable":
+        return "\u24E5";
+      case "import":
+        return "\u24D8";
+      case "export":
+        return "\u24D4";
+      case "interface":
+        return "\u24BE";
+      case "type":
+        return "\u24E3";
+      case "enum":
+        return "\u24BA";
+      case "decorator":
+        return "\u24D3";
+      case "comment":
+        return "\u24D2";
+      default:
+        return "\u2022";
+    }
+  }
+  /**
+   * 渲染搜索结果
+   */
+  renderSearchResults(results) {
+    const theme = getTheme();
+    const lines = [];
+    if (results.length === 0) {
+      lines.push(theme.subtle("\u672A\u627E\u5230\u5339\u914D\u7684\u7B26\u53F7"));
+      return lines.join("\n");
+    }
+    lines.push(theme.text.bold(`\u627E\u5230 ${results.length} \u4E2A\u7B26\u53F7:`));
+    lines.push(theme.inactive("\u2500".repeat(60)));
+    for (const result of results) {
+      const { symbol, score } = result;
+      const icon = this.getNodeIcon(symbol.type);
+      const name = theme.claude(symbol.name);
+      const type = theme.subtle(`(${symbol.type})`);
+      const file = theme.subtle(symbol.filePath);
+      const line = theme.subtle(`:${symbol.line}`);
+      lines.push(`${icon} ${name} ${type} ${file}${line}`);
+      if (symbol.dataType) {
+        lines.push(`  ${theme.subtle("\u7C7B\u578B:")} ${symbol.dataType}`);
+      }
+      if (symbol.documentation) {
+        lines.push(`  ${theme.subtle("\u6587\u6863:")} ${symbol.documentation}`);
+      }
+    }
+    return lines.join("\n");
+  }
+  /**
+   * 清空缓存
+   */
+  clearCache() {
+    this.astCache.clear();
+    this.searcher.clear();
+  }
+  /**
+   * 获取统计信息
+   */
+  getStats() {
+    return {
+      files: this.astCache.size,
+      symbols: this.searcher.count()
+    };
+  }
+};
+function createASTManager() {
+  return new ASTManager();
+}
+var astManager = createASTManager();
+
+// src/cli/commands.ts
+init_tree_sitter_parser();
+
+// src/cli/web-fetch.ts
+init_theme();
+var WebFetchManager = class {
+  defaultOptions = {
+    extractText: true,
+    extractLinks: true,
+    extractImages: false,
+    maxLength: 5e4,
+    timeout: 3e4,
+    userAgent: "Mozilla/5.0 (compatible; ForgeCLI/1.0)",
+    followRedirects: true
+  };
+  /**
+   * 获取网页内容
+   */
+  async fetch(options) {
+    const startTime = Date.now();
+    const mergedOptions = { ...this.defaultOptions, ...options };
+    try {
+      const axios = __require("axios");
+      const cheerio = __require("cheerio");
+      const response = await axios.get(mergedOptions.url, {
+        timeout: mergedOptions.timeout,
+        maxRedirects: mergedOptions.followRedirects ? 5 : 0,
+        headers: {
+          "User-Agent": mergedOptions.userAgent,
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"
+        }
+      });
+      const html = response.data;
+      const $ = cheerio.load(html);
+      const title = $("title").text().trim() || "";
+      let text = "";
+      if (mergedOptions.extractText) {
+        $("script, style, nav, footer, header, aside").remove();
+        text = $("body").text().replace(/\s+/g, " ").replace(/\n+/g, "\n").trim();
+        if (mergedOptions.maxLength && text.length > mergedOptions.maxLength) {
+          text = text.slice(0, mergedOptions.maxLength) + "...";
+        }
+      }
+      const links = [];
+      if (mergedOptions.extractLinks) {
+        $("a[href]").each((_, element) => {
+          const href = $(element).attr("href");
+          const text2 = $(element).text().trim();
+          if (href && text2) {
+            let absoluteHref = href;
+            if (href.startsWith("/")) {
+              const urlObj = new URL(mergedOptions.url);
+              absoluteHref = `${urlObj.origin}${href}`;
+            } else if (!href.startsWith("http")) {
+              try {
+                absoluteHref = new URL(href, mergedOptions.url).toString();
+              } catch {
+              }
+            }
+            links.push({ text: text2, href: absoluteHref });
+          }
+        });
+      }
+      const images = [];
+      if (mergedOptions.extractImages) {
+        $("img[src]").each((_, element) => {
+          const src = $(element).attr("src");
+          const alt = $(element).attr("alt") || "";
+          if (src) {
+            let absoluteSrc = src;
+            if (src.startsWith("/")) {
+              const urlObj = new URL(mergedOptions.url);
+              absoluteSrc = `${urlObj.origin}${src}`;
+            } else if (!src.startsWith("http")) {
+              try {
+                absoluteSrc = new URL(src, mergedOptions.url).toString();
+              } catch {
+              }
+            }
+            images.push({ alt, src: absoluteSrc });
+          }
+        });
+      }
+      const metadata = {};
+      $("meta").each((_, element) => {
+        const name = $(element).attr("name") || $(element).attr("property");
+        const content = $(element).attr("content");
+        if (name && content) {
+          metadata[name] = content;
+        }
+      });
+      return {
+        url: mergedOptions.url,
+        finalUrl: response.request?.responseURL || mergedOptions.url,
+        statusCode: response.status,
+        contentType: response.headers["content-type"] || "",
+        title,
+        html,
+        text,
+        links,
+        images,
+        metadata,
+        duration: Date.now() - startTime
+      };
+    } catch (error) {
+      return {
+        url: mergedOptions.url,
+        finalUrl: mergedOptions.url,
+        statusCode: 0,
+        contentType: "",
+        title: "",
+        html: "",
+        text: "",
+        links: [],
+        images: [],
+        metadata: {},
+        duration: Date.now() - startTime,
+        error: error.message
+      };
+    }
+  }
+  /**
+   * 快速获取网页文本
+   */
+  async fetchText(url) {
+    const result = await this.fetch({ url, extractText: true, extractLinks: false });
+    return result.text;
+  }
+  /**
+   * 获取网页标题
+   */
+  async fetchTitle(url) {
+    const result = await this.fetch({ url, extractText: false, extractLinks: false });
+    return result.title;
+  }
+  /**
+   * 渲染获取结果
+   */
+  renderResult(result) {
+    const theme = getTheme();
+    const lines = [];
+    if (result.title) {
+      lines.push(theme.text.bold(result.title));
+      lines.push("");
+    }
+    lines.push(theme.subtle("URL: ") + theme.text(result.url));
+    if (result.finalUrl !== result.url) {
+      lines.push(theme.subtle("\u91CD\u5B9A\u5411: ") + theme.text(result.finalUrl));
+    }
+    lines.push(theme.subtle("\u72B6\u6001: ") + theme.success(`${result.statusCode}`));
+    lines.push(theme.subtle("\u7C7B\u578B: ") + theme.text(result.contentType));
+    lines.push(theme.subtle("\u8017\u65F6: ") + theme.text(`${result.duration}ms`));
+    lines.push("");
+    if (result.text) {
+      lines.push(theme.text.bold("\u5185\u5BB9:"));
+      lines.push(theme.inactive("\u2500".repeat(60)));
+      lines.push(result.text);
+      lines.push("");
+    }
+    if (result.links.length > 0) {
+      lines.push(theme.text.bold(`\u94FE\u63A5 (${result.links.length}):`));
+      lines.push(theme.inactive("\u2500".repeat(60)));
+      for (const link of result.links.slice(0, 20)) {
+        lines.push(`  ${theme.claude(link.text)} ${theme.subtle(link.href)}`);
+      }
+      if (result.links.length > 20) {
+        lines.push(theme.subtle(`  ... \u8FD8\u6709 ${result.links.length - 20} \u4E2A\u94FE\u63A5`));
+      }
+      lines.push("");
+    }
+    if (result.images.length > 0) {
+      lines.push(theme.text.bold(`\u56FE\u7247 (${result.images.length}):`));
+      lines.push(theme.inactive("\u2500".repeat(60)));
+      for (const image of result.images.slice(0, 10)) {
+        lines.push(`  ${theme.claude(image.alt || "\u65E0\u63CF\u8FF0")} ${theme.subtle(image.src)}`);
+      }
+      if (result.images.length > 10) {
+        lines.push(theme.subtle(`  ... \u8FD8\u6709 ${result.images.length - 10} \u5F20\u56FE\u7247`));
+      }
+      lines.push("");
+    }
+    const metadataKeys = Object.keys(result.metadata);
+    if (metadataKeys.length > 0) {
+      lines.push(theme.text.bold("\u5143\u6570\u636E:"));
+      lines.push(theme.inactive("\u2500".repeat(60)));
+      for (const key of metadataKeys.slice(0, 10)) {
+        lines.push(`  ${theme.subtle(key)}: ${result.metadata[key]}`);
+      }
+      lines.push("");
+    }
+    if (result.error) {
+      lines.push(theme.error("\u9519\u8BEF: ") + result.error);
+    }
+    return lines.join("\n");
+  }
+  /**
+   * 渲染简洁结果
+   */
+  renderCompactResult(result) {
+    const theme = getTheme();
+    const lines = [];
+    if (result.error) {
+      lines.push(theme.error(`\u2717 ${result.error}`));
+    } else {
+      lines.push(theme.success(`\u2713 ${result.title || "\u65E0\u6807\u9898"}`));
+      lines.push(theme.subtle(`  ${result.url}`));
+      lines.push(theme.subtle(`  ${result.statusCode} | ${result.contentType} | ${result.duration}ms`));
+      if (result.text) {
+        const preview = result.text.slice(0, 200).replace(/\n/g, " ");
+        lines.push(theme.text(`  ${preview}...`));
+      }
+    }
+    return lines.join("\n");
+  }
+};
+function createWebFetchManager() {
+  return new WebFetchManager();
+}
+var webFetchManager = createWebFetchManager();
+
+// src/cli/web-search.ts
+init_theme();
+var WebSearchManager = class {
+  apiKey;
+  baseUrl;
+  constructor(apiKey) {
+    this.apiKey = apiKey || process.env.BAIDU_QIANFAN_API_KEY || "";
+    this.baseUrl = "https://qianfan.baidubce.com/v2/ai_search/web_summary";
+  }
+  /**
+   * 设置 API Key
+   */
+  setApiKey(apiKey) {
+    this.apiKey = apiKey;
+  }
+  /**
+   * 检查是否已配置
+   */
+  isConfigured() {
+    return !!this.apiKey;
+  }
+  /**
+   * 执行搜索
+   */
+  async search(options) {
+    const startTime = Date.now();
+    if (!this.apiKey) {
+      return {
+        requestId: "",
+        content: "",
+        references: [],
+        error: "\u672A\u914D\u7F6E\u767E\u5EA6\u5343\u5E06 API Key\uFF0C\u8BF7\u8BBE\u7F6E\u73AF\u5883\u53D8\u91CF BAIDU_QIANFAN_API_KEY",
+        duration: Date.now() - startTime
+      };
+    }
+    try {
+      const requestBody = {
+        messages: [
+          { role: "user", content: options.query }
+        ],
+        stream: false
+      };
+      if (options.resourceTypes) {
+        requestBody.resource_type_filter = options.resourceTypes;
+      } else {
+        requestBody.resource_type_filter = [
+          { type: "web", top_k: options.topK || 10 }
+        ];
+      }
+      if (options.instruction) {
+        requestBody.instruction = options.instruction;
+      }
+      if (options.temperature !== void 0) {
+        requestBody.temperature = options.temperature;
+      }
+      if (options.topP !== void 0) {
+        requestBody.top_p = options.topP;
+      }
+      const response = await fetch(this.baseUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Appbuilder-Authorization": `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          requestId: "",
+          content: "",
+          references: [],
+          error: `API \u8BF7\u6C42\u5931\u8D25: ${response.status} ${errorText}`,
+          duration: Date.now() - startTime
+        };
+      }
+      const data = await response.json();
+      const result = {
+        requestId: data.request_id || "",
+        content: "",
+        references: [],
+        duration: Date.now() - startTime
+      };
+      if (data.choices && data.choices.length > 0) {
+        const choice = data.choices[0];
+        if (choice.message) {
+          result.content = choice.message.content || "";
+        }
+      }
+      if (data.references) {
+        result.references = data.references.map((ref) => ({
+          id: ref.id,
+          url: ref.url,
+          title: ref.title,
+          date: ref.date,
+          content: ref.content || ref.snippet || "",
+          website: ref.website,
+          icon: ref.icon,
+          type: ref.type || "web",
+          snippet: ref.snippet
+        }));
+      }
+      return result;
+    } catch (error) {
+      return {
+        requestId: "",
+        content: "",
+        references: [],
+        error: `\u641C\u7D22\u5931\u8D25: ${error.message}`,
+        duration: Date.now() - startTime
+      };
+    }
+  }
+  /**
+   * 渲染搜索结果
+   */
+  renderResult(result) {
+    const theme = getTheme();
+    const lines = [];
+    if (result.error) {
+      lines.push(theme.error(`\u2717 ${result.error}`));
+      return lines.join("\n");
+    }
+    if (result.content) {
+      lines.push(result.content);
+      lines.push("");
+    }
+    if (result.references.length > 0) {
+      lines.push(theme.text.bold(`\u53C2\u8003\u6765\u6E90 (${result.references.length}):`));
+      lines.push(theme.inactive("\u2500".repeat(60)));
+      for (const ref of result.references) {
+        const icon = ref.type === "video" ? "\u25B6" : ref.type === "image" ? "\u{1F5BC}" : "\u{1F517}";
+        const title = theme.claude(ref.title || "\u65E0\u6807\u9898");
+        const url = theme.subtle(ref.url);
+        const website = ref.website ? theme.subtle(` (${ref.website})`) : "";
+        const date = ref.date ? theme.subtle(` [${ref.date}]`) : "";
+        lines.push(`${icon} ${title}${website}${date}`);
+        lines.push(`   ${url}`);
+        if (ref.snippet) {
+          const snippet = ref.snippet.slice(0, 150);
+          lines.push(theme.subtle(`   ${snippet}...`));
+        }
+        lines.push("");
+      }
+    }
+    lines.push(theme.subtle(`\u641C\u7D22\u65F6\u95F4: ${result.duration}ms`));
+    return lines.join("\n");
+  }
+  /**
+   * 渲染简洁结果
+   */
+  renderCompactResult(result) {
+    const theme = getTheme();
+    const lines = [];
+    if (result.error) {
+      lines.push(theme.error(`\u2717 ${result.error}`));
+    } else {
+      if (result.content) {
+        const preview = result.content.slice(0, 300).replace(/\n/g, " ");
+        lines.push(theme.text(`${preview}...`));
+      }
+      if (result.references.length > 0) {
+        lines.push(theme.subtle(`  ${result.references.length} \u4E2A\u53C2\u8003\u6765\u6E90`));
+      }
+      lines.push(theme.subtle(`  ${result.duration}ms`));
+    }
+    return lines.join("\n");
+  }
+};
+function createWebSearchManager(apiKey) {
+  return new WebSearchManager(apiKey);
+}
+var webSearchManager = createWebSearchManager();
+
+// src/cli/state-machine.ts
+init_theme();
+var StateMachineError = class extends Error {
+  constructor(message, code, currentState, event, targetState) {
+    super(message);
+    this.code = code;
+    this.currentState = currentState;
+    this.event = event;
+    this.targetState = targetState;
+    this.name = "StateMachineError";
+  }
+  code;
+  currentState;
+  event;
+  targetState;
+};
+var StateMachine = class {
+  currentState;
+  states;
+  transitions;
+  history = [];
+  context = {};
+  config;
+  stateStartTime = Date.now();
+  constructor(config) {
+    this.config = config;
+    this.currentState = config.initialState;
+    this.states = new Set(config.states);
+    this.transitions = /* @__PURE__ */ new Map();
+    for (const transition of config.transitions) {
+      const key = `${transition.from}:${transition.event}`;
+      if (!this.transitions.has(key)) {
+        this.transitions.set(key, []);
+      }
+      this.transitions.get(key).push(transition);
+    }
+  }
+  /**
+   * 获取当前状态
+   */
+  getCurrentState() {
+    return this.currentState;
+  }
+  /**
+   * 获取状态历史
+   */
+  getHistory() {
+    return [...this.history];
+  }
+  /**
+   * 获取上下文
+   */
+  getContext() {
+    return { ...this.context };
+  }
+  /**
+   * 设置上下文
+   */
+  setContext(context) {
+    this.context = { ...this.context, ...context };
+  }
+  /**
+   * 获取当前状态持续时间
+   */
+  getCurrentStateDuration() {
+    return Date.now() - this.stateStartTime;
+  }
+  /**
+   * 触发事件
+   */
+  send(event, data) {
+    const key = `${this.currentState}:${event}`;
+    const transitions = this.transitions.get(key) || [];
+    if (transitions.length === 0) {
+      const error = new StateMachineError(
+        `\u65E0\u6548\u7684\u72B6\u6001\u8F6C\u6362: ${this.currentState} + ${event}`,
+        "INVALID_TRANSITION",
+        this.currentState,
+        event
+      );
+      this.config.onError?.(error);
+      throw error;
+    }
+    const validTransition = transitions.find((t) => {
+      if (t.guard) {
+        return t.guard({ ...this.context, ...data });
+      }
+      return true;
+    });
+    if (!validTransition) {
+      const error = new StateMachineError(
+        `\u72B6\u6001\u8F6C\u6362\u6761\u4EF6\u4E0D\u6EE1\u8DB3: ${this.currentState} + ${event}`,
+        "GUARD_FAILED",
+        this.currentState,
+        event
+      );
+      this.config.onError?.(error);
+      throw error;
+    }
+    const from = this.currentState;
+    const to = validTransition.to;
+    const duration = this.getCurrentStateDuration();
+    this.history.push({
+      from,
+      to,
+      event,
+      timestamp: Date.now(),
+      context: data,
+      duration
+    });
+    if (validTransition.action) {
+      validTransition.action({ ...this.context, ...data });
+    }
+    this.currentState = to;
+    this.stateStartTime = Date.now();
+    this.config.onStateChange?.(from, to, event);
+    return true;
+  }
+  /**
+   * 检查是否可以触发事件
+   */
+  canSend(event) {
+    const key = `${this.currentState}:${event}`;
+    const transitions = this.transitions.get(key) || [];
+    return transitions.length > 0;
+  }
+  /**
+   * 获取当前状态可用的事件
+   */
+  getAvailableEvents() {
+    const events = [];
+    for (const [key] of this.transitions) {
+      const [state, event] = key.split(":");
+      if (state === this.currentState) {
+        events.push(event);
+      }
+    }
+    return events;
+  }
+  /**
+   * 获取状态转换图
+   */
+  getTransitionGraph() {
+    const graph = [];
+    for (const transitions of this.transitions.values()) {
+      for (const t of transitions) {
+        graph.push({ from: t.from, to: t.to, event: t.event });
+      }
+    }
+    return graph;
+  }
+  /**
+   * 创建快照
+   */
+  createSnapshot() {
+    return {
+      currentState: this.currentState,
+      history: [...this.history],
+      context: { ...this.context },
+      timestamp: Date.now()
+    };
+  }
+  /**
+   * 从快照恢复
+   */
+  restoreFromSnapshot(snapshot) {
+    if (!this.states.has(snapshot.currentState)) {
+      throw new StateMachineError(
+        `\u5FEB\u7167\u4E2D\u7684\u72B6\u6001\u65E0\u6548: ${snapshot.currentState}`,
+        "INVALID_STATE",
+        snapshot.currentState
+      );
+    }
+    this.currentState = snapshot.currentState;
+    this.history = [...snapshot.history];
+    this.context = { ...snapshot.context };
+    this.stateStartTime = Date.now();
+  }
+  /**
+   * 重置状态机
+   */
+  reset() {
+    this.currentState = this.config.initialState;
+    this.history = [];
+    this.context = {};
+    this.stateStartTime = Date.now();
+  }
+  /**
+   * 渲染状态机信息
+   */
+  render() {
+    const theme = getTheme();
+    const lines = [];
+    lines.push(theme.text.bold("\u72B6\u6001\u673A"));
+    lines.push(theme.inactive("\u2500".repeat(40)));
+    lines.push(`  ${theme.subtle("\u5F53\u524D\u72B6\u6001:")} ${theme.claude(this.currentState)}`);
+    lines.push(`  ${theme.subtle("\u6301\u7EED\u65F6\u95F4:")} ${theme.text(`${this.getCurrentStateDuration()}ms`)}`);
+    const events = this.getAvailableEvents();
+    if (events.length > 0) {
+      lines.push(`  ${theme.subtle("\u53EF\u7528\u4E8B\u4EF6:")} ${theme.text(events.join(", "))}`);
+    }
+    if (this.history.length > 0) {
+      lines.push("");
+      lines.push(theme.text.bold("\u5386\u53F2\u8BB0\u5F55:"));
+      lines.push(theme.inactive("\u2500".repeat(40)));
+      const recentHistory = this.history.slice(-10);
+      for (const entry of recentHistory) {
+        const time = new Date(entry.timestamp).toLocaleTimeString();
+        const duration = entry.duration ? ` (${entry.duration}ms)` : "";
+        lines.push(`  ${theme.subtle(time)} ${theme.claude(entry.from)} \u2192 ${theme.claude(entry.to)} ${theme.subtle(entry.event)}${duration}`);
+      }
+      if (this.history.length > 10) {
+        lines.push(theme.subtle(`  ... \u8FD8\u6709 ${this.history.length - 10} \u6761\u8BB0\u5F55`));
+      }
+    }
+    return lines.join("\n");
+  }
+  /**
+   * 渲染状态转换图
+   */
+  renderTransitionGraph() {
+    const theme = getTheme();
+    const lines = [];
+    lines.push(theme.text.bold("\u72B6\u6001\u8F6C\u6362\u56FE"));
+    lines.push(theme.inactive("\u2500".repeat(60)));
+    const graph = this.getTransitionGraph();
+    const states = /* @__PURE__ */ new Set();
+    const transitionsByState = /* @__PURE__ */ new Map();
+    for (const edge of graph) {
+      states.add(edge.from);
+      states.add(edge.to);
+      if (!transitionsByState.has(edge.from)) {
+        transitionsByState.set(edge.from, []);
+      }
+      transitionsByState.get(edge.from).push({ to: edge.to, event: edge.event });
+    }
+    for (const state of states) {
+      const isCurrent = state === this.currentState;
+      const stateLabel = isCurrent ? theme.claude(`[${state}]`) : theme.text(state);
+      lines.push(`  ${stateLabel}`);
+      const transitions = transitionsByState.get(state) || [];
+      for (const t of transitions) {
+        const arrow = isCurrent ? theme.claude("\u2192") : theme.subtle("\u2192");
+        lines.push(`    ${arrow} ${theme.text(t.to)} ${theme.subtle(`(${t.event})`)}`);
+      }
+    }
+    return lines.join("\n");
+  }
+};
+function createStateMachine(config) {
+  return new StateMachine(config);
+}
+async function saveSnapshot(snapshot, filePath) {
+  const fs = __require("fs");
+  const content = JSON.stringify(snapshot, null, 2);
+  fs.writeFileSync(filePath, content);
+}
+async function loadSnapshot(filePath) {
+  const fs = __require("fs");
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
+  const content = fs.readFileSync(filePath, "utf-8");
+  return JSON.parse(content);
+}
+
+// src/cli/commands.ts
 function ask(prompt) {
   const forge = globalThis.__forgeRL;
   forge?.pause();
@@ -6086,19 +9107,19 @@ function ask(prompt) {
   });
 }
 async function selectOption(prompt, options) {
-  console.log(chalk4.bold(`
+  console.log(chalk5.bold(`
 ${prompt}`));
   options.forEach((opt, i) => {
-    console.log(`  ${chalk4.cyan(i + 1 + "")}. ${opt}`);
+    console.log(`  ${chalk5.cyan(i + 1 + "")}. ${opt}`);
   });
-  console.log(chalk4.dim("  0. \u53D6\u6D88"));
-  const answer = await ask(chalk4.cyan("\n> "));
+  console.log(chalk5.dim("  0. \u53D6\u6D88"));
+  const answer = await ask(chalk5.cyan("\n> "));
   const num = parseInt(answer.trim());
   if (isNaN(num) || num < 0 || num > options.length) return null;
   return num === 0 ? null : num - 1;
 }
 async function promptInput(label) {
-  const answer = await ask(chalk4.cyan(`${label} > `));
+  const answer = await ask(chalk5.cyan(`${label} > `));
   return answer.trim() || null;
 }
 async function handleCommand(input, configManager2, contextManager2, aiClient, orchestrator) {
@@ -6110,7 +9131,7 @@ async function handleCommand(input, configManager2, contextManager2, aiClient, o
       return { handled: true, output: renderHelp() };
     case "/exit":
     case "/quit":
-      return { handled: true, shouldExit: true, output: chalk4.dim("\n\u518D\u89C1\uFF01") };
+      return { handled: true, shouldExit: true, output: chalk5.dim("\n\u518D\u89C1\uFF01") };
     case "/model":
       return await handleModelCommand(args, configManager2, aiClient);
     case "/config":
@@ -6142,6 +9163,29 @@ async function handleCommand(input, configManager2, contextManager2, aiClient, o
       return handleMemoryCommand();
     case "/trace":
       return handleTraceCommand(orchestrator);
+    case "/theme":
+      return handleThemeCommand(args);
+    case "/git":
+      return handleGitCommand(args);
+    case "/diff":
+      return handleDiffCommand(args);
+    case "/lint":
+      return handleLintCommand(args);
+    case "/test":
+      return handleTestCommand(args);
+    case "/ast":
+      return handleASTCommand(args);
+    case "/symbol":
+    case "/sym":
+      return handleSymbolCommand(args);
+    case "/fetch":
+    case "/web":
+      return handleFetchCommand(args);
+    case "/search":
+    case "/s":
+      return handleSearchCommand(args);
+    case "/state":
+      return handleStateCommand(args);
     default:
       return { handled: true, output: renderError(`\u672A\u77E5\u547D\u4EE4: ${command}
 \u8F93\u5165 /help \u67E5\u770B\u53EF\u7528\u547D\u4EE4`) };
@@ -6149,98 +9193,126 @@ async function handleCommand(input, configManager2, contextManager2, aiClient, o
 }
 async function handleModelCommand(args, cm, ai) {
   if (args.length >= 1) {
-    const modelName = args[0];
+    const raw = args[0];
+    const [providerKey, ...modelParts] = raw.split(":");
+    const modelName = modelParts.join(":");
     try {
-      const model = cm.getModel(modelName);
+      const model = cm.getModel(providerKey, modelName || void 0);
       if (!model.api_key) {
-        return { handled: true, output: renderError(`\u672A\u914D\u7F6E API Key\uFF0C\u8BF7\u5148\u7528 /model \u914D\u7F6E`) };
+        return { handled: true, output: renderError(`provider "${providerKey}" \u672A\u914D\u7F6E API Key\uFF0C\u8BF7\u5148\u7528 /model \u4EA4\u4E92\u5F0F\u914D\u7F6E`) };
       }
+      cm.setSelectedModel(providerKey, model.name);
       ai.setModel(model);
-      cm.setDefaultModel(modelName);
       cm.save().catch(() => {
       });
-      return { handled: true, output: renderSuccess(`\u5DF2\u5207\u6362\u5230\u6A21\u578B: ${modelName}`) };
-    } catch {
-      return { handled: true, output: renderError(`\u6A21\u578B "${modelName}" \u4E0D\u53EF\u7528`) };
+      return { handled: true, output: renderSuccess(`\u5DF2\u5207\u6362\u5230 ${providerKey} / ${model.name}`) };
+    } catch (e) {
+      return { handled: true, output: renderError(e instanceof Error ? e.message : String(e)) };
     }
   }
   return await flowModelManager(cm, ai);
 }
 async function flowModelManager(cm, ai) {
-  const config = cm.get();
-  const isConfigured = cm.isConfigured();
-  const provider = config.provider;
-  const status = isConfigured ? chalk4.green("\u2713 \u5DF2\u914D\u7F6E") : chalk4.red("\u2717 \u672A\u914D\u7F6E");
-  console.log(chalk4.bold(`
-\u63D0\u4F9B\u5546: ${chalk4.cyan(provider.name)}`));
-  console.log(`  ${chalk4.dim("Base URL:")} ${provider.base_url}`);
-  console.log(`  ${chalk4.dim("API Key:")} ${status}`);
-  const modelOptions = provider.models.map((m) => {
-    const isDefault = m === config.models.default;
-    return `${chalk4.cyan(m)}${isDefault ? chalk4.yellow(" [\u5F53\u524D]") : ""}`;
+  const defaultPk = cm.getDefaultProvider();
+  const defaultInfo = cm.getProvider(defaultPk);
+  const currentDisplay = defaultInfo?.selected || cm.get().defaults.model;
+  console.log(chalk5.bold("\n  \u6A21\u578B\u7BA1\u7406"));
+  console.log(chalk5.dim("  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"));
+  console.log(`  \u5F53\u524D: ${chalk5.cyan(defaultPk)} / ${chalk5.yellow(currentDisplay)}
+`);
+  const providers = cm.getAllProviders();
+  const options = [];
+  for (const p of providers) {
+    const hasKey = !!p.info.api_key;
+    const isSelected = p.key === defaultPk;
+    const modelDisplay = hasKey ? p.info.selected || p.info.models[0] : chalk5.dim("(\u672A\u914D\u7F6E)");
+    const tag = isSelected ? chalk5.yellow(" [\u5F53\u524D]") : "";
+    options.push(`${chalk5.cyan(p.key.padEnd(14))} ${modelDisplay}${tag}`);
+  }
+  options.push(chalk5.dim("\u81EA\u5B9A\u4E49 provider"));
+  const sel = await selectOption("", options);
+  if (sel === null) return { handled: true, output: chalk5.dim("\u5DF2\u53D6\u6D88") };
+  if (sel === providers.length) {
+    return await flowAddCustomProvider(cm, ai);
+  }
+  const chosen = providers[sel];
+  return await flowSelectModel(cm, ai, chosen.key);
+}
+async function flowSelectModel(cm, ai, providerKey) {
+  const info = cm.getProvider(providerKey);
+  if (!info) return { handled: true, output: renderError(`Provider "${providerKey}" \u4E0D\u5B58\u5728`) };
+  if (!info.api_key) {
+    console.log(chalk5.yellow(`
+  ${providerKey} \u5C1A\u672A\u914D\u7F6E API Key`));
+    const apiKey = await promptInput("  API Key");
+    if (!apiKey) return { handled: true, output: chalk5.dim("\u5DF2\u53D6\u6D88") };
+    cm.setApiKey(providerKey, apiKey);
+  }
+  const modelOptions = info.models.map((m) => {
+    const isCurrent = m === info.selected;
+    return `${chalk5.cyan(m)}${isCurrent ? chalk5.yellow(" [\u5F53\u524D]") : ""}`;
   });
-  if (!isConfigured) {
-    console.log(chalk4.yellow("\n\u8BF7\u5148\u914D\u7F6E API Key"));
-    const apiKey = await promptInput("API Key");
-    if (!apiKey) return { handled: true, output: chalk4.dim("\u5DF2\u53D6\u6D88") };
-    cm.setApiKey(apiKey);
-    cm.save().catch(() => {
-    });
-    const sel2 = await selectOption("\u9009\u62E9\u9ED8\u8BA4\u6A21\u578B:", modelOptions);
-    if (sel2 !== null) {
-      cm.setDefaultModel(provider.models[sel2]);
-      ai.setModel(cm.getModel());
-      cm.save().catch(() => {
-      });
-    }
-    return { handled: true, output: renderSuccess(`\u5DF2\u914D\u7F6E API Key\uFF0C\u5F53\u524D\u6A21\u578B: ${cm.get().models.default}`) };
-  }
-  const actions = [
-    ...modelOptions,
-    chalk4.yellow("\u91CD\u65B0\u914D\u7F6E API Key"),
-    chalk4.red("\u6E05\u9664 API Key")
-  ];
-  const sel = await selectOption("\u6A21\u578B\u7BA1\u7406:", actions);
-  if (sel === null) return { handled: true, output: chalk4.dim("\u5DF2\u53D6\u6D88") };
-  if (sel < provider.models.length) {
-    const modelName = provider.models[sel];
-    cm.setDefaultModel(modelName);
-    ai.setModel(cm.getModel());
-    cm.save().catch(() => {
-    });
-    return { handled: true, output: renderSuccess(`\u5DF2\u5207\u6362\u5230\u6A21\u578B: ${modelName}`) };
-  }
-  if (sel === provider.models.length) {
-    const apiKey = await promptInput("API Key");
-    if (!apiKey) return { handled: true, output: chalk4.dim("\u5DF2\u53D6\u6D88") };
-    cm.setApiKey(apiKey);
-    ai.setModel(cm.getModel());
-    cm.save().catch(() => {
-    });
-    return { handled: true, output: renderSuccess("API Key \u5DF2\u66F4\u65B0") };
-  }
-  cm.setApiKey("");
+  const sel = await selectOption(`${providerKey} - \u9009\u62E9\u6A21\u578B:`, modelOptions);
+  if (sel === null) return { handled: true, output: chalk5.dim("\u5DF2\u53D6\u6D88") };
+  const modelName = info.models[sel];
+  cm.setSelectedModel(providerKey, modelName);
+  ai.setModel(cm.getModel(providerKey, modelName));
   cm.save().catch(() => {
   });
-  return { handled: true, output: renderSuccess("API Key \u5DF2\u6E05\u9664") };
+  return { handled: true, output: renderSuccess(`\u5DF2\u5207\u6362\u5230 ${providerKey} / ${modelName}`) };
+}
+async function flowAddCustomProvider(cm, ai) {
+  const customCount = Object.keys(cm.get().custom_providers).length;
+  if (customCount >= MAX_CUSTOM_PROVIDERS) {
+    return { handled: true, output: renderError(`\u6700\u591A\u652F\u6301 ${MAX_CUSTOM_PROVIDERS} \u4E2A\u81EA\u5B9A\u4E49 provider`) };
+  }
+  console.log(chalk5.bold("\n  \u6DFB\u52A0\u81EA\u5B9A\u4E49 provider"));
+  console.log(chalk5.dim("  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"));
+  const name = await promptInput("  \u540D\u79F0");
+  if (!name) return { handled: true, output: chalk5.dim("\u5DF2\u53D6\u6D88") };
+  if (cm.getProvider(name)) {
+    return { handled: true, output: renderError(`Provider "${name}" \u5DF2\u5B58\u5728`) };
+  }
+  const baseUrl = await promptInput("  Base URL");
+  if (!baseUrl) return { handled: true, output: chalk5.dim("\u5DF2\u53D6\u6D88") };
+  const apiKey = await promptInput("  API Key");
+  if (!apiKey) return { handled: true, output: chalk5.dim("\u5DF2\u53D6\u6D88") };
+  const modelsStr = await promptInput("  \u6A21\u578B\uFF08\u9017\u53F7\u5206\u9694\uFF09");
+  if (!modelsStr) return { handled: true, output: chalk5.dim("\u5DF2\u53D6\u6D88") };
+  const models = modelsStr.split(",").map((m) => m.trim()).filter(Boolean);
+  if (models.length === 0) return { handled: true, output: renderError("\u81F3\u5C11\u9700\u8981\u4E00\u4E2A\u6A21\u578B") };
+  cm.addCustomProvider(name, { name, base_url: baseUrl, api_key: apiKey, models });
+  const modelOptions = models.map((m) => chalk5.cyan(m));
+  const sel = await selectOption("\u9009\u62E9\u9ED8\u8BA4\u6A21\u578B:", modelOptions);
+  const selectedModel = sel !== null ? models[sel] : models[0];
+  cm.setSelectedModel(name, selectedModel);
+  ai.setModel(cm.getModel(name, selectedModel));
+  cm.save().catch(() => {
+  });
+  return { handled: true, output: renderSuccess(`\u5DF2\u6DFB\u52A0 ${name}\uFF0C\u5F53\u524D\u6A21\u578B: ${selectedModel}`) };
 }
 function handleConfigCommand(cm) {
   const config = cm.get();
-  const p = config.provider;
+  const defaultPk = config.defaults.provider;
+  const defaultInfo = cm.getProvider(defaultPk);
+  const currentModel = defaultInfo?.selected || config.defaults.model;
   const lines = [
-    chalk4.bold("\n\u5F53\u524D\u914D\u7F6E:"),
-    `  ${chalk4.dim("\u63D0\u4F9B\u5546:")} ${chalk4.cyan(p.name)}`,
-    `  ${chalk4.dim("Base URL:")} ${p.base_url}`,
-    `  ${chalk4.dim("API Key:")} ${p.api_key ? chalk4.green("\u2713 \u5DF2\u914D\u7F6E") : chalk4.red("\u2717 \u672A\u914D\u7F6E")}`,
-    `  ${chalk4.dim("\u9ED8\u8BA4\u6A21\u578B:")} ${chalk4.yellow(config.models.default)}`,
-    `  ${chalk4.dim("\u53EF\u7528\u6A21\u578B:")}`,
-    ...p.models.map((m) => {
-      const tag = m === config.models.default ? chalk4.yellow(" [\u5F53\u524D]") : "";
-      return `    ${chalk4.cyan(m)}${tag}`;
-    }),
-    `  ${chalk4.dim("\u9879\u76EE\u8DEF\u5F84:")} ${config.project.root}`,
-    `  ${chalk4.dim("\u914D\u7F6E\u6587\u4EF6:")} ${cm.getConfigPath()}`
+    chalk5.bold("\n\u5F53\u524D\u914D\u7F6E:"),
+    `  ${chalk5.dim("\u9ED8\u8BA4 Provider:")} ${chalk5.cyan(defaultPk)}`,
+    `  ${chalk5.dim("\u9ED8\u8BA4\u6A21\u578B:")} ${chalk5.yellow(currentModel)}`,
+    `  ${chalk5.dim("\u9879\u76EE\u8DEF\u5F84:")} ${config.project.root}`,
+    `  ${chalk5.dim("\u914D\u7F6E\u6587\u4EF6:")} ${cm.getConfigPath()}`,
+    "",
+    chalk5.bold("Provider \u5217\u8868:")
   ];
+  for (const p of cm.getAllProviders()) {
+    const hasKey = !!p.info.api_key;
+    const status = hasKey ? chalk5.green("\u2713") : chalk5.red("\u2717");
+    const selected = p.info.selected || p.info.models[0] || "-";
+    const tag = p.key === defaultPk ? chalk5.yellow(" [\u5F53\u524D]") : "";
+    const presetTag = p.isPreset ? "" : chalk5.dim(" (\u81EA\u5B9A\u4E49)");
+    lines.push(`  ${status} ${chalk5.cyan(p.key)}${presetTag} \u2192 ${selected}${tag}`);
+  }
   return { handled: true, output: lines.join("\n") };
 }
 function handleFastCommand(orchestrator) {
@@ -6264,35 +9336,35 @@ function handleAutoCommand(orchestrator) {
 function handleSessionCommand(orchestrator) {
   if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
   const info = orchestrator.getSessionInfo();
-  if (!info) return { handled: true, output: chalk4.dim("\n\u65E0\u6D3B\u8DC3 session") };
+  if (!info) return { handled: true, output: chalk5.dim("\n\u65E0\u6D3B\u8DC3 session") };
   return { handled: true, output: [
-    chalk4.bold("\nSession \u4FE1\u606F:"),
-    `  ${chalk4.dim("ID:")} ${chalk4.cyan(info.id)}`,
-    `  ${chalk4.dim("\u72B6\u6001:")} ${chalk4.yellow(info.state)}`,
-    `  ${chalk4.dim("\u6A21\u5F0F:")} ${info.mode || chalk4.dim("\u672A\u8BBE\u7F6E")}`
+    chalk5.bold("\nSession \u4FE1\u606F:"),
+    `  ${chalk5.dim("ID:")} ${chalk5.cyan(info.id)}`,
+    `  ${chalk5.dim("\u72B6\u6001:")} ${chalk5.yellow(info.state)}`,
+    `  ${chalk5.dim("\u6A21\u5F0F:")} ${info.mode || chalk5.dim("\u672A\u8BBE\u7F6E")}`
   ].join("\n") };
 }
 function handlePluginsCommand(orchestrator) {
   if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
   const plugins = orchestrator.getPluginManager().getPlugins();
-  if (plugins.length === 0) return { handled: true, output: chalk4.dim("\n\u65E0\u5DF2\u52A0\u8F7D\u63D2\u4EF6") };
+  if (plugins.length === 0) return { handled: true, output: chalk5.dim("\n\u65E0\u5DF2\u52A0\u8F7D\u63D2\u4EF6") };
   return { handled: true, output: [
-    chalk4.bold("\n\u5DF2\u52A0\u8F7D\u63D2\u4EF6:"),
+    chalk5.bold("\n\u5DF2\u52A0\u8F7D\u63D2\u4EF6:"),
     ...plugins.map((p) => {
-      const s = p.enabled ? chalk4.green("\u2713") : chalk4.red("\u2717");
-      return `  ${s} ${chalk4.cyan(p.config.metadata.name)} ${chalk4.dim(`v${p.config.metadata.version}`)}`;
+      const s = p.enabled ? chalk5.green("\u2713") : chalk5.red("\u2717");
+      return `  ${s} ${chalk5.cyan(p.config.metadata.name)} ${chalk5.dim(`v${p.config.metadata.version}`)}`;
     })
   ].join("\n") };
 }
 function handleMCPCommand(args, orchestrator) {
   if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
   const servers = orchestrator.getMCPClient().getServers();
-  if (servers.length === 0) return { handled: true, output: chalk4.dim("\n\u65E0\u5DF2\u8FDE\u63A5 MCP \u670D\u52A1\u5668") };
+  if (servers.length === 0) return { handled: true, output: chalk5.dim("\n\u65E0\u5DF2\u8FDE\u63A5 MCP \u670D\u52A1\u5668") };
   return { handled: true, output: [
-    chalk4.bold("\nMCP \u670D\u52A1\u5668:"),
+    chalk5.bold("\nMCP \u670D\u52A1\u5668:"),
     ...servers.map((s) => {
-      const st = s.connected ? chalk4.green("\u2713") : chalk4.red("\u2717");
-      return `  ${st} ${chalk4.cyan(s.id)} ${chalk4.dim(`(${s.tools.length} \u5DE5\u5177)`)}`;
+      const st = s.connected ? chalk5.green("\u2713") : chalk5.red("\u2717");
+      return `  ${st} ${chalk5.cyan(s.id)} ${chalk5.dim(`(${s.tools.length} \u5DE5\u5177)`)}`;
     })
   ].join("\n") };
 }
@@ -6300,10 +9372,10 @@ function handleSecurityCommand(args, orchestrator) {
   if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
   const config = orchestrator.getSecurityChecker().getConfig();
   return { handled: true, output: [
-    chalk4.bold("\n\u5B89\u5168\u68C0\u67E5\u914D\u7F6E:"),
-    `  ${chalk4.dim("\u542F\u7528:")} ${config.enabled ? chalk4.green("\u662F") : chalk4.red("\u5426")}`,
-    `  ${chalk4.dim("\u4E25\u91CD\u6027\u9608\u503C:")} ${chalk4.yellow(config.severityThreshold)}`,
-    `  ${chalk4.dim("\u68C0\u67E5\u7C7B\u522B:")} ${config.categories.length} \u4E2A`
+    chalk5.bold("\n\u5B89\u5168\u68C0\u67E5\u914D\u7F6E:"),
+    `  ${chalk5.dim("\u542F\u7528:")} ${config.enabled ? chalk5.green("\u662F") : chalk5.red("\u5426")}`,
+    `  ${chalk5.dim("\u4E25\u91CD\u6027\u9608\u503C:")} ${chalk5.yellow(config.severityThreshold)}`,
+    `  ${chalk5.dim("\u68C0\u67E5\u7C7B\u522B:")} ${config.categories.length} \u4E2A`
   ].join("\n") };
 }
 function handleLearnCommand(orchestrator) {
@@ -6319,23 +9391,23 @@ function handleReviewCommand(args, orchestrator) {
   if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
   const config = orchestrator.getConfidenceScorer().getConfig();
   return { handled: true, output: [
-    chalk4.bold("\n\u4EE3\u7801\u5BA1\u67E5\u914D\u7F6E:"),
-    `  ${chalk4.dim("\u7F6E\u4FE1\u5EA6\u9608\u503C:")} ${chalk4.yellow(config.confidenceThreshold)}`,
-    `  ${chalk4.dim("\u6700\u5927\u95EE\u9898\u6570:")} ${config.maxIssues}`
+    chalk5.bold("\n\u4EE3\u7801\u5BA1\u67E5\u914D\u7F6E:"),
+    `  ${chalk5.dim("\u7F6E\u4FE1\u5EA6\u9608\u503C:")} ${chalk5.yellow(config.confidenceThreshold)}`,
+    `  ${chalk5.dim("\u6700\u5927\u95EE\u9898\u6570:")} ${config.maxIssues}`
   ].join("\n") };
 }
 function handleMemoryCommand() {
   const entries = memoryManager.getAll();
   if (entries.length === 0) {
-    return { handled: true, output: chalk4.dim("\n\u6682\u65E0\u8BB0\u5FC6") };
+    return { handled: true, output: chalk5.dim("\n\u6682\u65E0\u8BB0\u5FC6") };
   }
   const typeLabels = {
-    user: chalk4.blue("\u7528\u6237"),
-    project: chalk4.green("\u9879\u76EE"),
-    feedback: chalk4.yellow("\u53CD\u9988"),
-    reference: chalk4.magenta("\u53C2\u8003")
+    user: chalk5.blue("\u7528\u6237"),
+    project: chalk5.green("\u9879\u76EE"),
+    feedback: chalk5.yellow("\u53CD\u9988"),
+    reference: chalk5.magenta("\u53C2\u8003")
   };
-  const lines = [chalk4.bold("\n\u8BB0\u5FC6\u7CFB\u7EDF:")];
+  const lines = [chalk5.bold("\n\u8BB0\u5FC6\u7CFB\u7EDF:")];
   const byType = {};
   for (const e of entries) {
     (byType[e.type] ??= []).push(e);
@@ -6343,7 +9415,7 @@ function handleMemoryCommand() {
   for (const [type, items] of Object.entries(byType)) {
     lines.push(`  ${typeLabels[type] || type}:`);
     for (const e of items) {
-      lines.push(`    ${chalk4.cyan(e.name)} \u2014 ${chalk4.dim(e.description)}`);
+      lines.push(`    ${chalk5.cyan(e.name)} \u2014 ${chalk5.dim(e.description)}`);
     }
   }
   return { handled: true, output: lines.join("\n") };
@@ -6351,12 +9423,12 @@ function handleMemoryCommand() {
 function handleHookCommand(args, orchestrator) {
   if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
   const hooks = orchestrator.getHookManager().getHooks();
-  if (hooks.length === 0) return { handled: true, output: chalk4.dim("\n\u65E0\u5DF2\u6CE8\u518C\u94A9\u5B50") };
+  if (hooks.length === 0) return { handled: true, output: chalk5.dim("\n\u65E0\u5DF2\u6CE8\u518C\u94A9\u5B50") };
   return { handled: true, output: [
-    chalk4.bold("\n\u5DF2\u6CE8\u518C\u94A9\u5B50:"),
+    chalk5.bold("\n\u5DF2\u6CE8\u518C\u94A9\u5B50:"),
     ...hooks.map((h) => {
-      const s = h.enabled ? chalk4.green("\u2713") : chalk4.red("\u2717");
-      return `  ${s} ${chalk4.cyan(h.name)} ${chalk4.dim(`[${h.event}]`)}`;
+      const s = h.enabled ? chalk5.green("\u2713") : chalk5.red("\u2717");
+      return `  ${s} ${chalk5.cyan(h.name)} ${chalk5.dim(`[${h.event}]`)}`;
     })
   ].join("\n") };
 }
@@ -6364,32 +9436,792 @@ function handleTraceCommand(orchestrator) {
   if (!orchestrator) return { handled: true, output: renderError("\u7F16\u6392\u5668\u672A\u521D\u59CB\u5316") };
   const tracer = orchestrator.getTracer();
   if (!tracer) {
-    return { handled: true, output: chalk4.dim("\n\u65E0\u6D3B\u8DC3\u7684 Trace \u4F1A\u8BDD\uFF08\u6267\u884C\u4E00\u6B21\u4EFB\u52A1\u540E\u53EF\u67E5\u770B\uFF09") };
+    return { handled: true, output: chalk5.dim("\n\u65E0\u6D3B\u8DC3\u7684 Trace \u4F1A\u8BDD\uFF08\u6267\u884C\u4E00\u6B21\u4EFB\u52A1\u540E\u53EF\u67E5\u770B\uFF09") };
   }
   const session = tracer.getSession();
   const stats = tracer.getStats();
   const summary = generateSummary(session, stats);
   return { handled: true, output: "\n" + formatSummary(summary) };
 }
+function handleThemeCommand(args) {
+  const currentTheme2 = getThemeName();
+  const availableThemes = getAvailableThemes();
+  if (args.length === 0) {
+    const lines = [
+      chalk5.bold("\n\u4E3B\u9898\u8BBE\u7F6E"),
+      chalk5.dim("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"),
+      `  \u5F53\u524D\u4E3B\u9898: ${chalk5.cyan(currentTheme2)}`,
+      "",
+      chalk5.bold("\u53EF\u7528\u4E3B\u9898:"),
+      ...availableThemes.map((t) => {
+        const isCurrent = t === currentTheme2;
+        return `  ${chalk5.cyan(t)}${isCurrent ? chalk5.yellow(" [\u5F53\u524D]") : ""}`;
+      }),
+      "",
+      chalk5.dim("\u4F7F\u7528 /theme <name> \u5207\u6362\u4E3B\u9898")
+    ];
+    return { handled: true, output: lines.join("\n") };
+  }
+  const themeName = args[0];
+  if (!availableThemes.includes(themeName)) {
+    return { handled: true, output: renderError(`\u672A\u77E5\u4E3B\u9898: ${themeName}
+\u53EF\u7528\u4E3B\u9898: ${availableThemes.join(", ")}`) };
+  }
+  setTheme(themeName);
+  return { handled: true, output: renderSuccess(`\u5DF2\u5207\u6362\u5230\u4E3B\u9898: ${themeName}`) };
+}
+function handleGitCommand(args) {
+  if (!gitManager.isRepository()) {
+    return { handled: true, output: renderError("\u5F53\u524D\u76EE\u5F55\u4E0D\u662F Git \u4ED3\u5E93") };
+  }
+  const subCommand = args[0];
+  if (!subCommand) {
+    const status = gitManager.getStatus();
+    return { handled: true, output: gitManager.renderStatus(status) };
+  }
+  switch (subCommand) {
+    case "status":
+    case "st": {
+      const status = gitManager.getStatus();
+      return { handled: true, output: gitManager.renderStatus(status) };
+    }
+    case "log": {
+      const count = parseInt(args[1]) || 10;
+      const log = gitManager.getLog(count);
+      log.then((commits) => {
+        console.log(gitManager.renderLog(commits));
+      });
+      return { handled: true, output: chalk5.dim("\u52A0\u8F7D\u4E2D...") };
+    }
+    case "branch":
+    case "br": {
+      const branches = gitManager.getBranches();
+      return { handled: true, output: gitManager.renderBranches(branches) };
+    }
+    case "add": {
+      if (args.length < 2) {
+        return { handled: true, output: renderError("\u7528\u6CD5: /git add <file> \u6216 /git add .") };
+      }
+      if (args[1] === ".") {
+        gitManager.stageAll();
+        return { handled: true, output: renderSuccess("\u5DF2\u6682\u5B58\u6240\u6709\u6587\u4EF6") };
+      }
+      gitManager.stage(args.slice(1));
+      return { handled: true, output: renderSuccess(`\u5DF2\u6682\u5B58\u6587\u4EF6: ${args.slice(1).join(", ")}`) };
+    }
+    case "commit": {
+      if (args.length < 2) {
+        return { handled: true, output: renderError("\u7528\u6CD5: /git commit <message>") };
+      }
+      const message = args.slice(1).join(" ");
+      try {
+        const result = gitManager.commit(message);
+        return { handled: true, output: renderSuccess(result) };
+      } catch (error) {
+        return { handled: true, output: renderError(error.message) };
+      }
+    }
+    case "diff": {
+      const file = args[1];
+      const staged = args.includes("--staged") || args.includes("-S");
+      const diff = gitManager.getDiff(file, staged);
+      return { handled: true, output: gitManager.renderDiff(diff) };
+    }
+    case "remote": {
+      const remotes = gitManager.getRemotes();
+      if (remotes.length === 0) {
+        return { handled: true, output: chalk5.dim("\u65E0\u8FDC\u7A0B\u4ED3\u5E93") };
+      }
+      const lines = [
+        chalk5.bold("\n\u8FDC\u7A0B\u4ED3\u5E93:"),
+        ...remotes.map((r) => `  ${chalk5.cyan(r.name)} ${chalk5.dim(r.url)}`)
+      ];
+      return { handled: true, output: lines.join("\n") };
+    }
+    default:
+      return { handled: true, output: renderError(`\u672A\u77E5 Git \u5B50\u547D\u4EE4: ${subCommand}
+\u53EF\u7528: status, log, branch, add, commit, diff, remote`) };
+  }
+}
+function handleDiffCommand(args) {
+  if (args.length < 2) {
+    return { handled: true, output: renderError("\u7528\u6CD5: /diff <old-file> <new-file> \u6216 /diff --staged") };
+  }
+  if (args[0] === "--staged") {
+    if (!gitManager.isRepository()) {
+      return { handled: true, output: renderError("\u5F53\u524D\u76EE\u5F55\u4E0D\u662F Git \u4ED3\u5E93") };
+    }
+    const diff = gitManager.getDiff(void 0, true);
+    return { handled: true, output: gitManager.renderDiff(diff) };
+  }
+  const fs = __require("fs");
+  const oldFile = args[0];
+  const newFile = args[1];
+  try {
+    const oldContent = fs.existsSync(oldFile) ? fs.readFileSync(oldFile, "utf-8") : "";
+    const newContent = fs.existsSync(newFile) ? fs.readFileSync(newFile, "utf-8") : "";
+    const diff = diffGenerator.generateDiff(oldContent, newContent, newFile);
+    const stats = diffGenerator.getStats(diff);
+    const output = [
+      diffGenerator.renderDiff(diff),
+      "",
+      chalk5.bold("\u7EDF\u8BA1:"),
+      `  ${chalk5.green(`+${stats.additions} \u884C\u65B0\u589E`)}`,
+      `  ${chalk5.red(`-${stats.deletions} \u884C\u5220\u9664`)}`
+    ].join("\n");
+    return { handled: true, output };
+  } catch (error) {
+    return { handled: true, output: renderError(error.message) };
+  }
+}
+function handleLintCommand(args) {
+  const fs = __require("fs");
+  const path = __require("path");
+  if (args.length === 0) {
+    const files = findFiles(process.cwd(), [".ts", ".tsx"]);
+    if (files.length === 0) {
+      return { handled: true, output: chalk5.dim("\u672A\u627E\u5230 TypeScript \u6587\u4EF6") };
+    }
+    const allResults = [];
+    for (const file of files.slice(0, 10)) {
+      try {
+        const content = fs.readFileSync(file, "utf-8");
+        const results = lintChecker.checkTypeScript(content, file);
+        allResults.push(...results);
+      } catch {
+      }
+    }
+    return { handled: true, output: lintChecker.renderResults(allResults) };
+  }
+  const filePath = args[0];
+  if (!fs.existsSync(filePath)) {
+    return { handled: true, output: renderError(`\u6587\u4EF6\u4E0D\u5B58\u5728: ${filePath}`) };
+  }
+  try {
+    const content = fs.readFileSync(filePath, "utf-8");
+    const ext = path.extname(filePath);
+    let results;
+    if (ext === ".dart") {
+      results = lintChecker.checkDart(content, filePath);
+    } else {
+      results = lintChecker.checkTypeScript(content, filePath);
+    }
+    return { handled: true, output: lintChecker.renderResults(results) };
+  } catch (error) {
+    return { handled: true, output: renderError(error.message) };
+  }
+}
+function handleTestCommand(args) {
+  const { execSync: execSync2 } = __require("child_process");
+  const fs = __require("fs");
+  const isDart = fs.existsSync("pubspec.yaml");
+  const isNode = fs.existsSync("package.json");
+  const isPython = fs.existsSync("pyproject.toml") || fs.existsSync("requirements.txt");
+  const isRust = fs.existsSync("Cargo.toml");
+  const isGo = fs.existsSync("go.mod");
+  let command;
+  let parser;
+  if (isDart) {
+    parser = "dart";
+    command = "flutter test";
+  } else if (isNode) {
+    parser = "jest";
+    const packageJson = JSON.parse(fs.readFileSync("package.json", "utf-8"));
+    if (packageJson.scripts?.test) {
+      command = "npm test";
+    } else {
+      command = "npx jest";
+    }
+  } else if (isPython) {
+    parser = "pytest";
+    command = "pytest";
+  } else if (isRust) {
+    parser = "cargo";
+    command = "cargo test";
+  } else if (isGo) {
+    parser = "go";
+    command = "go test ./...";
+  } else {
+    return { handled: true, output: renderError("\u672A\u8BC6\u522B\u7684\u9879\u76EE\u7C7B\u578B\uFF08\u9700\u8981 pubspec.yaml\u3001package.json\u3001pyproject.toml\u3001Cargo.toml \u6216 go.mod\uFF09") };
+  }
+  if (args.length > 0) {
+    command += " " + args.join(" ");
+  }
+  try {
+    const output = execSync2(command, {
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"]
+    });
+    const { testRunner: testRunner2 } = (init_structured_edit(), __toCommonJS(structured_edit_exports));
+    let suite;
+    if (parser === "dart") {
+      suite = testRunner2.parseDartTestOutput(output);
+    } else {
+      suite = testRunner2.parseJestOutput(output);
+    }
+    return { handled: true, output: testRunner2.renderResults(suite) };
+  } catch (error) {
+    const output = error.stdout || error.stderr || "";
+    if (output) {
+      const { testRunner: testRunner2 } = (init_structured_edit(), __toCommonJS(structured_edit_exports));
+      let suite;
+      if (parser === "dart") {
+        suite = testRunner2.parseDartTestOutput(output);
+      } else {
+        suite = testRunner2.parseJestOutput(output);
+      }
+      return { handled: true, output: testRunner2.renderResults(suite) };
+    }
+    return { handled: true, output: renderError(`\u6D4B\u8BD5\u6267\u884C\u5931\u8D25: ${error.message}`) };
+  }
+}
+function findFiles(dir, extensions) {
+  const fs = __require("fs");
+  const path = __require("path");
+  const results = [];
+  try {
+    const files = fs.readdirSync(dir);
+    for (const file of files) {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      if (stat.isDirectory()) {
+        if (!["node_modules", ".git", "dist", "build"].includes(file)) {
+          results.push(...findFiles(filePath, extensions));
+        }
+      } else {
+        const ext = path.extname(file);
+        if (extensions.includes(ext)) {
+          results.push(filePath);
+        }
+      }
+    }
+  } catch {
+  }
+  return results;
+}
+function handleASTCommand(args) {
+  const fs = __require("fs");
+  const path = __require("path");
+  if (args.length === 0) {
+    const supportedLanguages = treeSitterParserManager.getSupportedLanguages();
+    const lines = [
+      chalk5.bold("\nAST \u89E3\u6790\u5668"),
+      chalk5.dim("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"),
+      `  \u652F\u6301\u7684\u8BED\u8A00: ${supportedLanguages.join(", ")}`,
+      "",
+      chalk5.bold("\u7528\u6CD5:"),
+      "  /ast <file>           \u89E3\u6790\u6587\u4EF6\u7ED3\u6784",
+      "  /ast --init           \u521D\u59CB\u5316 tree-sitter \u89E3\u6790\u5668",
+      "  /ast --languages      \u663E\u793A\u652F\u6301\u7684\u8BED\u8A00"
+    ];
+    return { handled: true, output: lines.join("\n") };
+  }
+  if (args[0] === "--init") {
+    astManager.initializeTreeSitter().then((success) => {
+      if (success) {
+        console.log(renderSuccess("tree-sitter \u89E3\u6790\u5668\u521D\u59CB\u5316\u6210\u529F"));
+      } else {
+        console.log(renderError("tree-sitter \u89E3\u6790\u5668\u521D\u59CB\u5316\u5931\u8D25"));
+      }
+    });
+    return { handled: true, output: chalk5.dim("\u6B63\u5728\u521D\u59CB\u5316 tree-sitter \u89E3\u6790\u5668...") };
+  }
+  if (args[0] === "--languages") {
+    const supportedLanguages = treeSitterParserManager.getSupportedLanguages();
+    const lines = [
+      chalk5.bold("\n\u652F\u6301\u7684\u8BED\u8A00:"),
+      ...supportedLanguages.map((lang) => `  \u2022 ${lang}`)
+    ];
+    return { handled: true, output: lines.join("\n") };
+  }
+  const filePath = args[0];
+  if (!fs.existsSync(filePath)) {
+    return { handled: true, output: renderError(`\u6587\u4EF6\u4E0D\u5B58\u5728: ${filePath}`) };
+  }
+  try {
+    const content = fs.readFileSync(filePath, "utf-8");
+    const structure = astManager.getFileStructure(filePath, content);
+    const stats = astManager.getStats();
+    const output = [
+      chalk5.bold(`\u6587\u4EF6\u7ED3\u6784: ${filePath}`),
+      chalk5.dim("\u2500".repeat(60)),
+      structure,
+      "",
+      chalk5.dim(`\u5DF2\u89E3\u6790 ${stats.files} \u4E2A\u6587\u4EF6\uFF0C\u7D22\u5F15 ${stats.symbols} \u4E2A\u7B26\u53F7`)
+    ].join("\n");
+    return { handled: true, output };
+  } catch (error) {
+    return { handled: true, output: renderError(error.message) };
+  }
+}
+function handleSymbolCommand(args) {
+  const fs = __require("fs");
+  const path = __require("path");
+  if (args.length === 0) {
+    const lines = [
+      chalk5.bold("\n\u7B26\u53F7\u641C\u7D22"),
+      chalk5.dim("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"),
+      "  /symbol <query>           \u641C\u7D22\u7B26\u53F7",
+      "  /symbol <query> --type=f  \u53EA\u641C\u7D22\u51FD\u6570",
+      "  /symbol <query> --type=c  \u53EA\u641C\u7D22\u7C7B",
+      "  /symbol <query> --exact   \u7CBE\u786E\u5339\u914D",
+      "",
+      chalk5.dim("\u7C7B\u578B: f=\u51FD\u6570, c=\u7C7B, m=\u65B9\u6CD5, v=\u53D8\u91CF, i=\u63A5\u53E3, t=\u7C7B\u578B, e=\u679A\u4E3E")
+    ];
+    return { handled: true, output: lines.join("\n") };
+  }
+  const query = args[0];
+  const options = {};
+  for (const arg of args.slice(1)) {
+    if (arg.startsWith("--type=")) {
+      const typeMap = {
+        "f": "function",
+        "c": "class",
+        "m": "method",
+        "v": "variable",
+        "i": "interface",
+        "t": "type",
+        "e": "enum"
+      };
+      const typeChar = arg.slice(7);
+      options.type = typeMap[typeChar] || typeChar;
+    } else if (arg === "--exact") {
+      options.exact = true;
+    } else if (arg.startsWith("--file=")) {
+      options.filePath = arg.slice(7);
+    }
+  }
+  const stats = astManager.getStats();
+  if (stats.symbols === 0) {
+    const files = findFiles(process.cwd(), [".ts", ".tsx", ".dart"]);
+    for (const file of files.slice(0, 50)) {
+      try {
+        const content = fs.readFileSync(file, "utf-8");
+        astManager.parseFile(content, file);
+      } catch {
+      }
+    }
+  }
+  const results = astManager.searchSymbol(query, options);
+  const output = astManager.renderSearchResults(results);
+  return { handled: true, output };
+}
+function handleFetchCommand(args) {
+  if (args.length === 0) {
+    const lines = [
+      chalk5.bold("\n\u7F51\u9875\u83B7\u53D6"),
+      chalk5.dim("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"),
+      "  /fetch <url>              \u83B7\u53D6\u7F51\u9875\u5185\u5BB9",
+      "  /fetch <url> --text       \u53EA\u83B7\u53D6\u6587\u672C",
+      "  /fetch <url> --compact    \u7B80\u6D01\u6A21\u5F0F",
+      "  /fetch <url> --links      \u663E\u793A\u94FE\u63A5",
+      "",
+      chalk5.dim("\u793A\u4F8B:"),
+      "  /fetch https://example.com",
+      "  /fetch https://example.com --text",
+      "  /fetch https://example.com --compact"
+    ];
+    return { handled: true, output: lines.join("\n") };
+  }
+  const url = args[0];
+  const options = { url };
+  for (const arg of args.slice(1)) {
+    if (arg === "--text") {
+      options.extractText = true;
+      options.extractLinks = false;
+      options.extractImages = false;
+    } else if (arg === "--compact") {
+      options.compact = true;
+    } else if (arg === "--links") {
+      options.extractLinks = true;
+    } else if (arg === "--images") {
+      options.extractImages = true;
+    }
+  }
+  webFetchManager.fetch(options).then((result) => {
+    if (options.compact) {
+      console.log(webFetchManager.renderCompactResult(result));
+    } else {
+      console.log(webFetchManager.renderResult(result));
+    }
+  }).catch((error) => {
+    console.log(renderError(`\u83B7\u53D6\u5931\u8D25: ${error.message}`));
+  });
+  return { handled: true, output: chalk5.dim("\u6B63\u5728\u83B7\u53D6\u7F51\u9875...") };
+}
+function handleSearchCommand(args) {
+  if (args.length === 0) {
+    const isConfigured = webSearchManager.isConfigured();
+    const lines = [
+      chalk5.bold("\n\u7F51\u7EDC\u641C\u7D22"),
+      chalk5.dim("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"),
+      `  \u72B6\u6001: ${isConfigured ? chalk5.green("\u2713 \u5DF2\u914D\u7F6E") : chalk5.red("\u2717 \u672A\u914D\u7F6E")}`,
+      "",
+      chalk5.bold("\u7528\u6CD5:"),
+      "  /search <query>           \u641C\u7D22\u7F51\u7EDC",
+      "  /search <query> --compact \u7B80\u6D01\u6A21\u5F0F",
+      "  /search <query> --top=20  \u8BBE\u7F6E\u7ED3\u679C\u6570\u91CF",
+      "  /search --key <key>       \u8BBE\u7F6E API Key",
+      "",
+      chalk5.dim("\u793A\u4F8B:"),
+      "  /search TypeScript AST \u89E3\u6790\u5E93",
+      "  /search React \u72B6\u6001\u7BA1\u7406 \u6700\u4F73\u5B9E\u8DF5",
+      "  /search --key your-api-key"
+    ];
+    return { handled: true, output: lines.join("\n") };
+  }
+  if (args[0] === "--key") {
+    if (args.length < 2) {
+      return { handled: true, output: renderError("\u7528\u6CD5: /search --key <your-api-key>") };
+    }
+    webSearchManager.setApiKey(args[1]);
+    return { handled: true, output: renderSuccess("API Key \u5DF2\u8BBE\u7F6E") };
+  }
+  let query = args[0];
+  const options = { query };
+  for (const arg of args.slice(1)) {
+    if (arg === "--compact") {
+      options.compact = true;
+    } else if (arg.startsWith("--top=")) {
+      options.topK = parseInt(arg.slice(6));
+    }
+  }
+  webSearchManager.search(options).then((result) => {
+    if (options.compact) {
+      console.log(webSearchManager.renderCompactResult(result));
+    } else {
+      console.log(webSearchManager.renderResult(result));
+    }
+  }).catch((error) => {
+    console.log(renderError(`\u641C\u7D22\u5931\u8D25: ${error.message}`));
+  });
+  return { handled: true, output: chalk5.dim("\u6B63\u5728\u641C\u7D22...") };
+}
+function handleStateCommand(args) {
+  if (args.length === 0) {
+    const lines = [
+      chalk5.bold("\n\u72B6\u6001\u673A\u7BA1\u7406"),
+      chalk5.dim("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"),
+      "  /state status             \u663E\u793A\u5F53\u524D\u72B6\u6001",
+      "  /state history            \u663E\u793A\u72B6\u6001\u5386\u53F2",
+      "  /state graph              \u663E\u793A\u72B6\u6001\u8F6C\u6362\u56FE",
+      "  /state snapshot <file>    \u4FDD\u5B58\u72B6\u6001\u5FEB\u7167",
+      "  /state restore <file>     \u6062\u590D\u72B6\u6001\u5FEB\u7167",
+      "  /state reset              \u91CD\u7F6E\u72B6\u6001\u673A",
+      "",
+      chalk5.dim("\u793A\u4F8B:"),
+      "  /state status",
+      "  /state snapshot state.json",
+      "  /state restore state.json"
+    ];
+    return { handled: true, output: lines.join("\n") };
+  }
+  const subCommand = args[0];
+  const exampleStateMachine = createStateMachine({
+    initialState: "idle",
+    states: ["idle", "processing", "completed", "error"],
+    transitions: [
+      { from: "idle", to: "processing", event: "start" },
+      { from: "processing", to: "completed", event: "finish" },
+      { from: "processing", to: "error", event: "fail" },
+      { from: "error", to: "idle", event: "reset" },
+      { from: "completed", to: "idle", event: "reset" }
+    ]
+  });
+  switch (subCommand) {
+    case "status":
+      return { handled: true, output: exampleStateMachine.render() };
+    case "history": {
+      const history = exampleStateMachine.getHistory();
+      if (history.length === 0) {
+        return { handled: true, output: chalk5.dim("\u6682\u65E0\u72B6\u6001\u5386\u53F2") };
+      }
+      const lines = [
+        chalk5.bold("\n\u72B6\u6001\u5386\u53F2"),
+        chalk5.dim("\u2500".repeat(60)),
+        ...history.map((entry) => {
+          const time = new Date(entry.timestamp).toLocaleTimeString();
+          const duration = entry.duration ? ` (${entry.duration}ms)` : "";
+          return `  ${chalk5.gray(time)} ${chalk5.cyan(entry.from)} \u2192 ${chalk5.cyan(entry.to)} ${chalk5.dim(entry.event)}${duration}`;
+        })
+      ];
+      return { handled: true, output: lines.join("\n") };
+    }
+    case "graph":
+      return { handled: true, output: exampleStateMachine.renderTransitionGraph() };
+    case "snapshot": {
+      if (args.length < 2) {
+        return { handled: true, output: renderError("\u7528\u6CD5: /state snapshot <file>") };
+      }
+      const filePath = args[1];
+      const snapshot = exampleStateMachine.createSnapshot();
+      saveSnapshot(snapshot, filePath).then(() => {
+        console.log(renderSuccess(`\u72B6\u6001\u5FEB\u7167\u5DF2\u4FDD\u5B58: ${filePath}`));
+      }).catch((error) => {
+        console.log(renderError(`\u4FDD\u5B58\u5931\u8D25: ${error.message}`));
+      });
+      return { handled: true, output: chalk5.dim("\u6B63\u5728\u4FDD\u5B58\u72B6\u6001\u5FEB\u7167...") };
+    }
+    case "restore": {
+      if (args.length < 2) {
+        return { handled: true, output: renderError("\u7528\u6CD5: /state restore <file>") };
+      }
+      const filePath = args[1];
+      loadSnapshot(filePath).then((snapshot) => {
+        if (!snapshot) {
+          console.log(renderError(`\u5FEB\u7167\u6587\u4EF6\u4E0D\u5B58\u5728: ${filePath}`));
+          return;
+        }
+        exampleStateMachine.restoreFromSnapshot(snapshot);
+        console.log(renderSuccess("\u72B6\u6001\u5DF2\u6062\u590D"));
+        console.log(exampleStateMachine.render());
+      }).catch((error) => {
+        console.log(renderError(`\u6062\u590D\u5931\u8D25: ${error.message}`));
+      });
+      return { handled: true, output: chalk5.dim("\u6B63\u5728\u6062\u590D\u72B6\u6001...") };
+    }
+    case "reset":
+      exampleStateMachine.reset();
+      return { handled: true, output: renderSuccess("\u72B6\u6001\u673A\u5DF2\u91CD\u7F6E") };
+    default:
+      return { handled: true, output: renderError(`\u672A\u77E5\u5B50\u547D\u4EE4: ${subCommand}`) };
+  }
+}
 
 // src/version.ts
-var VERSION = "0.5.0";
+var VERSION = "1.0.0";
+
+// src/cli/input-layout.ts
+init_theme();
+var InputLayoutManager = class {
+  width;
+  constructor() {
+    this.width = process.stdout.columns || 80;
+  }
+  /**
+   * 渲染输入框布局
+   */
+  render(options) {
+    const theme = getTheme();
+    const {
+      statusData,
+      prompt = "\u276F ",
+      showShortcuts = true,
+      shortcuts = [],
+      width = this.width
+    } = options;
+    const lines = [];
+    lines.push(theme.inactive("\u2500".repeat(width)));
+    lines.push(this.renderStatusLine(statusData, width));
+    lines.push(theme.inactive("\u2500".repeat(width)));
+    lines.push(theme.claude(prompt));
+    if (showShortcuts && shortcuts.length > 0) {
+      lines.push(this.renderShortcuts(shortcuts, width));
+    }
+    return lines.join("\n");
+  }
+  /**
+   * 渲染状态行
+   */
+  renderStatusLine(data, width) {
+    const theme = getTheme();
+    const parts = [];
+    if (data.model) {
+      parts.push(theme.warning(data.model));
+    }
+    if (data.currentDir) {
+      const dir = this.truncate(data.currentDir, 30);
+      parts.push(theme.subtle(dir));
+    }
+    if (data.contextPercent !== void 0) {
+      const pct = data.contextPercent;
+      const pctColor = pct > 80 ? theme.error : pct > 50 ? theme.warning : theme.success;
+      parts.push(pctColor(`${pct}%`));
+    }
+    if (data.permissionMode) {
+      parts.push(theme.permission(data.permissionMode));
+    }
+    if (data.vimMode) {
+      parts.push(theme.ide(`[${data.vimMode.toUpperCase()}]`));
+    }
+    if (data.cost !== void 0) {
+      parts.push(theme.subtle(`$${data.cost.toFixed(4)}`));
+    }
+    if (data.duration !== void 0) {
+      const seconds = Math.floor(data.duration / 1e3);
+      parts.push(theme.subtle(this.formatDuration(seconds)));
+    }
+    const content = parts.join(" \u2502 ");
+    const contentLength = this.stripAnsi(content).length;
+    const padding = Math.max(0, width - contentLength - 2);
+    return ` ${content}${" ".repeat(padding)} `;
+  }
+  /**
+   * 渲染快捷键提示
+   */
+  renderShortcuts(shortcuts, width) {
+    const theme = getTheme();
+    const parts = [];
+    for (const shortcut of shortcuts) {
+      parts.push(`${theme.claude(shortcut.key)}${theme.subtle(":")}${theme.text(shortcut.desc)}`);
+    }
+    const content = parts.join(" \u2502 ");
+    const contentLength = this.stripAnsi(content).length;
+    const padding = Math.max(0, width - contentLength - 2);
+    return theme.subtle(` ${content}${" ".repeat(padding)} `);
+  }
+  /**
+   * 渲染简洁布局
+   */
+  renderCompact(statusData, prompt = "\u276F ") {
+    const theme = getTheme();
+    const width = this.width;
+    const lines = [];
+    lines.push(theme.inactive("\u2500".repeat(width)));
+    const parts = [];
+    if (statusData.model) {
+      parts.push(theme.warning(statusData.model));
+    }
+    if (statusData.contextPercent !== void 0) {
+      const pct = statusData.contextPercent;
+      const pctColor = pct > 80 ? theme.error : pct > 50 ? theme.warning : theme.success;
+      parts.push(pctColor(`${pct}%`));
+    }
+    const content = parts.join(" \u2502 ");
+    const contentLength = this.stripAnsi(content).length;
+    const padding = Math.max(0, width - contentLength - 2);
+    lines.push(` ${content}${" ".repeat(padding)} `);
+    lines.push(theme.inactive("\u2500".repeat(width)));
+    lines.push(theme.claude(prompt));
+    return lines.join("\n");
+  }
+  /**
+   * 渲染分隔线
+   */
+  renderDivider(width) {
+    const theme = getTheme();
+    return theme.inactive("\u2500".repeat(width || this.width));
+  }
+  /**
+   * 更新终端宽度
+   */
+  updateWidth(width) {
+    this.width = width;
+  }
+  // 辅助函数
+  stripAnsi(str) {
+    return str.replace(/\x1B\[[0-9;]*m/g, "");
+  }
+  truncate(str, maxLen) {
+    if (str.length <= maxLen) return str;
+    return str.slice(0, maxLen - 3) + "...";
+  }
+  formatDuration(seconds) {
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+};
+function createInputLayoutManager() {
+  return new InputLayoutManager();
+}
+var inputLayoutManager = createInputLayoutManager();
 
 // src/cli/repl.ts
+function askSetup(promptText) {
+  const rl = readline2.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve8) => {
+    rl.question(promptText, (answer) => {
+      rl.close();
+      resolve8(answer);
+    });
+  });
+}
+async function selectSetup(promptText, options) {
+  console.log(chalk6.bold(`
+${promptText}`));
+  options.forEach((opt, i) => {
+    console.log(`  ${chalk6.cyan(i + 1 + "")}. ${opt}`);
+  });
+  console.log(chalk6.dim("  0. \u53D6\u6D88"));
+  const answer = await askSetup(chalk6.cyan("\n> "));
+  const num = parseInt(answer.trim());
+  if (isNaN(num) || num < 0 || num > options.length) return null;
+  return num === 0 ? null : num - 1;
+}
+async function flowFirstSetup(cm, ai) {
+  console.log(chalk6.bold("\n  \u6B22\u8FCE\u4F7F\u7528 Forge CLI"));
+  console.log(chalk6.dim("  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"));
+  console.log("  \u68C0\u6D4B\u5230\u5C1A\u672A\u914D\u7F6E\u6A21\u578B\uFF0C\u8BF7\u9009\u62E9\u4E00\u4E2A provider \u5F00\u59CB:\n");
+  const presetEntries = Object.entries(PROVIDER_PRESETS);
+  const options = presetEntries.map(([key, preset2]) => {
+    const models = preset2.models.slice(0, 3).join(", ") + (preset2.models.length > 3 ? "..." : "");
+    return `${chalk6.cyan(key.padEnd(14))} ${models}`;
+  });
+  options.push(chalk6.dim("\u81EA\u5B9A\u4E49 provider"));
+  const sel = await selectSetup("\u9009\u62E9 Provider:", options);
+  if (sel === null) return { handled: true, output: chalk6.dim("\u5DF2\u53D6\u6D88") };
+  if (sel === presetEntries.length) {
+    return await setupCustomProvider(cm, ai);
+  }
+  const [providerKey, preset] = presetEntries[sel];
+  console.log(chalk6.yellow(`
+  \u8BF7\u8F93\u5165 ${providerKey} \u7684 API Key`));
+  const apiKey = await askSetup(chalk6.cyan("  API Key > "));
+  if (!apiKey.trim()) return { handled: true, output: chalk6.dim("\u5DF2\u53D6\u6D88") };
+  cm.setApiKey(providerKey, apiKey.trim());
+  const modelOptions = preset.models.map((m) => chalk6.cyan(m));
+  const modelSel = await selectSetup("\u9009\u62E9\u9ED8\u8BA4\u6A21\u578B:", modelOptions);
+  const selectedModel = modelSel !== null ? preset.models[modelSel] : preset.models[0];
+  cm.setSelectedModel(providerKey, selectedModel);
+  ai.setModel(cm.getModel(providerKey, selectedModel));
+  cm.save().catch(() => {
+  });
+  return { handled: true, output: renderSuccess(`\u914D\u7F6E\u5B8C\u6210\uFF01\u5F53\u524D\u6A21\u578B: ${providerKey} / ${selectedModel}`) };
+}
+async function setupCustomProvider(cm, ai) {
+  console.log(chalk6.bold("\n  \u6DFB\u52A0\u81EA\u5B9A\u4E49 provider"));
+  console.log(chalk6.dim("  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"));
+  const name = await askSetup(chalk6.cyan("  \u540D\u79F0 > "));
+  if (!name.trim()) return { handled: true, output: chalk6.dim("\u5DF2\u53D6\u6D88") };
+  const baseUrl = await askSetup(chalk6.cyan("  Base URL > "));
+  if (!baseUrl.trim()) return { handled: true, output: chalk6.dim("\u5DF2\u53D6\u6D88") };
+  const apiKey = await askSetup(chalk6.cyan("  API Key > "));
+  if (!apiKey.trim()) return { handled: true, output: chalk6.dim("\u5DF2\u53D6\u6D88") };
+  const modelsStr = await askSetup(chalk6.cyan("  \u6A21\u578B\uFF08\u9017\u53F7\u5206\u9694\uFF09 > "));
+  if (!modelsStr.trim()) return { handled: true, output: chalk6.dim("\u5DF2\u53D6\u6D88") };
+  const models = modelsStr.split(",").map((m) => m.trim()).filter(Boolean);
+  if (models.length === 0) return { handled: true, output: renderError("\u81F3\u5C11\u9700\u8981\u4E00\u4E2A\u6A21\u578B") };
+  cm.addCustomProvider(name.trim(), { name: name.trim(), base_url: baseUrl.trim(), api_key: apiKey.trim(), models });
+  const modelOptions = models.map((m) => chalk6.cyan(m));
+  const sel = await selectSetup("\u9009\u62E9\u9ED8\u8BA4\u6A21\u578B:", modelOptions);
+  const selectedModel = sel !== null ? models[sel] : models[0];
+  cm.setSelectedModel(name.trim(), selectedModel);
+  ai.setModel(cm.getModel(name.trim(), selectedModel));
+  cm.save().catch(() => {
+  });
+  return { handled: true, output: renderSuccess(`\u914D\u7F6E\u5B8C\u6210\uFF01\u5F53\u524D\u6A21\u578B: ${name.trim()} / ${selectedModel}`) };
+}
 async function startREPL() {
   process.on("uncaughtException", (err) => {
-    console.error(chalk5.red(`
+    console.error(chalk6.red(`
 \u672A\u6355\u83B7\u5F02\u5E38: ${err.message}`));
     console.error(err.stack);
   });
   process.on("unhandledRejection", (reason) => {
-    console.error(chalk5.red(`
+    console.error(chalk6.red(`
 \u672A\u5904\u7406\u7684\u62D2\u7EDD: ${reason}`));
     if (reason instanceof Error) console.error(reason.stack);
   });
   const config = await configManager.load();
+  const defaultPk = configManager.getDefaultProvider();
   const currentModel = configManager.getModel();
   const aiClient = new AIClient(currentModel);
+  if (!configManager.isConfigured()) {
+    const { handled, output } = await flowFirstSetup(configManager, aiClient);
+    if (handled && output) console.log(output);
+  }
   registerAllTools();
   const orchestrator = new AgentOrchestrator(
     aiClient,
@@ -6411,16 +10243,17 @@ ${text}`,
   });
   const memoryContext = memoryManager.getContextString();
   contextManager.setSystemPrompt(
-    `\u4F60\u662F Flutter Forge\uFF0C\u4E00\u4E2A\u4E13\u4E1A\u7684 Flutter \u5F00\u53D1\u52A9\u624B\u3002\u4F60\u5E2E\u52A9\u7528\u6237\u5B8C\u6210 Flutter \u9879\u76EE\u7684\u5F00\u53D1\u4EFB\u52A1\uFF0C\u5305\u62EC\u9700\u6C42\u5206\u6790\u3001\u65B9\u6848\u8BBE\u8BA1\u3001\u4EE3\u7801\u5B9E\u73B0\u548C\u9A8C\u8BC1\u3002
+    `\u4F60\u662F Forge CLI\uFF0C\u4E00\u4E2A\u4E13\u4E1A\u7684 AI \u5F00\u53D1\u52A9\u624B\u3002\u4F60\u5E2E\u52A9\u7528\u6237\u5B8C\u6210\u5404\u79CD\u5F00\u53D1\u4EFB\u52A1\uFF0C\u5305\u62EC\u9700\u6C42\u5206\u6790\u3001\u65B9\u6848\u8BBE\u8BA1\u3001\u4EE3\u7801\u5B9E\u73B0\u548C\u9A8C\u8BC1\u3002
+\u4F60\u652F\u6301\u591A\u79CD\u7F16\u7A0B\u8BED\u8A00\u548C\u6846\u67B6\uFF0C\u5305\u62EC\u4F46\u4E0D\u9650\u4E8E TypeScript\u3001JavaScript\u3001Python\u3001Java\u3001Go\u3001Rust\u3001Dart/Flutter \u7B49\u3002
 \u4F60\u9075\u5FAA\u7ED3\u6784\u5316\u5DE5\u4F5C\u6D41\uFF1AS1 \u9700\u6C42\u5206\u6790 \u2192 S2 \u65B9\u6848\u8BBE\u8BA1 \u2192 S3 \u4EFB\u52A1\u62C6\u5206\uFF08\u53EF\u9009\uFF09\u2192 S4 \u5B9E\u73B0 \u2192 S5 \u9A8C\u8BC1\u3002
-\u4F60\u53EF\u4EE5\u4F7F\u7528\u5DE5\u5177\u6765\u8BFB\u5199\u6587\u4EF6\u3001\u6267\u884C\u547D\u4EE4\u3001\u626B\u63CF\u9879\u76EE\u3001\u641C\u7D22\u4EE3\u7801\u7B49\u3002
+\u4F60\u53EF\u4EE5\u4F7F\u7528\u5DE5\u5177\u6765\u8BFB\u5199\u6587\u4EF6\u3001\u6267\u884C\u547D\u4EE4\u3001\u626B\u63CF\u9879\u76EE\u3001\u641C\u7D22\u4EE3\u7801\u3001\u83B7\u53D6\u7F51\u9875\u5185\u5BB9\u3001\u641C\u7D22\u7F51\u7EDC\u7B49\u3002
 \u53EF\u7528\u5DE5\u5177\uFF1A
 - read_file: \u8BFB\u53D6\u6587\u4EF6\u5185\u5BB9\uFF08\u652F\u6301\u884C\u53F7\u8303\u56F4\uFF09
 - write_file: \u5199\u5165\u6587\u4EF6
 - edit_file: \u7F16\u8F91\u6587\u4EF6\uFF08\u66FF\u6362\u6307\u5B9A\u6587\u672C\uFF09
 - list_files: \u5217\u51FA\u76EE\u5F55\u5185\u5BB9
 - search_files: \u641C\u7D22\u6587\u4EF6\u5185\u5BB9\uFF08\u6B63\u5219\uFF09
-- glob: \u6309\u6A21\u5F0F\u641C\u7D22\u6587\u4EF6\uFF08\u5982 **/*.dart\uFF09
+- glob: \u6309\u6A21\u5F0F\u641C\u7D22\u6587\u4EF6\uFF08\u5982 **/*.ts\uFF09
 - grep: \u5728\u6587\u4EF6\u4E2D\u641C\u7D22\u5185\u5BB9\uFF08\u6B63\u5219\u3001\u652F\u6301\u4E0A\u4E0B\u6587\u884C\uFF09
 - ls: \u6811\u5F62\u5217\u51FA\u76EE\u5F55\u7ED3\u6784
 - run_command: \u6267\u884C shell \u547D\u4EE4
@@ -6434,29 +10267,35 @@ ${text}`,
 ${memoryContext ? "\n" + memoryContext : ""}
 \u8BF7\u7528\u4E2D\u6587\u56DE\u590D\u3002`
   );
-  console.log(renderBanner(VERSION, currentModel.name, config.project.root));
-  if (!configManager.isConfigured()) {
-    console.log(chalk5.yellow("\n\u26A0 \u672A\u914D\u7F6E API Key"));
-    console.log(chalk5.dim("\u4F7F\u7528 /model \u8FDB\u5165\u4EA4\u4E92\u5F0F\u914D\u7F6E"));
-  }
+  const defaultPk2 = configManager.getDefaultProvider();
+  const displayModel = configManager.getProvider(defaultPk2)?.selected || currentModel.name;
+  console.log(renderBanner(VERSION, `${defaultPk2}/${displayModel}`, config.project.root));
   const stripAnsi = (s) => s.replace(/\x1B\[[0-9;]*m/g, "");
   function printInputBar() {
     const w = process.stdout.columns || 80;
-    const modelName = aiClient.getModel() || configManager.get().models.default;
+    const pk = configManager.getDefaultProvider();
+    const modelName = `${pk}/${aiClient.getModel() || configManager.get().defaults.model}`;
     const pct = contextManager.getContextPercent();
-    const pctColor = pct > 80 ? chalk5.red : pct > 50 ? chalk5.yellow : chalk5.green;
-    const sep = chalk5.dim("\u2500".repeat(w));
-    const left = ` ${chalk5.yellow(modelName)}`;
-    const right = `\u4E0A\u4E0B\u6587: ${pctColor(pct + "%")} `;
-    const gap = Math.max(1, w - stripAnsi(left).length - stripAnsi(right).length - 1);
-    const statusLine = left + " ".repeat(gap) + "\u2502" + right;
-    console.log(sep);
-    console.log(statusLine);
+    const output = inputLayoutManager.render({
+      statusData: {
+        model: modelName,
+        contextPercent: pct
+      },
+      prompt: chalk6.cyan("\u276F "),
+      showShortcuts: true,
+      shortcuts: [
+        { key: "Ctrl+C", desc: "\u4E2D\u65AD" },
+        { key: "Ctrl+D", desc: "\u9000\u51FA" },
+        { key: "/help", desc: "\u5E2E\u52A9" }
+      ],
+      width: w
+    });
+    console.log(output);
   }
   const rl = readline2.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: chalk5.cyan("\u276F ")
+    prompt: chalk6.cyan("\u276F ")
   });
   printInputBar();
   rl.prompt();
@@ -6504,11 +10343,11 @@ ${memoryContext ? "\n" + memoryContext : ""}
           } else if (event.type === "tool-call") {
             try {
               const call = JSON.parse(event.content);
-              const argsPreview = Object.entries(call.args || {}).map(([k, v]) => `${k}=${chalk5.dim(truncate(String(v), 40))}`).join(", ");
-              console.log(chalk5.yellow(`
-\u26A1 ${call.name}`) + (argsPreview ? chalk5.dim(` \u2192 ${argsPreview})`) : ""));
+              const argsPreview = Object.entries(call.args || {}).map(([k, v]) => `${k}=${chalk6.dim(truncate(String(v), 40))}`).join(", ");
+              console.log(chalk6.yellow(`
+\u26A1 ${call.name}`) + (argsPreview ? chalk6.dim(` \u2192 ${argsPreview})`) : ""));
             } catch {
-              console.log(chalk5.yellow(`
+              console.log(chalk6.yellow(`
 \u26A1 ${event.content}`));
             }
           } else if (event.type === "tool-result") {
@@ -6533,18 +10372,18 @@ ${memoryContext ? "\n" + memoryContext : ""}
     }
   });
   process.stdin.on("end", () => {
-    console.error(chalk5.red("\nstdin \u5DF2\u5173\u95ED"));
+    console.error(chalk6.red("\nstdin \u5DF2\u5173\u95ED"));
   });
   rl.on("close", () => {
     if (sigintState >= 1) {
-      process.stdout.write(chalk5.dim("\n\u518D\u89C1\uFF01\n"));
+      process.stdout.write(chalk6.dim("\n\u518D\u89C1\uFF01\n"));
     } else {
-      process.stdout.write(chalk5.dim("\n(readline \u5DF2\u5173\u95ED)\n"));
+      process.stdout.write(chalk6.dim("\n(readline \u5DF2\u5173\u95ED)\n"));
     }
     process.exit(0);
   });
   rl.on("error", (err) => {
-    console.error(chalk5.red(`
+    console.error(chalk6.red(`
 readline \u9519\u8BEF: ${err.message}`));
   });
   rl.on("SIGINT", () => {
@@ -6552,7 +10391,7 @@ readline \u9519\u8BEF: ${err.message}`));
       rl.close();
     } else {
       sigintState = 1;
-      console.log(chalk5.dim("\n(\u518D\u6309\u4E00\u6B21 Ctrl+C \u9000\u51FA\uFF0C\u6216\u8F93\u5165 /exit)"));
+      console.log(chalk6.dim("\n(\u518D\u6309\u4E00\u6B21 Ctrl+C \u9000\u51FA\uFF0C\u6216\u8F93\u5165 /exit)"));
       printInputBar();
       rl.prompt();
     }

@@ -81,7 +81,7 @@ export class AgentRegistry {
   }
 
   private getControllerPrompt(): string {
-    return `你是 Flutter Forge 的主控 Agent，负责路由判断、阶段推进、子 Agent 调度和状态管理。
+    return `你是 Forge CLI 的主控 Agent，负责路由判断、阶段推进、子 Agent 调度和状态管理。
 
 ## 核心职责
 
@@ -125,7 +125,7 @@ export class AgentRegistry {
       page_engineer: '页面工程师',
       verify_agent: '验证工程师',
     };
-    return `你是 Flutter Forge 的${names[role]}，负责执行特定阶段的任务。`;
+    return `你是 Forge CLI 的${names[role]}，负责执行特定阶段的任务。`;
   }
 
   get(role: AgentRole): AgentConfig | undefined {

@@ -3,7 +3,7 @@ import chalk from 'chalk';
 export function renderBanner(version: string, model: string, projectRoot: string): string {
   const lines = [
     chalk.cyan('╔══════════════════════════════════════════╗'),
-    chalk.cyan('║') + chalk.bold('  Flutter Forge ') + chalk.dim(`v${version}`) + '                    ' + chalk.cyan('║'),
+    chalk.cyan('║') + chalk.bold('  Forge CLI ') + chalk.dim(`v${version}`) + '                         ' + chalk.cyan('║'),
     chalk.cyan('║') + chalk.dim('  模型: ') + chalk.yellow(model) + ' '.repeat(Math.max(0, 30 - model.length)) + chalk.cyan('║'),
     chalk.cyan('║') + chalk.dim('  项目: ') + chalk.white(truncate(projectRoot, 28)) + ' '.repeat(Math.max(0, 30 - Math.min(projectRoot.length, 28))) + chalk.cyan('║'),
     chalk.cyan('║') + chalk.dim('  输入 /help 查看命令') + '                  ' + chalk.cyan('║'),
@@ -32,6 +32,16 @@ export function renderHelp(): string {
     ['/memory', '查看已保存的记忆'],
     ['/hook', '查看已注册钩子'],
     ['/trace', '查看最近一次执行的 Trace 摘要'],
+    ['/theme', '切换主题'],
+    ['/git', 'Git 操作：status/log/branch/add/commit/diff/remote'],
+    ['/diff', '查看 Diff：/diff <old> <new> 或 /diff --staged'],
+    ['/lint', 'Lint 检查：/lint 或 /lint <file>'],
+    ['/test', '运行测试：/test 或 /test <args>'],
+    ['/ast', '查看文件结构：/ast <file> 或 /ast --init'],
+    ['/symbol', '搜索符号：/symbol <query> 或 /sym <query>'],
+    ['/fetch', '获取网页：/fetch <url> 或 /web <url>'],
+    ['/search', '网络搜索：/search <query> 或 /s <query>'],
+    ['/state', '状态机管理：/state status/history/graph/snapshot/restore/reset'],
     ['/exit', '退出程序'],
   ];
 

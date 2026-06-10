@@ -2,10 +2,10 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
 import { homedir } from 'os';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
-import type { AppConfig, ModelConfig, ProviderConfig } from './types.js';
-import { DEFAULT_CONFIG } from './types.js';
+import type { AppConfig, ModelConfig, ProviderConfig, ProviderInfo } from './types.js';
+import { PROVIDER_PRESETS, MAX_CUSTOM_PROVIDERS, DEFAULT_CONFIG, DEFAULT_PROVIDER, DEFAULT_MODEL } from './types.js';
 
-const MODULE_NAME = 'flutter-forge';
+const MODULE_NAME = 'forge-cli';
 const CONFIG_DIR = join(homedir(), `.${MODULE_NAME}`);
 const CONFIG_FILE = join(CONFIG_DIR, 'config.yaml');
 
@@ -40,48 +40,167 @@ export class ConfigManager {
     return this.config;
   }
 
-  // 获取 provider 配置
-  getProvider(): ProviderConfig {
-    return this.config.provider;
+  // ─── Provider 查询 ─────────────────────────────────────────
+
+  // 获取所有 provider（预设 + 自定义）
+  getAllProviders(): Array<{ key: string; info: ProviderInfo; isPreset: boolean }> {
+    const result: Array<{ key: string; info: ProviderInfo; isPreset: boolean }> = [];
+    // 预设固定顺序
+    for (const [key, preset] of Object.entries(PROVIDER_PRESETS)) {
+      const saved = this.config.providers[key];
+      result.push({
+        key,
+        info: {
+          base_url: saved?.base_url || preset.base_url,
+          api_key: saved?.api_key || '',
+          models: saved?.models || preset.models,
+          selected: saved?.selected || '',
+        },
+        isPreset: true,
+      });
+    }
+    // 自定义
+    for (const [key, cp] of Object.entries(this.config.custom_providers)) {
+      const saved = this.config.providers[key];
+      result.push({
+        key,
+        info: {
+          base_url: saved?.base_url || cp.base_url,
+          api_key: saved?.api_key || cp.api_key,
+          models: saved?.models || cp.models,
+          selected: saved?.selected || '',
+        },
+        isPreset: false,
+      });
+    }
+    return result;
   }
 
-  // 获取当前默认模型的完整配置（含 provider 的 base_url 和 api_key）
-  getModel(name?: string): ModelConfig {
-    const modelName = name || this.config.models.default;
-    if (!this.config.provider.models.includes(modelName)) {
-      throw new Error(`Model "${modelName}" not available`);
+  // 获取指定 provider
+  getProvider(key: string): ProviderInfo | null {
+    if (PROVIDER_PRESETS[key]) {
+      const preset = PROVIDER_PRESETS[key];
+      const saved = this.config.providers[key];
+      return {
+        base_url: saved?.base_url || preset.base_url,
+        api_key: saved?.api_key || '',
+        models: saved?.models || preset.models,
+        selected: saved?.selected || '',
+      };
     }
+    const cp = this.config.custom_providers[key];
+    if (cp) {
+      const saved = this.config.providers[key];
+      return {
+        base_url: saved?.base_url || cp.base_url,
+        api_key: saved?.api_key || cp.api_key,
+        models: saved?.models || cp.models,
+        selected: saved?.selected || '',
+      };
+    }
+    return null;
+  }
+
+  // 获取当前默认 provider key
+  getDefaultProvider(): string {
+    return this.config.defaults.provider;
+  }
+
+  // 获取当前默认模型的完整配置
+  getModel(providerKey?: string, modelName?: string): ModelConfig {
+    const pk = providerKey || this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    if (!info) {
+      throw new Error(`Provider "${pk}" not found`);
+    }
+    const mn = modelName || info.selected || this.config.defaults.model || info.models[0];
+    // 环境变量 fallback
+    const apiKey = process.env.FORGE_API_KEY || info.api_key;
+    const baseUrl = process.env.FORGE_BASE_URL || info.base_url;
     return {
-      name: modelName,
-      base_url: this.config.provider.base_url,
-      api_key: this.config.provider.api_key,
+      name: mn,
+      base_url: baseUrl,
+      api_key: apiKey,
+      provider_key: pk,
     };
   }
 
-  // 获取所有可用模型
-  getAvailableModels(): string[] {
-    return this.config.provider.models;
-  }
+  // ─── Provider 设置 ─────────────────────────────────────────
 
-  // 设置 provider API Key（所有模型共享）
-  setApiKey(apiKey: string): void {
-    this.config.provider.api_key = apiKey;
-  }
-
-  // 设置 provider base_url
-  setBaseUrl(url: string): void {
-    this.config.provider.base_url = url;
-  }
-
-  // 设置默认模型
-  setDefaultModel(name: string): void {
-    if (!this.config.provider.models.includes(name)) {
-      throw new Error(`Model "${name}" not available`);
+  // 设置 provider API Key
+  setApiKey(providerKey: string, apiKey: string): void {
+    if (!this.config.providers[providerKey]) {
+      this.config.providers[providerKey] = { base_url: '', api_key: '', models: [], selected: '' };
     }
-    this.config.models.default = name;
+    this.config.providers[providerKey].api_key = apiKey;
   }
 
-  // 设置项目根目录
+  // 设置 provider 选择的模型
+  setSelectedModel(providerKey: string, modelName: string): void {
+    if (!this.config.providers[providerKey]) {
+      this.config.providers[providerKey] = { base_url: '', api_key: '', models: [], selected: '' };
+    }
+    this.config.providers[providerKey].selected = modelName;
+    this.config.defaults.provider = providerKey;
+    this.config.defaults.model = modelName;
+  }
+
+  // 添加自定义 provider
+  addCustomProvider(key: string, config: ProviderConfig): void {
+    const customCount = Object.keys(this.config.custom_providers).length;
+    if (customCount >= MAX_CUSTOM_PROVIDERS) {
+      throw new Error(`最多支持 ${MAX_CUSTOM_PROVIDERS} 个自定义 provider`);
+    }
+    this.config.custom_providers[key] = config;
+    this.config.providers[key] = {
+      base_url: config.base_url,
+      api_key: config.api_key,
+      models: config.models,
+      selected: '',
+    };
+  }
+
+  // 删除自定义 provider
+  removeCustomProvider(key: string): void {
+    delete this.config.custom_providers[key];
+    delete this.config.providers[key];
+    // 如果删的是当前默认，切回 deepseek
+    if (this.config.defaults.provider === key) {
+      this.config.defaults.provider = DEFAULT_PROVIDER;
+      this.config.defaults.model = DEFAULT_MODEL;
+    }
+  }
+
+  // ─── 废弃兼容 ─────────────────────────────────────────────
+
+  getProvider_legacy(): ProviderConfig {
+    const pk = this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    return {
+      name: pk,
+      base_url: info?.base_url || '',
+      api_key: info?.api_key || '',
+      models: info?.models || [],
+    };
+  }
+
+  setBaseUrl(url: string): void {
+    const pk = this.config.defaults.provider;
+    if (!this.config.providers[pk]) {
+      this.config.providers[pk] = { base_url: '', api_key: '', models: [], selected: '' };
+    }
+    this.config.providers[pk].base_url = url;
+  }
+
+  setDefaultModel(name: string): void {
+    const pk = this.config.defaults.provider;
+    if (!this.config.providers[pk]) {
+      this.config.providers[pk] = { base_url: '', api_key: '', models: [], selected: '' };
+    }
+    this.config.providers[pk].selected = name;
+    this.config.defaults.model = name;
+  }
+
   setProjectRoot(root: string): void {
     this.config.project.root = resolve(root);
   }
@@ -90,37 +209,43 @@ export class ConfigManager {
     return this.configPath;
   }
 
-  // API Key 是否已配置
+  // 当前默认 provider 是否已配置 API Key
   isConfigured(): boolean {
-    return !!this.config.provider.api_key;
+    const pk = this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    return !!(info?.api_key || process.env.FORGE_API_KEY);
   }
 
-  // 获取已配置的模型列表（有 API Key 的）
+  // 获取可用模型列表
+  getAvailableModels(): string[] {
+    const pk = this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    return info?.models || [];
+  }
+
   getConfiguredModels(): ModelConfig[] {
-    if (!this.config.provider.api_key) return [];
-    return this.config.provider.models.map(name => ({
+    const pk = this.config.defaults.provider;
+    const info = this.getProvider(pk);
+    if (!info || (!info.api_key && !process.env.FORGE_API_KEY)) return [];
+    return info.models.map(name => ({
       name,
-      base_url: this.config.provider.base_url,
-      api_key: this.config.provider.api_key,
+      base_url: info.base_url,
+      api_key: info.api_key,
+      provider_key: pk,
     }));
   }
 
+  // ─── 合并配置 ─────────────────────────────────────────────
+
   private mergeConfig(overrides: Partial<AppConfig>): AppConfig {
     const defaults = structuredClone(DEFAULT_CONFIG);
-    const provider = {
-      name: overrides.provider?.name || defaults.provider.name,
-      base_url: overrides.provider?.base_url || defaults.provider.base_url,
-      api_key: overrides.provider?.api_key || defaults.provider.api_key,
-      models: overrides.provider?.models || defaults.provider.models,
-    };
-    // 确保 default 模型在 provider.models 中
-    let defaultModel = overrides.models?.default || defaults.models.default;
-    if (!provider.models.includes(defaultModel)) {
-      defaultModel = provider.models[0];
-    }
     return {
-      provider,
-      models: { default: defaultModel },
+      providers: overrides.providers || defaults.providers,
+      defaults: {
+        provider: overrides.defaults?.provider || defaults.defaults.provider,
+        model: overrides.defaults?.model || defaults.defaults.model,
+      },
+      custom_providers: overrides.custom_providers || defaults.custom_providers,
       project: { root: overrides.project?.root || defaults.project.root },
     };
   }

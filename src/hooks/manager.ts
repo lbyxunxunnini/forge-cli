@@ -11,8 +11,8 @@ import type {
   HookAction,
 } from './types.js';
 
-const HOOKS_DIR = join(homedir(), '.flutter-forge', 'hooks');
-const PROJECT_HOOKS_DIR = '.flutter-forge/hooks';
+const HOOKS_DIR = join(homedir(), '.forge-cli', 'hooks');
+const PROJECT_HOOKS_DIR = '.forge-cli/hooks';
 
 export class HookManager {
   private hooks: Map<string, HookDefinition> = new Map();

@@ -40,7 +40,7 @@ export function registerAllTools(): void {
   toolRegistry.register(deleteMemoryTool);
   toolRegistry.register(compressMemoryTool);
 
-  // Flutter 专用工具
+  // 项目分析工具
   toolRegistry.register(scanProjectTool);
   toolRegistry.register(detectProjectStateTool);
   toolRegistry.register(validateOutputTool);

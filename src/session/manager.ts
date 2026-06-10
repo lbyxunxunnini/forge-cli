@@ -41,7 +41,7 @@ export interface SessionData {
   }>;
 }
 
-const SESSION_DIR = join(homedir(), '.flutter-forge', 'sessions');
+const SESSION_DIR = join(homedir(), '.forge-cli', 'sessions');
 
 export class SessionManager {
   private session: SessionData | null = null;

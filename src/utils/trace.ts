@@ -48,7 +48,7 @@ export interface TraceConfig {
 const DEFAULT_CONFIG: TraceConfig = {
   enabled: true,
   persistToDisk: true,
-  dir: join(homedir(), '.flutter-forge', 'traces'),
+  dir: join(homedir(), '.forge-cli', 'traces'),
   maxEvents: 500,
   consoleOutput: false,
 };

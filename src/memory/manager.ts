@@ -10,7 +10,7 @@ import { checkThreshold, calculateConfidence } from './threshold.js';
 import { detectDuplicate, mergeMemories } from './dedup.js';
 import { compressMemories } from './compress.js';
 
-const MEMORY_DIR = join(homedir(), '.flutter-forge', 'memory');
+const MEMORY_DIR = join(homedir(), '.forge-cli', 'memory');
 const INDEX_FILE = join(MEMORY_DIR, 'MEMORY.md');
 
 export class MemoryManager {
@@ -407,16 +407,17 @@ export class MemoryManager {
   private extractTags(text: string): string[] {
     const tags: string[] = [];
     const patterns: [RegExp, string][] = [
-      [/flutter/i, 'flutter'],
-      [/dart/i, 'dart'],
-      [/ios/i, 'ios'],
-      [/android/i, 'android'],
+      [/typescript|ts/i, 'typescript'],
+      [/javascript|js/i, 'javascript'],
+      [/python/i, 'python'],
+      [/java/i, 'java'],
       [/api/i, 'api'],
       [/数据库|database|sqlite/i, 'database'],
-      [/状态管理|riverpod|bloc/i, 'state-management'],
       [/测试|test/i, 'testing'],
       [/ui|界面|布局/i, 'ui'],
       [/架构|architecture/i, 'architecture'],
+      [/配置|config/i, 'config'],
+      [/部署|deploy/i, 'deploy'],
     ];
 
     for (const [pattern, tag] of patterns) {

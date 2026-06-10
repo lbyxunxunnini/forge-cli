@@ -31,21 +31,24 @@ function createCompatFetch(): typeof fetch {
 export class AIClient {
   private provider: ReturnType<typeof createOpenAI>;
   private modelName: string;
+  private providerKey: string;
 
   constructor(config: ModelConfig) {
+    this.providerKey = config.provider_key || '';
     this.provider = createOpenAI({
       apiKey: config.api_key,
       baseURL: config.base_url,
-      fetch: createCompatFetch(),
+      fetch: this.providerKey === 'deepseek' ? createCompatFetch() : undefined,
     });
     this.modelName = config.name;
   }
 
   setModel(config: ModelConfig): void {
+    this.providerKey = config.provider_key || '';
     this.provider = createOpenAI({
       apiKey: config.api_key,
       baseURL: config.base_url,
-      fetch: createCompatFetch(),
+      fetch: this.providerKey === 'deepseek' ? createCompatFetch() : undefined,
     });
     this.modelName = config.name;
   }

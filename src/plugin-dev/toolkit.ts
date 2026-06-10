@@ -252,7 +252,7 @@ if __name__ == "__main__":
 
 ## 安装
 
-将此插件放入 \`~/.flutter-forge/plugins/\` 目录。
+将此插件放入 \`~/.forge-cli/plugins/\` 目录。
 
 ## 使用
 

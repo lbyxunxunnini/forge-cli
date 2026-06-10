@@ -71,17 +71,17 @@ export class AgentOrchestrator {
     this.toolRetry = new ToolRetryExecutor({ maxAttempts: 2 }, this.tracer);
 
     try {
-      // 先让大模型判断：是否需要进入 f-forge 工作流
+      // 先让大模型判断：是否需要进入工作流
       this.tracer.traceLLMCall('classifier', 1, 0);
       const classifyStart = Date.now();
-      const isFlutterTask = await this.classifyTask(userInput);
+      const isProjectTask = await this.classifyTask(userInput);
       this.tracer.traceLLMResponse(
-        isFlutterTask ? '是' : '否',
+        isProjectTask ? '是' : '否',
         0,
         Date.now() - classifyStart
       );
 
-      if (isFlutterTask === null) {
+      if (isProjectTask === null) {
         this.tracer.traceError(new Error('模型不可用'), 'classifyTask');
         this.finishTrace();
         return {
@@ -91,14 +91,14 @@ export class AgentOrchestrator {
         };
       }
 
-      if (!isFlutterTask) {
-        this.tracer.record('state_change', { from: 'classify', to: 'direct_response', reason: '非 Flutter 任务' });
+      if (!isProjectTask) {
+        this.tracer.record('state_change', { from: 'classify', to: 'direct_response', reason: '非项目任务' });
         const result = await this.directResponse(userInput);
         this.finishTrace();
         return result;
       }
 
-      // ─── 以下为 Flutter 任务的完整工作流 ───
+      // ─── 以下为项目任务的完整工作流 ───
 
       // 执行 PromptSubmit 钩子
       const promptHookResult = await hookManager.execute('PromptSubmit', {
@@ -261,24 +261,24 @@ export class AgentOrchestrator {
       // 先判断是否需要进入工作流
       this.tracer.traceLLMCall('classifier', 1, 0);
       const classifyStart = Date.now();
-      const isFlutterTask = await this.classifyTask(userInput);
-      this.tracer.traceLLMResponse(isFlutterTask ? '是' : '否', 0, Date.now() - classifyStart);
+      const isProjectTask = await this.classifyTask(userInput);
+      this.tracer.traceLLMResponse(isProjectTask ? '是' : '否', 0, Date.now() - classifyStart);
 
-      if (isFlutterTask === null) {
+      if (isProjectTask === null) {
         this.tracer.traceError(new Error('模型不可用'), 'classifyTask');
         this.finishTrace();
         yield { type: 'text', content: '模型不可用，请检查 API 配置（/model）' };
         return;
       }
 
-      if (!isFlutterTask) {
+      if (!isProjectTask) {
         this.tracer.record('state_change', { from: 'classify', to: 'direct_response' });
         yield* this.directResponseStream(userInput);
         this.finishTrace();
         return;
       }
 
-      // ─── Flutter 工作流 ───
+      // ─── 项目工作流 ───
 
       // PromptSubmit 钩子
       const promptHookResult = await hookManager.execute('PromptSubmit', {

@@ -13,8 +13,8 @@ import type {
   MCPServerConfig,
 } from './types.js';
 
-const PLUGINS_DIR = join(homedir(), '.flutter-forge', 'plugins');
-const PROJECT_PLUGINS_DIR = '.flutter-forge/plugins';
+const PLUGINS_DIR = join(homedir(), '.forge-cli', 'plugins');
+const PROJECT_PLUGINS_DIR = '.forge-cli/plugins';
 
 export class PluginLoader {
   private loadedPlugins: Map<string, Plugin> = new Map();

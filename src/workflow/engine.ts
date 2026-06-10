@@ -8,7 +8,7 @@ export class WorkflowEngine {
 
   constructor(contextManager: ContextManager) {
     this.state = {
-      projectState: 'flutter_existing',
+      projectState: 'existing',
       currentMode: null,
       currentPhase: null,
       userConfirmed: false,
@@ -110,7 +110,7 @@ export class WorkflowEngine {
   // 重置状态
   reset(): void {
     this.state = {
-      projectState: 'flutter_existing',
+      projectState: 'existing',
       currentMode: null,
       currentPhase: null,
       userConfirmed: false,
@@ -119,7 +119,7 @@ export class WorkflowEngine {
   }
 
   private getDirectPrompt(userInput: string): string {
-    return `你是 Flutter Forge 的直通模式。用户的问题可以直接回答，不需要走完整流程。
+    return `你是 Forge CLI 的直通模式。用户的问题可以直接回答，不需要走完整流程。
 
 用户输入：${userInput}
 
@@ -127,7 +127,7 @@ export class WorkflowEngine {
   }
 
   private getLightweightPrompt(userInput: string): string {
-    return `你是 Flutter Forge 的页面工程师，当前执行轻量任务。
+    return `你是 Forge CLI 的页面工程师，当前执行轻量任务。
 
 用户输入：${userInput}
 
@@ -141,7 +141,7 @@ export class WorkflowEngine {
   }
 
   private getMediumPrompt(userInput: string): string {
-    return `你是 Flutter Forge 的页面工程师，当前执行中等任务。
+    return `你是 Forge CLI 的页面工程师，当前执行中等任务。
 
 用户输入：${userInput}
 
@@ -156,7 +156,7 @@ export class WorkflowEngine {
   }
 
   private getUIOptimizePrompt(userInput: string): string {
-    return `你是 Flutter Forge 的 UI 设计师，当前执行 UI 优化任务。
+    return `你是 Forge CLI 的 UI 设计师，当前执行 UI 优化任务。
 
 用户输入：${userInput}
 
@@ -170,7 +170,7 @@ UI 优化流程：
   }
 
   private getArchitecturePrompt(userInput: string): string {
-    return `你是 Flutter Forge 的架构设计师，当前执行架构级任务。
+    return `你是 Forge CLI 的架构设计师，当前执行架构级任务。
 
 用户输入：${userInput}
 
@@ -186,7 +186,7 @@ UI 优化流程：
 
   private getFullFlowPrompt(userInput: string): string {
     const mode = this.state.currentMode === 'feature' ? '功能开发' : '页面开发';
-    return `你是 Flutter Forge，当前执行${mode}任务，需要走完整流程。
+    return `你是 Forge CLI，当前执行${mode}任务，需要走完整流程。
 
 用户输入：${userInput}
 
@@ -204,7 +204,7 @@ S5 验证：测试验证功能
   }
 
   private getNewProjectPrompt(userInput: string): string {
-    return `你是 Flutter Forge，当前执行新项目共创任务。
+    return `你是 Forge CLI，当前执行新项目共创任务。
 
 用户输入：${userInput}
 
