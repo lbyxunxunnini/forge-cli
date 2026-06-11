@@ -15,6 +15,7 @@ export interface StatusLineData {
   vimMode?: string
   cost?: number
   duration?: number
+  totalTokens?: number
 }
 
 // 输入框选项
@@ -56,15 +57,6 @@ export class InputLayoutManager {
 
     const lines: string[] = []
 
-    // 第一条分割线
-    lines.push(theme.inactive('─'.repeat(width)))
-
-    // 状态行
-    lines.push(this.renderStatusLine(statusData, width))
-
-    // 第二条分割线
-    lines.push(theme.inactive('─'.repeat(width)))
-
     // 输入提示符
     lines.push(theme.claude(prompt))
 
@@ -72,6 +64,9 @@ export class InputLayoutManager {
     if (showShortcuts && shortcuts.length > 0) {
       lines.push(this.renderShortcuts(shortcuts, width))
     }
+
+    // 底部状态栏（模型 + 上下文 + tokens）
+    lines.push(this.renderBottomStatusBar(statusData, width))
 
     return lines.join('\n')
   }
@@ -130,6 +125,46 @@ export class InputLayoutManager {
     const padding = Math.max(0, width - contentLength - 2)
 
     return ` ${content}${' '.repeat(padding)} `
+  }
+
+  /**
+   * 渲染底部状态栏
+   */
+  private renderBottomStatusBar(data: StatusLineData, width: number): string {
+    const theme = getTheme()
+    const parts: string[] = []
+
+    // 模型名称
+    if (data.model) {
+      parts.push(theme.warning(data.model))
+    }
+
+    // 上下文百分比
+    if (data.contextPercent !== undefined) {
+      const pct = data.contextPercent
+      const pctColor = pct > 80 ? theme.error : pct > 50 ? theme.warning : theme.success
+      parts.push(pctColor(`${pct}%`))
+    }
+
+    // Token 量（格式化）
+    if (data.totalTokens !== undefined) {
+      parts.push(theme.subtle(this.formatTokens(data.totalTokens)))
+    }
+
+    const content = parts.join(' │ ')
+    const contentLength = this.stripAnsi(content).length
+    const padding = Math.max(0, width - contentLength - 2)
+
+    return theme.inactive('─'.repeat(width)) + '\n' + ` ${content}${' '.repeat(padding)} `
+  }
+
+  /**
+   * 格式化 Token 数量
+   */
+  private formatTokens(tokens: number): string {
+    if (tokens >= 1000000) return `${(tokens / 1000000).toFixed(1)}M tokens`
+    if (tokens >= 1000) return `${(tokens / 1000).toFixed(1)}K tokens`
+    return `${tokens} tokens`
   }
 
   /**

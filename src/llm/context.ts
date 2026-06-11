@@ -12,6 +12,7 @@ export interface ContextMessage extends Message {
 export class ContextManager {
   private messages: ContextMessage[] = [];
   private systemPrompt: string = '';
+  private dynamicContext: ContextMessage[] = [];  // 动态上下文（记忆等）
   private maxMessages: number;
   private maxTokens: number;
   private summarizer?: (messages: ContextMessage[]) => Promise<string>;
@@ -51,6 +52,36 @@ export class ContextManager {
     this.addMessage({ role: 'assistant', content });
   }
 
+  /**
+   * 添加动态上下文（如记忆、临时信息）
+   * 这些内容会被放在消息列表最后，避免污染 prompt cache
+   */
+  addDynamicContext(content: string, importance: Importance = 'normal'): void {
+    this.dynamicContext.push({
+      role: 'system',
+      content,
+      importance,
+      tokenEstimate: estimateTokens(content),
+    });
+  }
+
+  /**
+   * 清空动态上下文
+   */
+  clearDynamicContext(): void {
+    this.dynamicContext = [];
+  }
+
+  /**
+   * 更新动态上下文（替换所有动态内容）
+   */
+  setDynamicContext(content: string, importance: Importance = 'normal'): void {
+    this.clearDynamicContext();
+    if (content) {
+      this.addDynamicContext(content, importance);
+    }
+  }
+
   addToolResult(toolCallId: string, content: string): void {
     // 大工具结果自动裁剪
     const trimmed = trimToolResult(content);
@@ -59,14 +90,27 @@ export class ContextManager {
 
   getMessages(): Message[] {
     const messages: Message[] = [];
+
+    // 1. 静态系统 prompt（最前面，可缓存）
     if (this.systemPrompt) {
       messages.push({ role: 'system', content: this.systemPrompt });
     }
+
+    // 2. 主要消息历史（用户、助手、工具消息）
     messages.push(...this.messages.map(m => ({
       role: m.role,
       content: m.content,
       ...(m.tool_call_id ? { tool_call_id: m.tool_call_id } : {}),
     })));
+
+    // 3. 动态上下文（最后，避免污染缓存）
+    if (this.dynamicContext.length > 0) {
+      messages.push(...this.dynamicContext.map(m => ({
+        role: m.role,
+        content: m.content,
+      })));
+    }
+
     return messages;
   }
 
@@ -83,7 +127,9 @@ export class ContextManager {
   }
 
   getTotalTokens(): number {
-    return this.messages.reduce((sum, m) => sum + (m.tokenEstimate || 0), 0);
+    const messageTokens = this.messages.reduce((sum, m) => sum + (m.tokenEstimate || 0), 0);
+    const dynamicTokens = this.dynamicContext.reduce((sum, m) => sum + (m.tokenEstimate || 0), 0);
+    return messageTokens + dynamicTokens;
   }
 
   getSummary(): string {

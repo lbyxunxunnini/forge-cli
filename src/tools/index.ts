@@ -7,6 +7,7 @@ export { readFileTool, writeFileTool, editFileTool, listFilesTool, searchFilesTo
 export { runCommandTool, runCommandWithOutputTool } from './command.js';
 export { executeScript, executePython, executeShell } from './executor.js';
 export { saveMemoryTool, readMemoryTool, deleteMemoryTool, compressMemoryTool } from './memory.js';
+export { fetchTool, websearchTool } from './web-tools.js';
 export type { Tool, ToolDefinition, ToolResult } from './types.js';
 
 import { toolRegistry } from './registry.js';
@@ -17,6 +18,7 @@ import { classifyTaskTool } from './classifier.js';
 import { readFileTool, writeFileTool, editFileTool, listFilesTool, searchFilesTool, globTool, grepTool, lsTool } from './filesystem.js';
 import { runCommandTool, runCommandWithOutputTool } from './command.js';
 import { saveMemoryTool, readMemoryTool, deleteMemoryTool, compressMemoryTool } from './memory.js';
+import { fetchTool, websearchTool } from './web-tools.js';
 
 // 注册所有工具
 export function registerAllTools(): void {
@@ -33,6 +35,10 @@ export function registerAllTools(): void {
   // 命令执行工具
   toolRegistry.register(runCommandTool);
   toolRegistry.register(runCommandWithOutputTool);
+
+  // 网络工具
+  toolRegistry.register(fetchTool);
+  toolRegistry.register(websearchTool);
 
   // 记忆工具
   toolRegistry.register(saveMemoryTool);

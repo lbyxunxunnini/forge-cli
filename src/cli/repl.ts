@@ -6,11 +6,13 @@ import { AIClient } from '../llm/client-v2.js';
 import { AgentOrchestrator } from '../agents/index.js';
 import { registerAllTools, toolRegistry } from '../tools/index.js';
 import { handleCommand } from './commands.js';
-import { renderBanner, renderAssistantStart, renderError, renderSuccess, truncate } from './renderer.js';
+import { renderBanner, renderAssistantStart, renderError, renderSuccess, renderMarkdown, truncate } from './renderer.js';
 import { VERSION } from '../version.js';
 import { memoryManager } from '../memory/manager.js';
 import { PROVIDER_PRESETS } from '../config/types.js';
 import { inputLayoutManager } from './input-layout.js';
+import { taskGroupRenderer } from './task-group.js';
+import { forgeLogger } from '../output/logger.js';
 import type { ConfigManager } from '../config/manager.js';
 
 // ─── 首次运行引导 ─────────────────────────────────────────────
@@ -129,11 +131,26 @@ export async function startREPL(): Promise<void> {
     if (handled && output) console.log(output);
   }
 
+  // 清屏，移除启动命令残留和内部日志
+  console.clear();
+
+  // 临时禁用日志输出，避免初始化日志污染界面
+  forgeLogger.setQuiet(true);
+
   registerAllTools();
 
   const orchestrator = new AgentOrchestrator(
     aiClient, contextManager, toolRegistry, config.project.root
   );
+
+  // 等待异步初始化完成
+  await orchestrator.waitForInit();
+
+  // 恢复日志输出
+  forgeLogger.setQuiet(false);
+
+  // 再次清屏，确保界面干净
+  console.clear();
 
   // 设置上下文摘要生成器
   contextManager.setSummarizer(async (messages) => {
@@ -150,8 +167,9 @@ export async function startREPL(): Promise<void> {
   // 加载记忆上下文
   const memoryContext = memoryManager.getContextString();
 
-  contextManager.setSystemPrompt(
-    `你是 Forge CLI，一个专业的 AI 开发助手。你帮助用户完成各种开发任务，包括需求分析、方案设计、代码实现和验证。
+  // 静态系统 prompt（可缓存，不包含动态内容）
+  // 注意：这个字符串必须保持固定，任何变化都会导致缓存失效
+  const STATIC_SYSTEM_PROMPT = `你是 Forge CLI，一个专业的 AI 开发助手。你帮助用户完成各种开发任务，包括需求分析、方案设计、代码实现和验证。
 你支持多种编程语言和框架，包括但不限于 TypeScript、JavaScript、Python、Java、Go、Rust、Dart/Flutter 等。
 你遵循结构化工作流：S1 需求分析 → S2 方案设计 → S3 任务拆分（可选）→ S4 实现 → S5 验证。
 你可以使用工具来读写文件、执行命令、扫描项目、搜索代码、获取网页内容、搜索网络等。
@@ -165,16 +183,25 @@ export async function startREPL(): Promise<void> {
 - grep: 在文件中搜索内容（正则、支持上下文行）
 - ls: 树形列出目录结构
 - run_command: 执行 shell 命令
+- fetch: 获取指定 URL 的网页内容（返回文本和链接）
+- websearch: 使用网络搜索引擎搜索信息（无需 API Key，使用 DuckDuckGo）
 - save_memory: 保存记忆（用户偏好、项目知识、重要决策），会自动检查写入门槛和去重
 - read_memory: 读取/搜索记忆（支持语义召回，返回置信度和稳定性标记）
 - delete_memory: 删除记忆
 - compress_memory: 压缩记忆（合并相似条目、淘汰过期记忆）
 重要：先用 glob/grep/ls 探索项目结构，再进行开发。
+当需要获取网页内容时使用 fetch 工具，当需要搜索信息时使用 websearch 工具。
 当了解到用户偏好、项目架构、重要决策时，主动用 save_memory 保存。
 记忆有置信度标记：稳定记忆可直接使用，待验证记忆需要更多确认。
-${memoryContext ? '\n' + memoryContext : ''}
-请用中文回复。`
-  );
+请用中文回复。`;
+
+  // 设置静态系统 prompt（可缓存）
+  contextManager.setSystemPrompt(STATIC_SYSTEM_PROMPT);
+
+  // 记忆上下文作为动态上下文添加（放在消息列表最后，不污染缓存）
+  if (memoryContext) {
+    contextManager.setDynamicContext(`以下是已保存的记忆上下文：\n${memoryContext}`, 'high');
+  }
 
   const defaultPk2 = configManager.getDefaultProvider();
   const displayModel = configManager.getProvider(defaultPk2)?.selected || currentModel.name;
@@ -184,29 +211,54 @@ ${memoryContext ? '\n' + memoryContext : ''}
   // eslint-disable-next-line no-control-regex
   const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*m/g, '');
 
+  // 工具调用统计
+  let toolCallCount = 0;
+  let toolCallStartTime = 0;
+  let totalTokensUsed = 0;
+
   function printInputBar() {
     const w = process.stdout.columns || 80;
     const pk = configManager.getDefaultProvider();
     const modelName = `${pk}/${aiClient.getModel() || configManager.get().defaults.model}`;
     const pct = contextManager.getContextPercent();
+    const totalTokens = contextManager.getTotalTokens();
 
-    // 使用新的输入框布局
+    // 使用新的输入框布局（只显示输入提示和底部状态栏）
     const output = inputLayoutManager.render({
       statusData: {
         model: modelName,
         contextPercent: pct,
+        totalTokens: totalTokens,
       },
       prompt: chalk.cyan('❯ '),
-      showShortcuts: true,
-      shortcuts: [
-        { key: 'Ctrl+C', desc: '中断' },
-        { key: 'Ctrl+D', desc: '退出' },
-        { key: '/help', desc: '帮助' },
-      ],
+      showShortcuts: false,  // 快捷键已在 Banner 中显示
+      shortcuts: [],
       width: w,
     });
 
     console.log(output);
+  }
+
+  // 打印工具调用统计摘要
+  function printToolCallSummary() {
+    if (toolCallCount === 0) return;
+
+    const duration = Date.now() - toolCallStartTime;
+    const durationStr = duration < 1000 ? `${duration}ms`
+      : duration < 60000 ? `${(duration / 1000).toFixed(1)}s`
+      : `${Math.floor(duration / 60000)}m ${Math.floor((duration % 60000) / 1000)}s`;
+
+    const tokensStr = totalTokensUsed >= 1000000
+      ? `${(totalTokensUsed / 1000000).toFixed(1)}M`
+      : totalTokensUsed >= 1000
+        ? `${(totalTokensUsed / 1000).toFixed(1)}K`
+        : `${totalTokensUsed}`;
+
+    console.log(chalk.dim(`\nDone (${toolCallCount} tool uses · ${tokensStr} tokens · ${durationStr})`));
+
+    // 重置统计
+    toolCallCount = 0;
+    toolCallStartTime = 0;
   }
 
   // ─── readline ──────────────────────────────────────────────
@@ -232,8 +284,8 @@ ${memoryContext ? '\n' + memoryContext : ''}
     sigintState = 0;
     const input = line.trim();
 
+    // 空输入时只显示提示符，不重新打印状态栏
     if (!input) {
-      printInputBar();
       rl.prompt();
       return;
     }
@@ -258,27 +310,66 @@ ${memoryContext ? '\n' + memoryContext : ''}
       try {
         process.stdout.write(renderAssistantStart());
 
+        // 重置工具调用统计
+        toolCallCount = 0;
+        toolCallStartTime = Date.now();
+        let groupStarted = false;
+
         let fullText = '';
+        const toolResults: Array<{ name: string; result: string; success: boolean }> = [];
+
         for await (const event of orchestrator.executeStream(input)) {
           if (event.type === 'text') {
-            process.stdout.write(event.content);
+            // 收集完整文本，稍后统一渲染 Markdown
             fullText += event.content;
           } else if (event.type === 'tool-call') {
+            toolCallCount++;
+
+            // 第一个工具调用时开始分组
+            if (!groupStarted) {
+              console.log(taskGroupRenderer.startGroup('Tool Calls'));
+              groupStarted = true;
+            }
+
             try {
               const call = JSON.parse(event.content);
-              const argsPreview = Object.entries(call.args || {})
-                .map(([k, v]) => `${k}=${chalk.dim(truncate(String(v), 40))}`)
-                .join(', ');
-              console.log(chalk.yellow(`\n⚡ ${call.name}`) + (argsPreview ? chalk.dim(` → ${argsPreview})`) : ''));
+              taskGroupRenderer.addToolCall(call.name, call.args);
+              console.log(taskGroupRenderer.renderToolCall(call.name, call.args));
             } catch {
-              console.log(chalk.yellow(`\n⚡ ${event.content}`));
+              taskGroupRenderer.addToolCall(event.content);
+              console.log(taskGroupRenderer.renderToolCall(event.content));
             }
           } else if (event.type === 'tool-result') {
-            // tool-result 不单独展示，结果会体现在后续文本中
+            try {
+              const result = JSON.parse(event.content);
+              toolResults.push({
+                name: result.name || 'unknown',
+                result: typeof result.result === 'string' ? result.result : JSON.stringify(result.result),
+                success: true,
+              });
+              taskGroupRenderer.completeToolCall(true);
+            } catch {
+              taskGroupRenderer.completeToolCall(true);
+            }
           }
         }
-        // 流式结束后换行
-        if (fullText) console.log('');
+
+        // 流式结束后渲染 Markdown 并输出
+        if (fullText) {
+          console.log(renderMarkdown(fullText));
+        } else if (toolResults.length > 0) {
+          // 如果没有对话文本但有工具结果，显示工具结果摘要
+          console.log(chalk.dim('\n工具执行完成，未生成回复文本。'));
+        }
+
+        // 结束分组（在对话内容之后）
+        if (groupStarted) {
+          const groupEnd = taskGroupRenderer.endGroup();
+          if (groupEnd) console.log(groupEnd);
+        }
+
+        // 显示统计摘要
+        printToolCallSummary();
       } catch (execError: unknown) {
         console.log(renderError(execError instanceof Error ? execError.message : String(execError)));
       }

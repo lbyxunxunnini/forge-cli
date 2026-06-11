@@ -4,74 +4,94 @@ export type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
 export class ForgeLogger {
   private prefix = '[f-forge]';
+  private quiet = false;
+
+  // 设置安静模式
+  setQuiet(quiet: boolean): void {
+    this.quiet = quiet;
+  }
 
   // 进入日志
   enterController(): void {
+    if (this.quiet) return;
     console.log(chalk.blue(`${this.prefix} 进入 controller`));
   }
 
   // 模式日志
   logMode(mode: string): void {
+    if (this.quiet) return;
     console.log(chalk.blue(`${this.prefix} 模式：${mode}`));
   }
 
   // 阶段日志
   logPhase(phase: string): void {
+    if (this.quiet) return;
     console.log(chalk.blue(`${this.prefix} 阶段：${phase}`));
   }
 
   // 角色切换日志
   logRoleSwitch(from: string, to: string): void {
+    if (this.quiet) return;
     console.log(chalk.blue(`${this.prefix} 角色切换：${from} → ${to}`));
   }
 
   // 角色结果日志
   logAgentResult(agent: string, result: string): void {
+    if (this.quiet) return;
     console.log(chalk.blue(`${this.prefix} ${agent}：${result}`));
   }
 
   // 完成日志
   logComplete(content: string): void {
+    if (this.quiet) return;
     console.log(chalk.green(`${this.prefix} 本轮完成：${content}`));
   }
 
   // 升级日志
   logUpgrade(fromMode: string, toMode: string, reason: string): void {
+    if (this.quiet) return;
     console.log(chalk.yellow(`${this.prefix} 升级：${fromMode} → ${toMode}，原因：${reason}`));
   }
 
   // 跳过 S3 日志
   logSkipS3(): void {
+    if (this.quiet) return;
     console.log(chalk.blue(`${this.prefix} 主控：首批范围足够小，跳过 S3 拆分任务冻结，直接进入 S4 实现。`));
   }
 
   // 等待日志
   logWaiting(reason: string): void {
+    if (this.quiet) return;
     console.log(chalk.yellow(`${this.prefix} 等待：${reason}`));
   }
 
   // 错误日志
   logError(error: string): void {
+    if (this.quiet) return;
     console.error(chalk.red(`${this.prefix} 错误：${error}`));
   }
 
   // 警告日志
   logWarning(warning: string): void {
+    if (this.quiet) return;
     console.warn(chalk.yellow(`${this.prefix} 警告：${warning}`));
   }
 
   // 信息日志
   logInfo(message: string): void {
+    if (this.quiet) return;
     console.log(chalk.dim(`${this.prefix} ${message}`));
   }
 
   // 验证日志
   logVerification(result: string): void {
+    if (this.quiet) return;
     console.log(chalk.blue(`${this.prefix} 验证：${result}`));
   }
 
   // 门禁日志
   logGate(gateId: string, passed: boolean, reason?: string): void {
+    if (this.quiet) return;
     if (passed) {
       console.log(chalk.green(`${this.prefix} 门禁 ${gateId}：通过`));
     } else {

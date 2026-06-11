@@ -53,6 +53,16 @@ async function promptInput(label: string): Promise<string | null> {
   return answer.trim() || null;
 }
 
+// 已注册的命令列表
+const REGISTERED_COMMANDS = new Set([
+  '/help', '/exit', '/quit', '/model', '/config', '/clear', '/status',
+  '/fast', '/auto', '/session', '/plugins', '/mcp', '/security', '/learn',
+  '/review', '/hook', '/memory', '/trace', '/theme', '/git', '/diff',
+  '/lint', '/test', '/ast', '/symbol', '/sym', '/fetch', '/web',
+  '/search', '/s', '/state', '/flutter-forge', '/ff', '/skill', '/skills',
+  '/skill-install', '/skill-up', '/skill-remove',
+]);
+
 export async function handleCommand(
   input: string,
   configManager: ConfigManager,
@@ -61,9 +71,17 @@ export async function handleCommand(
   orchestrator?: AgentOrchestrator
 ): Promise<CommandResult> {
   const trimmed = input.trim();
+
+  // 不以 / 开头，不是命令
   if (!trimmed.startsWith('/')) return { handled: false };
 
   const [command, ...args] = trimmed.split(/\s+/);
+
+  // 检查是否是已注册的命令
+  // 如果不是已注册的命令，可能是文件路径（如 /Users/...），交给 AI 处理
+  if (!REGISTERED_COMMANDS.has(command.toLowerCase())) {
+    return { handled: false };
+  }
 
   switch (command) {
     case '/help':
@@ -128,8 +146,17 @@ export async function handleCommand(
     case '/flutter-forge':
     case '/ff':
       return await handleWorkflowCommand(args, orchestrator);
+    case '/skill':
+    case '/skills':
+      return handleSkillCommand(orchestrator);
+    case '/skill-install':
+      return await handleSkillInstallCommand(args);
+    case '/skill-up':
+      return await handleSkillUpdateCommand();
+    case '/skill-remove':
+      return handleSkillRemoveCommand(args);
     default:
-      return { handled: true, output: renderError(`未知命令: ${command}\n输入 /help 查看可用命令`) };
+      return { handled: false };
   }
 }
 
@@ -1193,4 +1220,117 @@ async function startWorkflow(
     handled: true,
     output: result.output || chalk.dim(`[workflow] ${workflow.manifest.name} 执行完成`),
   };
+}
+
+// ─── /skill ─────────────────────────────────────────────────
+
+function handleSkillCommand(orchestrator?: AgentOrchestrator): CommandResult {
+  if (!orchestrator) return { handled: true, output: renderError('编排器未初始化') };
+
+  const pluginManager = orchestrator.getPluginManager();
+  const skills = pluginManager.getSkills();
+
+  if (skills.length === 0) {
+    return { handled: true, output: chalk.dim('\n无已加载技能') };
+  }
+
+  const lines = [chalk.bold('\n已加载技能:')];
+  for (const skill of skills) {
+    const trigger = skill.trigger ? chalk.yellow(skill.trigger) : chalk.dim('无触发词');
+    lines.push(`  ${chalk.cyan('•')} ${chalk.white(skill.name)} ${chalk.dim(`- ${skill.description || '无描述'}`)}`);
+    lines.push(`    ${chalk.dim('触发:')} ${trigger}`);
+  }
+
+  return { handled: true, output: lines.join('\n') };
+}
+
+// 获取所有可用命令（用于自动补全）
+export function getAvailableCommands(): Array<{ command: string; description: string; args?: string }> {
+  return [
+    { command: '/help', description: '显示帮助信息' },
+    { command: '/model', description: '模型管理：查看/切换/配置/添加模型' },
+    { command: '/config', description: '查看当前配置' },
+    { command: '/clear', description: '清空对话上下文' },
+    { command: '/status', description: '显示当前状态' },
+    { command: '/fast', description: '切换 ff-fast 快速模式' },
+    { command: '/auto', description: '切换 ff-a 全自动模式' },
+    { command: '/session', description: '查看当前 session 信息' },
+    { command: '/plugins', description: '查看已加载插件' },
+    { command: '/mcp', description: '查看 MCP 服务器状态' },
+    { command: '/security', description: '查看安全检查配置' },
+    { command: '/learn', description: '切换学习模式' },
+    { command: '/review', description: '查看代码审查配置' },
+    { command: '/memory', description: '查看已保存的记忆' },
+    { command: '/hook', description: '查看已注册钩子' },
+    { command: '/trace', description: '查看最近一次执行的 Trace 摘要' },
+    { command: '/theme', description: '切换主题' },
+    { command: '/git', description: 'Git 操作', args: '<status|log|branch|add|commit|diff|remote>' },
+    { command: '/diff', description: '查看 Diff' },
+    { command: '/lint', description: 'Lint 检查' },
+    { command: '/test', description: '运行测试' },
+    { command: '/ast', description: '查看文件结构' },
+    { command: '/symbol', description: '搜索符号' },
+    { command: '/fetch', description: '获取网页内容', args: '<url>' },
+    { command: '/search', description: '网络搜索', args: '<query>' },
+    { command: '/state', description: '状态机管理' },
+    { command: '/skill', description: '查看已加载技能' },
+    { command: '/skill-install', description: '安装远程技能', args: '<github-url>' },
+    { command: '/skill-up', description: '检查技能更新' },
+    { command: '/skill-remove', description: '删除技能', args: '<name>' },
+    { command: '/flutter-forge', description: '启动 Flutter 工作流' },
+    { command: '/exit', description: '退出程序' },
+  ];
+}
+
+// ─── /skill-install ─────────────────────────────────────────
+
+import { skillManager } from '../skills/manager.js';
+
+async function handleSkillInstallCommand(args: string[]): Promise<CommandResult> {
+  if (args.length === 0) {
+    return { handled: true, output: renderError('请提供 GitHub URL，例如: /skill-install https://github.com/user/repo') };
+  }
+
+  const url = args[0];
+  const result = await skillManager.installSkill(url);
+
+  if (result.success) {
+    return { handled: true, output: renderSuccess(result.message) };
+  }
+  return { handled: true, output: renderError(result.message) };
+}
+
+// ─── /skill-up ──────────────────────────────────────────────
+
+async function handleSkillUpdateCommand(): Promise<CommandResult> {
+  const updates = await skillManager.checkUpdates();
+
+  if (updates.length === 0) {
+    return { handled: true, output: chalk.dim('\n所有技能都是最新版本') };
+  }
+
+  const lines = [chalk.bold('\n可更新的技能:')];
+  for (const update of updates) {
+    lines.push(`  ${chalk.cyan('•')} ${chalk.white(update.name)} ${chalk.dim(update.currentVersion)} → ${chalk.green(update.latestVersion)}`);
+  }
+  lines.push('');
+  lines.push(chalk.dim('使用 /skill-install <url> 更新'));
+
+  return { handled: true, output: lines.join('\n') };
+}
+
+// ─── /skill-remove ──────────────────────────────────────────
+
+function handleSkillRemoveCommand(args: string[]): CommandResult {
+  if (args.length === 0) {
+    return { handled: true, output: renderError('请提供技能名称，例如: /skill-remove my-skill') };
+  }
+
+  const name = args[0];
+  const result = skillManager.removeSkill(name);
+
+  if (result.success) {
+    return { handled: true, output: renderSuccess(result.message) };
+  }
+  return { handled: true, output: renderError(result.message) };
 }

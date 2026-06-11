@@ -27,6 +27,7 @@ export class AgentOrchestrator {
   private tracer: Tracer | null = null;
   private toolRetry: ToolRetryExecutor;
   private workflowExecutor: WorkflowExecutor;
+  private initPromise: Promise<void>;
 
   constructor(
     private aiClient: AIClient,
@@ -51,8 +52,13 @@ export class AgentOrchestrator {
     this.workflowExecutor = new WorkflowExecutor(aiClient, contextManager, toolRegistry);
 
     // 初始化插件管理器和工作流注册表
-    this.initPluginManager();
+    this.initPromise = this.initPluginManager();
     this.initWorkflowRegistry();
+  }
+
+  // 等待初始化完成
+  async waitForInit(): Promise<void> {
+    await this.initPromise;
   }
 
   // 初始化插件管理器
