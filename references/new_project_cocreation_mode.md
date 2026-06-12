@@ -1,4 +1,4 @@
-# Flutter Forge Reference - 新项目共创模式
+# Forge CLI Reference - 新项目共创模式
 
 `新项目共创` 是 `controller` 主导的前代码阶段轨道，不是“先把四个角色都跑一遍”。
 

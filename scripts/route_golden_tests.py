@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run deterministic golden checks for Flutter Forge routing examples."""
+"""Run deterministic golden checks for Forge CLI routing examples."""
 
 from __future__ import annotations
 

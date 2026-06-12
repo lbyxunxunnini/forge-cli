@@ -488,7 +488,7 @@ export class TestRunner {
   }
 
   /**
-   * 解析 Dart/Flutter test 输出
+   * 解析 test 输出
    */
   parseDartTestOutput(output: string): TestSuite {
     const tests: TestResult[] = []

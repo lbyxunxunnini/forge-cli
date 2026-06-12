@@ -1,4 +1,4 @@
-# Flutter Forge Reference - Load Map
+# Forge CLI Reference - Load Map
 
 这个文件定义主 skill 之外的按需加载映射。主 `SKILL.md` 不再重复列出大量"遇到什么就读什么"的声明。
 
@@ -11,13 +11,13 @@
 - [project_init_flow.md](project_init_flow.md)
 - [existing_project_entry.md](existing_project_entry.md)
 - [existing_project_scan.md](existing_project_scan.md)
-- [flutter_stack_detection.md](flutter_stack_detection.md)
+- [project_stack_detection.md](project_stack_detection.md)
 - [stack_profiles.md](stack_profiles.md)
 - [project_guardrails_template.yaml](project_guardrails_template.yaml)
 - [example_project_guardrails.yaml](example_project_guardrails.yaml)
 - [existing_rules_discovery.md](existing_rules_discovery.md)
 
-### 新 Flutter 应用从 0 到 1
+### 新应用从 0 到 1
 
 - [new_project_cocreation_mode.md](new_project_cocreation_mode.md)
 - [stack_profiles.md](stack_profiles.md)
@@ -36,15 +36,15 @@
 - [memory_protocol.md](memory_protocol.md)
 - [core_contracts.yaml](core_contracts.yaml)
 
-### 需要工程判断标准或 Flutter 专项规则
+### 需要工程判断标准或 项目专项规则
 
 - [engineering_heuristics.md](engineering_heuristics.md)
-- [flutter_stack_detection.md](flutter_stack_detection.md)
+- [project_stack_detection.md](project_stack_detection.md)
 - [stack_profiles.md](stack_profiles.md)
 
-### 需要 Flutter skills 委托规则
+### 需要 项目 skills 委托规则
 
-- [official_flutter_skills.md](official_flutter_skills.md)
+- [official_project_skills.md](official_project_skills.md)
 - [delegation_map.yaml](delegation_map.yaml)
 
 ### 需要判断宿主对子代理的支持与降级路径
@@ -119,9 +119,9 @@
 | memory_protocol.md | SKILL.md（记忆机制）、load_map.md |
 | core_contracts.yaml | maintenance_map.md、load_map.md |
 | engineering_heuristics.md | load_map.md |
-| flutter_stack_detection.md | load_map.md |
+| project_stack_detection.md | load_map.md |
 | stack_profiles.md | load_map.md |
-| official_flutter_skills.md | SKILL.md（Flutter skills）、load_map.md |
+| official_project_skills.md | SKILL.md（项目 skills）、load_map.md |
 | delegation_map.yaml | load_map.md |
 | host_subagent_support.md | SKILL.md（并行协议）、load_map.md |
 | agent_isolation_protocol.md | SKILL.md（角色隔离执行）、load_map.md |

@@ -1,10 +1,10 @@
-# Flutter Forge Reference - Network And API Rules
+# Forge CLI Reference - Network And API Rules
 
 这个文件定义网络层与 API 层的项目语义规则，避免把所有问题都丢给通用 HTTP skill。
 
 ## 关注范围
 
-Flutter Forge 在项目内应明确：
+Forge CLI 在项目内应明确：
 
 1. 网络错误怎么处理
 2. 业务错误怎么处理

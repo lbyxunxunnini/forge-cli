@@ -1,6 +1,6 @@
-# Flutter Forge Reference - Existing Project Entry
+# Forge CLI Reference - Existing Project Entry
 
-迭代中 Flutter 项目首次接入时，目标是：
+迭代中 项目首次接入时，目标是：
 
 - 识别项目现状
 - 初始化或校准 `project_guardrails`
@@ -9,7 +9,7 @@
 ## 推荐入口表达
 
 ```text
-这是一个迭代中的 Flutter 项目。先用 flutter-forge 识别项目结构和 project_guardrails，再进入当前任务。
+这是一个迭代中的 项目。先用 forge-cli 识别项目结构和 project_guardrails，再进入当前任务。
 ```
 
 ## 首次接入时需要回答的问题
@@ -39,7 +39,7 @@
 [f-forge] 模式：启动握手
 - 项目阶段：迭代项目
 - 项目护栏：已加载
-- 项目护栏路径：.claude/.flutter-forge/projects/<project>.project_guardrails.yaml
+- 项目护栏路径：.claude/.forge-cli/projects/<project>.project_guardrails.yaml
 - 下一步：进入当前任务
 ```
 
@@ -64,4 +64,4 @@
 1. 已有项目规则
 2. 当前模块主流写法
 3. 已生成的 `project_guardrails`
-4. Flutter 通用建议
+4. 项目通用建议

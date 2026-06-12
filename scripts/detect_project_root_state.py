@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Detect whether the current root is an empty new workspace, Flutter app, or non-Flutter workspace."""
+"""Detect whether the current root is an empty new workspace, project app, or non-project workspace."""
 
 from __future__ import annotations
 
@@ -23,10 +23,10 @@ def detect_root_state(root: Path) -> dict[str, object]:
         root_type = "empty_new"
         forge_enabled = True
     elif has_pubspec and has_lib_dir:
-        root_type = "flutter_existing"
+        root_type = "existing"
         forge_enabled = True
     else:
-        root_type = "non_flutter"
+        root_type = "non_project"
         forge_enabled = False
 
     return {

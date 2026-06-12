@@ -1,4 +1,4 @@
-# Flutter Forge Reference - Memory Protocol
+# Forge CLI Reference - Memory Protocol
 
 三层记忆的分工和读写边界。
 
@@ -6,9 +6,9 @@
 
 | 层 | 位置 | 回答什么 | 详细协议 |
 |----|------|----------|----------|
-| Session | `.flutter-forge/session.md` | 这次任务做到哪了 | [session_management.md](session_management.md) |
-| Project Guardrails | 当前项目内 `.flutter-forge/projects/<project>.project_guardrails.yaml` 或宿主子目录下同名文件 | 这个项目长期怎么做 | [project_guardrails_protocol.md](project_guardrails_protocol.md) |
-| 跨项目偏好 | `~/.flutter-forge/global_preferences.yaml` | 跨项目稳定偏好 | — |
+| Session | `.forge-cli/session.md` | 这次任务做到哪了 | [session_management.md](session_management.md) |
+| Project Guardrails | 当前项目内 `.forge-cli/projects/<project>.project_guardrails.yaml` 或宿主子目录下同名文件 | 这个项目长期怎么做 | [project_guardrails_protocol.md](project_guardrails_protocol.md) |
+| 跨项目偏好 | `~/.forge-cli/global_preferences.yaml` | 跨项目稳定偏好 | — |
 
 ## 读写权限
 
@@ -31,5 +31,5 @@
 - 任务进度不写进 guardrails
 - impl-agent 不写长期规则
 - 扫描推断不误报为"已加载正式 guardrails"
-- `~/.claude/projects/.../memory/*.yaml` 不是 Flutter Forge 项目 guardrails 来源
+- `~/.claude/projects/.../memory/*.yaml` 不是 Forge CLI 项目 guardrails 来源
 - 当前项目没有精确命中 guardrails 时，必须初始化，不能读取其他项目记忆兜底

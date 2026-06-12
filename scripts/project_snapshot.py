@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a compact Flutter project snapshot for fast-mode cold starts."""
+"""Generate a compact project snapshot for fast-mode cold starts."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ from pathlib import Path
 
 
 def load_stack_scanner(root: Path):
-    path = root / "scripts" / "flutter_stack_scan.py"
-    spec = importlib.util.spec_from_file_location("flutter_stack_scan", path)
+    path = root / "scripts" / "project_stack_scan.py"
+    spec = importlib.util.spec_from_file_location("project_stack_scan", path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"cannot load scanner: {path}")
     module = importlib.util.module_from_spec(spec)
@@ -42,10 +42,10 @@ def top_dirs(root: Path) -> list[str]:
 def find_project_guardrails(root: Path) -> list[str]:
     project_name = root.name
     patterns = [
-        f".claude/.flutter-forge/projects/{project_name}.project_guardrails.yaml",
-        f".trae/.flutter-forge/projects/{project_name}.project_guardrails.yaml",
-        f".agents/.flutter-forge/projects/{project_name}.project_guardrails.yaml",
-        f".flutter-forge/projects/{project_name}.project_guardrails.yaml",
+        f".claude/.forge-cli/projects/{project_name}.project_guardrails.yaml",
+        f".trae/.forge-cli/projects/{project_name}.project_guardrails.yaml",
+        f".agents/.forge-cli/projects/{project_name}.project_guardrails.yaml",
+        f".forge-cli/projects/{project_name}.project_guardrails.yaml",
     ]
     guardrails: list[str] = []
     for pattern in patterns:
@@ -60,7 +60,7 @@ def snapshot(root: Path) -> dict[str, object]:
 
     return {
         "project_root": str(root),
-        "is_flutter_project": stack["is_flutter_project"],
+        "is_project": stack["is_project"],
         "pubspec": "pubspec.yaml" if (root / "pubspec.yaml").exists() else None,
         "lib_top_dirs": top_dirs(root),
         "project_guardrails": find_project_guardrails(root),
@@ -83,7 +83,7 @@ def snapshot(root: Path) -> dict[str, object]:
 
 def print_text(data: dict[str, object]) -> None:
     print(f"project_root: {data['project_root']}")
-    print(f"is_flutter_project: {str(data['is_flutter_project']).lower()}")
+    print(f"is_project: {str(data['is_project']).lower()}")
     print(f"pubspec: {data['pubspec']}")
     print(f"project_guardrails: {', '.join(data['project_guardrails']) if data['project_guardrails'] else 'none'}")
     print(f"lib_top_dirs: {', '.join(data['lib_top_dirs']) if data['lib_top_dirs'] else 'none'}")

@@ -1,4 +1,4 @@
-# Flutter Forge Reference - Fast Mode
+# Forge CLI Reference - Fast Mode
 
 `ff-fast` 是快速执行策略，不是独立任务模式。它的目标是提效：轻量优先、自动生成项目摘要、减少非关键前置流程，除非发现明确架构风险才升级到完整流程。未升级的轻量路径豁免最强写前确认等待；升级到中等及以上后按对应模式门禁执行。`ff-fast` 只减少读取和确认成本，不减少真实性门禁。
 
@@ -41,7 +41,7 @@
 `ff-fast` 启动时可调用：
 
 ```bash
-python3 scripts/project_snapshot.py /path/to/flutter/project
+python3 scripts/project_snapshot.py /path/to/project
 ```
 
 摘要至少包含：

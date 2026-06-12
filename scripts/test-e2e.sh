@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Flutter Forge 端到端测试脚本
+# Forge CLI 端到端测试脚本
 
 set -e
 
-echo "=== Flutter Forge 端到端测试 ==="
+echo "=== Forge CLI 端到端测试 ==="
 echo ""
 
 # 检查 API key

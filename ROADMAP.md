@@ -4,7 +4,7 @@
 > 目标：达到 Claude Code 70%+ 核心体验，支持多语言、多模型、多工具
 > 更新时间：2026-06-10
 >
-> 支持语言：TypeScript、JavaScript、Python、Java、Go、Rust、Dart/Flutter 等
+> 支持语言：TypeScript、JavaScript、Python、Java、Go、Rust、Dart 等
 
 ---
 
@@ -40,7 +40,7 @@
 |------|------|------|
 | CLI REPL 交互 | ✅ | readline 交互式界面、状态栏、Ctrl+C 两步退出 |
 | 多模型支持 | ✅ | DeepSeek, Qwen, MiMo, 通义千问, GLM 等 (OpenAI 兼容) |
-| 多语言支持 | ✅ | TypeScript、JavaScript、Python、Java、Go、Rust、Dart/Flutter 等 |
+| 多语言支持 | ✅ | TypeScript、JavaScript、Python、Java、Go、Rust、Dart 等 |
 | 流式输出 | ✅ | REPL 已接入 executeStream，逐字输出 + 工具调用可视化 |
 | 工具调用 | ✅ | 20+ 工具：文件读写、命令执行、Glob/Grep/LS、记忆、项目扫描、WebFetch、WebSearch 等 |
 | 上下文压缩 | ✅ | 重要性标记、Token 预算管理、工具结果裁剪、LLM 摘要生成 |
@@ -116,6 +116,11 @@
 | /fetch | 网页获取 | ✅ |
 | /search | 网络搜索 | ✅ |
 | /state | 状态机管理 | ✅ |
+| /workflow | 工作流管理 | ✅ |
+| /skill | 技能查看 | ✅ |
+| /skill-install | 安装远程技能 | ✅ |
+| /skill-up | 检查技能更新 | ✅ |
+| /skill-remove | 删除技能 | ✅ |
 
 ---
 
@@ -145,7 +150,7 @@
 |------|--------|--------|------|------|
 | 插件市场 | P3 | 长期 | ❌ | 插件发布、安装、更新 |
 | IDE 集成 | P3 | 2 周 | ❌ | VS Code / JetBrains 插件 |
-| 工作流抽取 | P3 | 1 周 | ❌ | flutter-forge 抽成工作模式 |
+| 工作流抽取 | P3 | 1 周 | ✅ | Flutter 工作流已移除，通用工作流引擎就绪 |
 
 ---
 
@@ -220,7 +225,7 @@
    - 实时同步和协作
 
 3. **工作流抽取**
-   - flutter-forge 抽成独立工作模式
+   - forge-cli 抽成独立工作模式
    - meta-skill 转换流程
    - 模板项目
 
@@ -253,7 +258,8 @@
 | 2026-06-10 | **状态机增强**：实现状态机系统 `src/cli/state-machine.ts`（StateMachine + 状态转换验证 + 历史记录 + 快照恢复）、/state 命令 |
 | 2026-06-10 | **测试覆盖率提升**：添加 vitest 测试框架，创建 7 个测试文件，79 个测试用例全部通过 |
 | 2026-06-10 | **输入框布局优化**：实现输入框布局组件 `src/cli/input-layout.ts`，对齐 Claude Code 布局（输入框在两条分割线中间） |
-| 2026-06-10 | **通用 Agent 重构**：移除 Flutter 专项内容，重新定义为通用 AI 协作 CLI Agent，支持多语言（TypeScript/JavaScript/Python/Java/Go/Rust/Dart 等） |
+| 2026-06-10 | **通用 Agent 重构**：移除 项目专项内容，重新定义为通用 AI 协作 CLI Agent，支持多语言（TypeScript/JavaScript/Python/Java/Go/Rust/Dart 等） |
+| 2026-06-12 | **v0.6.0 通用化重构**：移除 Flutter 工作流（/flutter-forge 命令、/forge-cli 和 /ff 别名），工作流入口统一为 /workflow，项目成为纯通用 Agent 框架 |
 
 ---
 
@@ -367,4 +373,4 @@ UI/UX 对齐度   ████████████████░░░░  
 
 *最后更新：2026-06-10*
 
-*项目已从 Flutter Forge 重构为通用 Forge CLI Agent*
+*项目已从 Forge CLI 重构为通用 Forge CLI Agent*

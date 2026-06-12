@@ -1,5 +1,5 @@
-# Flutter Forge 配置文件
-# 放置位置: ~/.flutter-forge/config.yaml
+# Forge CLI 配置文件
+# 放置位置: ~/.forge-cli/config.yaml
 
 models:
   default: deepseek-chat

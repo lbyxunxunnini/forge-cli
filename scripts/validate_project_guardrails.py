@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Flutter Forge project-guardrails files without external dependencies."""
+"""Validate Forge CLI project-guardrails files without external dependencies."""
 
 from __future__ import annotations
 

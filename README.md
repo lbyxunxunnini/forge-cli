@@ -1,6 +1,6 @@
-# Flutter Forge CLI Agent
+# Forge CLI
 
-> 基于 Vercel AI SDK 的 Flutter 开发 CLI Agent，集成完整的工作流和角色系统
+> 通用 AI 协作 CLI Agent，支持多语言、多模型、可挂载独立工作流
 
 ## 架构
 
@@ -19,9 +19,6 @@
 ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
 │ 需求分析师     │ │ UI 设计师      │ │ 架构设计师     │
 │ Agent         │ │ Agent         │ │ Agent         │
-│ - 目标冻结     │ │ - 视觉方案     │ │ - 架构设计     │
-│ - 范围确认     │ │ - 交互设计     │ │ - 模块划分     │
-│ - 验收标准     │ │ - 样式规范     │ │ - 技术选型     │
 └───────────────┘ └───────────────┘ └───────────────┘
         │                 │                 │
         └─────────────────┼─────────────────┘
@@ -29,30 +26,28 @@
                 ┌───────────────┐
                 │ 页面工程师     │
                 │ Agent         │
-                │ - 代码实现     │
-                │ - 文件读写     │
-                │ - 命令执行     │
                 └───────────────┘
                           │
                           ▼
                 ┌───────────────┐
                 │ 验证工程师     │
                 │ Agent         │
-                │ - 功能验证     │
-                │ - 测试执行     │
-                │ - 质量检查     │
                 └───────────────┘
 ```
 
 ## 特性
 
+- **通用 Agent** — 不绑定特定语言或框架，支持任意项目类型
+- **多语言支持** — TypeScript、JavaScript、Python、Java、Go、Rust、Dart 等
+- **多模型支持** — DeepSeek、Qwen、MiMo、通义千问、GLM 等（OpenAI 兼容）
+- **工作流引擎** — 可挂载独立工作流，通过 `/workflow` 命令管理
 - **5 个专业 Agent** — 需求分析师、UI 设计师、架构设计师、页面工程师、验证工程师
-- **角色隔离** — 每个 Agent 有独立的工具权限和职责边界
-- **结构化工作流** — S1→S2→S3→S4→S5→S6 阶段流程
-- **工具调用** — 基于 Vercel AI SDK 的 tool calling
-- **文件读写** — 创建、编辑、删除文件
-- **命令执行** — 运行 shell 命令
-- **多模型支持** — DeepSeek、通义千问、小米大模型
+- **20+ 工具** — 文件读写、命令执行、Glob/Grep/LS、AST 解析、WebFetch、WebSearch 等
+- **插件系统** — commands/agents/skills/hooks/mcp 架构
+- **MCP 支持** — Model Context Protocol 外部工具集成
+- **Hooks 系统** — PreToolUse/PostToolUse/SessionStart/Stop/PromptSubmit
+- **记忆系统** — 四类记忆、写入门槛、去重合并、语义召回
+- **可观测性** — 全链路 Trace、执行摘要
 
 ## 快速开始
 
@@ -70,98 +65,63 @@ npm run build
 ### 启动
 
 ```bash
-flutter-forge
+forge-cli
 ```
 
 ### 配置模型
 
 ```
-> /model-config deepseek-chat sk-your-api-key
+> /model add deepseek sk-your-api-key
 ```
 
 ### 开始使用
 
 ```
 > 帮我创建一个登录页面
-> 修改 main.dart 的标题
-> 运行 flutter pub get
+> 修改 src/main.ts 的标题
+> 运行 npm test
 ```
-
-## Agent 角色
-
-### 主控 Agent (Controller)
-- 路由判断：根据用户输入判断任务类型
-- 阶段推进：管理 S1→S6 阶段流程
-- 子 Agent 调度：根据阶段调用对应的 Agent
-- 状态管理：维护 session 状态
-
-### 需求分析师 (Requirement Analyst)
-- 目标冻结：明确业务目标
-- 范围确认：定义功能范围
-- 验收标准：制定验收条件
-- 约束定义：明确技术约束
-
-**工具权限**：只读（read_file, list_files, search_files, scan_project）
-
-### UI 设计师 (UI Designer)
-- 视觉方案：设计界面风格
-- 交互设计：设计用户交互
-- 样式规范：制定样式标准
-
-**工具权限**：只读（read_file, list_files, search_files, scan_project）
-
-### 架构设计师 (Architecture Designer)
-- 架构设计：设计系统架构
-- 模块划分：划分功能模块
-- 技术选型：选择技术方案
-
-**工具权限**：只读（read_file, list_files, search_files, scan_project, detect_project_state）
-
-### 页面工程师 (Page Engineer)
-- 代码实现：编写业务代码
-- 文件读写：创建和编辑文件
-- 命令执行：运行构建和测试命令
-
-**工具权限**：全部（read_file, write_file, edit_file, run_command, list_files, search_files）
-
-### 验证工程师 (Verify Agent)
-- 功能验证：验证功能正确性
-- 测试执行：运行测试用例
-- 质量检查：检查代码质量
-
-**工具权限**：部分（read_file, list_files, search_files, run_command, validate_output, validate_docs_sync）
-
-## 工作流阶段
-
-| 阶段 | 说明 | 调用的 Agent |
-|------|------|-------------|
-| S0 | 准备 | 主控 |
-| S1 | 需求分析 | 需求分析师 |
-| S2 | 方案设计 | UI 设计师 / 架构设计师 |
-| S3 | 任务拆分 | 主控（可选） |
-| S4 | 实现 | 页面工程师 |
-| S5 | 验证 | 验证工程师 |
-| S6 | 完成 | 主控 |
 
 ## 命令
 
 | 命令 | 说明 |
 |------|------|
-| `/help` | 显示帮助 |
-| `/model` | 查看可用模型 |
-| `/model <name>` | 切换模型 |
-| `/model-config <name> <key>` | 配置 API Key |
-| `/config` | 查看配置 |
-| `/clear` | 清空上下文 |
-| `/status` | 查看状态 |
-| `/exit` | 退出 |
+| `/help` | 显示帮助信息 |
+| `/model` | 模型管理：查看/切换/配置/添加模型 |
+| `/config` | 查看当前配置 |
+| `/clear` | 清空对话上下文 |
+| `/status` | 显示当前状态 |
+| `/fast` | 切换快速模式 |
+| `/auto` | 切换全自动模式 |
+| `/session` | 查看当前 session 信息 |
+| `/workflow` | 工作流管理：列出/启动工作流 |
+| `/skill` | 查看已加载技能 |
+| `/skill-install` | 安装远程技能 |
+| `/plugins` | 查看已加载插件 |
+| `/mcp` | 查看 MCP 服务器状态 |
+| `/security` | 查看安全检查配置 |
+| `/learn` | 切换学习模式 |
+| `/memory` | 查看已保存的记忆 |
+| `/hook` | 查看已注册钩子 |
+| `/trace` | 查看最近一次执行的 Trace 摘要 |
+| `/theme` | 切换主题 |
+| `/git` | Git 操作 |
+| `/diff` | 查看 Diff |
+| `/lint` | Lint 检查 |
+| `/test` | 运行测试 |
+| `/ast` | 查看文件结构 |
+| `/symbol` | 搜索符号 |
+| `/fetch` | 获取网页内容 |
+| `/search` | 网络搜索 |
+| `/state` | 状态机管理 |
+| `/exit` | 退出程序 |
 
 ## 技术栈
 
 - **Runtime**: Node.js 18+
 - **语言**: TypeScript
 - **AI SDK**: Vercel AI SDK (`ai`, `@ai-sdk/openai`)
-- **CLI**: readline
+- **CLI UI**: Ink (React for CLI)
 - **构建**: tsup
 
 ## 开发
@@ -178,6 +138,9 @@ npm run typecheck
 
 # 开发模式
 npm run dev
+
+# 测试
+npm test
 ```
 
 ## 许可证

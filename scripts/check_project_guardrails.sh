@@ -10,7 +10,7 @@ set -euo pipefail
 
 PROJECT_ROOT="${1:-.}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-STATE_FILE="${PROJECT_ROOT}/.flutter-forge/runtime/project_guardrails_status.json"
+STATE_FILE="${PROJECT_ROOT}/.forge-cli/runtime/project_guardrails_status.json"
 
 cached_json() {
   local ttl="$1"
@@ -68,10 +68,10 @@ script_dir = Path(os.environ["SCRIPT_DIR"])
 project_name = project_root.name
 
 search_paths = [
-    f".claude/.flutter-forge/projects/{project_name}.project_guardrails.yaml",
-    f".trae/.flutter-forge/projects/{project_name}.project_guardrails.yaml",
-    f".agents/.flutter-forge/projects/{project_name}.project_guardrails.yaml",
-    f".flutter-forge/projects/{project_name}.project_guardrails.yaml",
+    f".claude/.forge-cli/projects/{project_name}.project_guardrails.yaml",
+    f".trae/.forge-cli/projects/{project_name}.project_guardrails.yaml",
+    f".agents/.forge-cli/projects/{project_name}.project_guardrails.yaml",
+    f".forge-cli/projects/{project_name}.project_guardrails.yaml",
 ]
 
 found_path = next((path for path in search_paths if (project_root / path).is_file()), "-")
@@ -83,13 +83,13 @@ auto_refreshed = False
 
 if root_type == "empty_new":
     status = "empty_new"
-elif root_type == "non_flutter":
-    status = "non_flutter"
+elif root_type == "non_project":
+    status = "non_project"
 elif found_path != "-":
     status = "found"
 
     # 检查 refresh_needed 标记（mtime 为写入时间）
-    refresh_marker = project_root / ".flutter-forge" / "runtime" / "refresh_needed"
+    refresh_marker = project_root / ".forge-cli" / "runtime" / "refresh_needed"
     if refresh_marker.exists():
         try:
             marker_age = int(time.time()) - int(refresh_marker.stat().st_mtime)
@@ -180,7 +180,7 @@ print(json.dumps(result, ensure_ascii=False))
 PY
 )"
 
-mkdir -p "${PROJECT_ROOT}/.flutter-forge/runtime" 2>/dev/null || true
+mkdir -p "${PROJECT_ROOT}/.forge-cli/runtime" 2>/dev/null || true
 printf '%s\n' "$RESULT_JSON" > "$STATE_FILE"
 
 if [[ "${2:-}" == "--json" ]]; then

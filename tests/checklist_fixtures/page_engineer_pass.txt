@@ -15,5 +15,5 @@ checklist:
     - "密码找回按钮点击"
   verification_type: minimal
   commands_run:
-    - "flutter analyze"
+    - "项目验证命令"
 ```

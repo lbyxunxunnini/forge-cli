@@ -95,7 +95,7 @@ checklist:
   code_quality: true
   regression_clear: true
   quality_checks:
-    - "flutter analyze 无 error"
+    - "项目验证命令无 error"
   logs_compliant: true
   decision: pass
 ```

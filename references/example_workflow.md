@@ -1,4 +1,4 @@
-# Flutter Forge Reference - Example Workflow
+# Forge CLI Reference - Example Workflow
 
 这个文件展示一个真实任务在现行协议下的推荐流转方式。它说明的是：
 
@@ -12,7 +12,7 @@
 
 - 一份会员中心页面 PRD
 - 一张会员中心页面设计图
-- 一个现有迭代中 Flutter 项目
+- 一个现有迭代中 项目
 
 目标：
 
@@ -28,7 +28,7 @@
 [f-forge] 模式：启动握手
 - 项目阶段：迭代项目
 - guardrails：未发现
-- Flutter skills：已就绪
+- 项目 skills：已就绪
 - 下一步：进入页面开发
 ```
 
@@ -107,7 +107,7 @@
 [f-forge] 本轮完成：已完成会员中心页面结构、状态接入和基础验证；修改了页面骨架、目录落点和复用边界；实现了新增页面的首轮收口。
 [f-forge] 本轮完成：任务已完成，是否需要更新guardrails
 - 是：更新guardrails
-任务结束，已自动退出 flutter-forge
+任务结束，已自动退出 forge-cli
 ```
 
 ## 这个示例想说明什么

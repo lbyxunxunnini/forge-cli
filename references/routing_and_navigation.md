@@ -1,10 +1,10 @@
-# Flutter Forge Reference - Routing And Navigation Rules
+# Forge CLI Reference - Routing And Navigation Rules
 
 这个文件定义项目级路由与导航规范，补足“技术实现之外的项目约束”。
 
 ## 关注范围
 
-Flutter Forge 在项目内应明确：
+Forge CLI 在项目内应明确：
 
 1. 路由命名规范
 2. 页面参数传递方式
@@ -20,7 +20,7 @@ Flutter Forge 在项目内应明确：
 - 路由路径风格在项目内保持统一
 - 不在同一项目里混用多套命名风格，除非明确是历史迁移
 
-命名风格本身以项目主流为准，Flutter Forge 不强推 kebab-case 或 camelCase。
+命名风格本身以项目主流为准，Forge CLI 不强推 kebab-case 或 camelCase。
 
 ## 参数传递
 

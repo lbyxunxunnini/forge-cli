@@ -1,11 +1,11 @@
-# Flutter Forge Reference - 主工作流可视化
+# Forge CLI Reference - 主工作流可视化
 
-本文档包含 flutter-forge 主工作流的 digraph 流程图，帮助 agent 快速定位自己在流程中的位置。
+本文档包含 forge-cli 主工作流的 digraph 流程图，帮助 agent 快速定位自己在流程中的位置。
 
 ## 主工作流
 
 ```dot
-digraph flutter_forge_workflow {
+digraph forge_cli_workflow {
     rankdir=TB;
     node [shape=box];
 

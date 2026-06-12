@@ -1,6 +1,6 @@
 global_preferences:
   user_profile:
-    role: "flutter_frontend_engineer"
+    role: "frontend_engineer"
     confidence: "medium"
 
   page_split_preferences:
@@ -18,7 +18,7 @@ global_preferences:
     maintainability_priority_high: true
     ui_fidelity_as_advice: true
 
-  flutter_skills_preferences:
+  skills_preferences:
     reminder_suppressed: false
     notes: []
 

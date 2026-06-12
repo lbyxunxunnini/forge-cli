@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.pyc
+__pycache__/
+.DS_Store
+*.log
+.env
+.env.*
+*.tgz
+coverage/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

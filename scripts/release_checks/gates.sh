@@ -3,15 +3,15 @@ set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 
-tmp_gate_project="$(mktemp -d -t flutter-forge-gate.XXXXXX)"
+tmp_gate_project="$(mktemp -d -t forge-cli-gate.XXXXXX)"
 tmp_gate_name="$(basename "$tmp_gate_project")"
-mkdir -p "$tmp_gate_project/.claude/.flutter-forge/projects" "$tmp_gate_project/.flutter-forge/runtime"
-printf 'project_guardrails:\n  project:\n    name: "%s"\n    root_type: "flutter_existing"\n' "$tmp_gate_name" > "$tmp_gate_project/.claude/.flutter-forge/projects/${tmp_gate_name}.project_guardrails.yaml"
+mkdir -p "$tmp_gate_project/.claude/.forge-cli/projects" "$tmp_gate_project/.forge-cli/runtime"
+printf 'project_guardrails:\n  project:\n    name: "%s"\n    root_type: "existing"\n' "$tmp_gate_name" > "$tmp_gate_project/.claude/.forge-cli/projects/${tmp_gate_name}.project_guardrails.yaml"
 scripts/ff_session.sh --project-root "$tmp_gate_project" init --track execution --phase S2 --mode 页面开发 >/dev/null
-cat > "$tmp_gate_project/.flutter-forge/runtime/task_gate.json" <<'EOF'
+cat > "$tmp_gate_project/.forge-cli/runtime/task_gate.json" <<'EOF'
 {
   "project_root": "REPLACE_PROJECT_ROOT",
-  "project_root_state": "flutter_existing",
+  "project_root_state": "existing",
   "forge_enabled": true,
   "mode": "页面开发",
   "confidence": "high",
@@ -23,7 +23,7 @@ cat > "$tmp_gate_project/.flutter-forge/runtime/task_gate.json" <<'EOF'
   "checked_at": 9999999999
 }
 EOF
-python3 - <<'PY' "$tmp_gate_project/.flutter-forge/runtime/task_gate.json" "$tmp_gate_project"
+python3 - <<'PY' "$tmp_gate_project/.forge-cli/runtime/task_gate.json" "$tmp_gate_project"
 import json, sys
 path, root = sys.argv[1], sys.argv[2]
 data = json.load(open(path, encoding="utf-8"))
@@ -87,7 +87,7 @@ printf '%s\n' "$gate_plan_conflict_output" | grep -q '"gate": "plan_conflict"' |
 
 scripts/ff_session.sh --project-root "$tmp_gate_project" update --plan_conflict 无 >/dev/null
 scripts/ff_session.sh --project-root "$tmp_gate_project" update --confirmation_status 未确认 >/dev/null
-python3 - <<'PY' "$tmp_gate_project/.flutter-forge/runtime/task_gate.json"
+python3 - <<'PY' "$tmp_gate_project/.forge-cli/runtime/task_gate.json"
 import json, sys
 path = sys.argv[1]
 data = json.load(open(path, encoding="utf-8"))
@@ -97,7 +97,7 @@ PY
 gate_auto_output="$(python3 scripts/gate_check.py --project-root "$tmp_gate_project" --target-path lib/features/order/detail_page.dart --mode enforce)"
 printf '%s\n' "$gate_auto_output" | grep -q '"decision": "allow"' || fail "gate_check did not exempt autonomous policy"
 
-python3 - <<'PY' "$tmp_gate_project/.flutter-forge/runtime/task_gate.json"
+python3 - <<'PY' "$tmp_gate_project/.forge-cli/runtime/task_gate.json"
 import json, sys
 path = sys.argv[1]
 data = json.load(open(path, encoding="utf-8"))

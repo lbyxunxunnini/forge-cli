@@ -1,6 +1,6 @@
-# Flutter Forge Reference - 项目初始化与接入
+# Forge CLI Reference - 项目初始化与接入
 
-这个文件定义项目首次接入 `flutter-forge` 时，如何判断：
+这个文件定义项目首次接入 `forge-cli` 时，如何判断：
 
 - 当前是新项目还是迭代项目
 - 是否应该进入新项目共创

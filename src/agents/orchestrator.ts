@@ -130,7 +130,7 @@ export class AgentOrchestrator {
     }
   }
 
-  /** 直接启动指定工作流（不经过触发词匹配，供 /flutter-forge 命令使用） */
+  /** 直接启动指定工作流（不经过触发词匹配，供 /workflow 命令使用） */
   async executeWorkflow(workflowName: string, userInput: string): Promise<AgentResult> {
     const workflow = workflowRegistry.get(workflowName);
     if (!workflow) {

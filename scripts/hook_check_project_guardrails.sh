@@ -44,7 +44,7 @@ except Exception:
 fi
 
 if [ -n "$COMMAND_TEXT" ]; then
-  if printf '%s' "$COMMAND_TEXT" | grep -qE '(check_project_guardrails\.sh|init_project_guardrails\.py|hook_check_project_guardrails\.sh|project_snapshot\.py|find_existing_rules\.sh|flutter_stack_scan\.py)'; then
+  if printf '%s' "$COMMAND_TEXT" | grep -qE '(check_project_guardrails\.sh|init_project_guardrails\.py|hook_check_project_guardrails\.sh|project_snapshot\.py|find_existing_rules\.sh|project_stack_scan\.py)'; then
     exit 0
   fi
 fi
@@ -83,7 +83,7 @@ esac
 
 if [ "$STATUS" = "missing" ]; then
   if [ "$IS_WRITE" = "true" ]; then
-    TASK_GATE="${PROJECT_ROOT}/.flutter-forge/runtime/task_gate.json"
+    TASK_GATE="${PROJECT_ROOT}/.forge-cli/runtime/task_gate.json"
     if [ -f "$TASK_GATE" ]; then
       ALLOW_BY_GATE="$(TASK_GATE="$TASK_GATE" PROJECT_ROOT="$PROJECT_ROOT" TARGET_PATH="$TARGET_PATH" python3 -c "
 import json, os, sys, time
@@ -146,7 +146,7 @@ print('allow')
 import json, sys
 json.dump({
     'permissionDecision': 'block',
-    'reason': 'project_guardrails 未初始化，且当前工具调用涉及代码改动。请先运行 scripts/init_project_guardrails.py 初始化项目锚点；Flutter 现有项目再按需补齐长期护栏。'
+    'reason': 'project_guardrails 未初始化，且当前工具调用涉及代码改动。请先运行 scripts/init_project_guardrails.py 初始化项目锚点；现有项目再按需补齐长期护栏。'
 }, sys.stdout, ensure_ascii=False)
 "
     exit 2
@@ -160,10 +160,10 @@ fi
 if [ "$IS_WRITE" = "true" ]; then
   SESSION_FILE_PATH=""
   for candidate in \
-    "$PROJECT_ROOT/.claude/.flutter-forge/session.md" \
-    "$PROJECT_ROOT/.trae/.flutter-forge/session.md" \
-    "$PROJECT_ROOT/.agents/.flutter-forge/session.md" \
-    "$PROJECT_ROOT/.flutter-forge/session.md"; do
+    "$PROJECT_ROOT/.claude/.forge-cli/session.md" \
+    "$PROJECT_ROOT/.trae/.forge-cli/session.md" \
+    "$PROJECT_ROOT/.agents/.forge-cli/session.md" \
+    "$PROJECT_ROOT/.forge-cli/session.md"; do
     if [ -f "$candidate" ]; then
       SESSION_FILE_PATH="$candidate"
       break
@@ -194,7 +194,7 @@ if [ "$IS_WRITE" = "true" ] && [ -n "$TARGET_PATH" ]; then
   NORM_TARGET="$(printf '%s' "$TARGET_PATH" | sed 's|\\|/|g')"
   case "$NORM_TARGET" in
     *pubspec.yaml|*/lib/*|lib/*)
-      MARKER_DIR="${PROJECT_ROOT}/.flutter-forge/runtime"
+      MARKER_DIR="${PROJECT_ROOT}/.forge-cli/runtime"
       mkdir -p "$MARKER_DIR" 2>/dev/null || true
       date +%s > "${MARKER_DIR}/refresh_needed" 2>/dev/null || true
       ;;
@@ -212,7 +212,7 @@ except Exception:
     print('allow')
 " 2>/dev/null || echo "allow")"
     if [ "$GATE_DECISION" = "would_block" ]; then
-      printf '[hook] would_block by flutter-forge gate: %s\n' "$GATE_OUTPUT" >&2
+      printf '[hook] would_block by forge-cli gate: %s\n' "$GATE_OUTPUT" >&2
       exit 0
     fi
     if [ "$GATE_DECISION" = "block" ]; then
@@ -220,10 +220,10 @@ except Exception:
 import json, sys
 try:
     data = json.load(sys.stdin)
-    print(data.get('reason', '当前写入被 flutter-forge gate 阻断'))
+    print(data.get('reason', '当前写入被 forge-cli gate 阻断'))
 except Exception:
-    print('当前写入被 flutter-forge gate 阻断')
-" 2>/dev/null || echo "当前写入被 flutter-forge gate 阻断")"
+    print('当前写入被 forge-cli gate 阻断')
+" 2>/dev/null || echo "当前写入被 forge-cli gate 阻断")"
       GATE_REASON="$GATE_REASON" python3 -c "
 import json, os, sys
 json.dump({

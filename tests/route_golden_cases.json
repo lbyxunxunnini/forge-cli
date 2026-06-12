@@ -9,7 +9,7 @@
   },
   {
     "name": "existing_project_startup_handshake",
-    "prompt": "ff- 这是一个迭代中的 Flutter 项目。先扫描项目结构并初始化 project_guardrails，不要先写代码。",
+    "prompt": "ff- 这是一个迭代中的项目。先扫描项目结构并初始化 project_guardrails，不要先写代码。",
     "expected_mode": "启动握手",
     "expected_policy": "标准",
     "expected_guardrails_check": "required",

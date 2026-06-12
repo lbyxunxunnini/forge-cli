@@ -290,11 +290,11 @@ export class WorkflowExecutor {
 
   /**
    * 将 YAML session 同步为 gate_check.py 能读的 markdown session.md
-   * gate_check.py 期望：project_root/.claude/.flutter-forge/session.md
+   * gate_check.py 期望：project_root/.claude/.forge-cli/session.md
    * 格式：每行 "- 字段：值"
    */
   private syncSessionForGateCheck(session: WorkflowSessionData): void {
-    const gateSessionDir = join(session.projectRoot, '.claude', '.flutter-forge');
+    const gateSessionDir = join(session.projectRoot, '.claude', '.forge-cli');
     if (!existsSync(gateSessionDir)) {
       mkdirSync(gateSessionDir, { recursive: true });
     }

@@ -1,4 +1,4 @@
-# Flutter Forge Reference - Engineering Heuristics
+# Forge CLI Reference - Engineering Heuristics
 
 这个文件补充可执行判断标准，避免角色只停留在抽象职责。
 
@@ -77,7 +77,7 @@
 - 共享组件边界
 - API 请求入口
 
-## Flutter 专项规则
+## 项目专项规则
 
 ### BuildContext
 
@@ -127,8 +127,8 @@
 
 ### 测试与预览
 
-如果项目已安装官方 Flutter skills，以下情况优先委托：
+如果项目已安装官方 项目 skills，以下情况优先委托：
 
-- 组件交互验证：`flutter-add-widget-test`
-- 新组件展示和状态对照：`flutter-add-widget-preview`
-- 真实页面流程验证：`flutter-add-integration-test`
+- 组件交互验证：`add-widget-test`
+- 新组件展示和状态对照：`add-widget-preview`
+- 真实页面流程验证：`add-integration-test`

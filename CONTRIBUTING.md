@@ -1,12 +1,12 @@
 # Contributing
 
-Flutter Forge is a workflow skill for AI-assisted Flutter development. Contributions should improve how the skill routes tasks, reads project context, handles incomplete input, or keeps generated work aligned with an existing Flutter codebase.
+Forge CLI is a workflow skill for AI-assisted 项目开发. Contributions should improve how the skill routes tasks, reads project context, handles incomplete input, or keeps generated work aligned with an existing 项目代码库.
 
 ## Good Contribution Areas
 
 - Clearer task-routing rules in `SKILL.md`.
 - Better reference material under `references/`.
-- Real validation logs from actual Flutter projects.
+- Real validation logs from actual 项目.
 - Installation, diagnosis, and compatibility fixes.
 - More precise guardrails fields or examples.
 - Bug reports where the skill chose the wrong workflow.
@@ -31,7 +31,7 @@ For focused checks:
 
 ```bash
 python3 scripts/route_golden_tests.py
-python3 scripts/validate_flutter_stack_scan.py
+python3 scripts/validate_project_stack_scan.py
 python3 scripts/validate_docs_sync.py
 python3 scripts/validate_project_guardrails.py --allow-placeholders references/project_guardrails_template.yaml memory/projects/example_project.project_guardrails.yaml
 ```
@@ -40,7 +40,7 @@ For workflow changes, test at least one prompt from each affected mode:
 
 - Light task: a small UI copy/style edit.
 - Page development: a new page or module request.
-- Code review: review an existing Flutter page.
+- Code review: review an existing 项目页面.
 - Migration: state-management or directory-structure migration.
 
 ## Writing Style

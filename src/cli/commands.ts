@@ -59,7 +59,7 @@ const REGISTERED_COMMANDS = new Set([
   '/fast', '/auto', '/session', '/plugins', '/mcp', '/security', '/learn',
   '/review', '/hook', '/memory', '/trace', '/theme', '/git', '/diff',
   '/lint', '/test', '/ast', '/symbol', '/sym', '/fetch', '/web',
-  '/search', '/s', '/state', '/flutter-forge', '/ff', '/skill', '/skills',
+  '/search', '/s', '/state', '/workflow', '/skill', '/skills',
   '/skill-install', '/skill-up', '/skill-remove',
 ]);
 
@@ -143,8 +143,7 @@ export async function handleCommand(
       return handleSearchCommand(args);
     case '/state':
       return handleStateCommand(args);
-    case '/flutter-forge':
-    case '/ff':
+    case '/workflow':
       return await handleWorkflowCommand(args, orchestrator);
     case '/skill':
     case '/skills':
@@ -703,7 +702,7 @@ function handleTestCommand(args: string[]): CommandResult {
 
   if (isDart) {
     parser = 'dart'
-    command = 'flutter test'
+    command = 'dart test'
   } else if (isNode) {
     parser = 'jest'
     // 检查测试脚本
@@ -1159,7 +1158,7 @@ function handleStateCommand(args: string[]): CommandResult {
   }
 }
 
-// ─── /flutter-forge ────────────────────────────────────────
+// ─── /workflow ────────────────────────────────────────
 
 async function handleWorkflowCommand(
   args: string[],
@@ -1181,7 +1180,7 @@ async function handleWorkflowCommand(
       lines.push(`    角色: ${chalk.dim(wf.manifest.roles.map(r => r.name).join(', '))}`);
     }
     lines.push('');
-    lines.push(chalk.dim('使用方式: 输入触发词直接进入，或 /flutter-forge <名称> 手动启动'));
+    lines.push(chalk.dim('使用方式: 输入触发词直接进入，或 /workflow <名称> 手动启动'));
     return { handled: true, output: lines.join('\n') };
   }
 
@@ -1277,7 +1276,7 @@ export function getAvailableCommands(): Array<{ command: string; description: st
     { command: '/skill-install', description: '安装远程技能', args: '<github-url>' },
     { command: '/skill-up', description: '检查技能更新' },
     { command: '/skill-remove', description: '删除技能', args: '<name>' },
-    { command: '/flutter-forge', description: '启动 Flutter 工作流' },
+    { command: '/workflow', description: '启动工作流' },
     { command: '/exit', description: '退出程序' },
   ];
 }

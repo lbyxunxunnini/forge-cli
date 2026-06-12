@@ -1,4 +1,4 @@
-# Flutter Forge CLI Agent 验证清单
+# Forge CLI CLI Agent 验证清单
 
 ## 前置条件
 
@@ -43,7 +43,7 @@ npm install
 
 ### 2. 配置管理
 
-- [x] 配置文件加载（~/.flutter-forge/config.yaml）
+- [x] 配置文件加载（~/.forge-cli/config.yaml）
 - [x] 环境变量替换（${DEEPSEEK_API_KEY}）
 - [x] 模型切换
 - [x] 配置保存
@@ -238,7 +238,7 @@ chmod +x scripts/*.sh scripts/*.py
 ### 4. 命令未找到
 
 ```bash
-flutter-forge: command not found
+forge-cli: command not found
 ```
 
 重新安装全局包：

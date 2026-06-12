@@ -1,6 +1,6 @@
-# Flutter Forge Reference - Host Subagent Support
+# Forge CLI Reference - Host Subagent Support
 
-这个文件说明 `flutter-forge` 在不同宿主中的子代理支持情况，以及当宿主能力未知或不支持真实子代理时，如何安全降级为串行执行。
+这个文件说明 `forge-cli` 在不同宿主中的子代理支持情况，以及当宿主能力未知或不支持真实子代理时，如何安全降级为串行执行。
 
 ## 1. 先看结论
 
@@ -32,7 +32,7 @@
 - tool restrictions
 - custom subagents
 
-适合 `flutter-forge` 的点：
+适合 `forge-cli` 的点：
 
 - 可以把搜索、规划、实现、验证拆给不同子代理
 - 可以限制不同子代理的工具权限
@@ -73,7 +73,7 @@
 - foreground / background
 - custom subagents
 
-适合 `flutter-forge` 的点：
+适合 `forge-cli` 的点：
 
 - 探索、终端、浏览器等噪音型任务适合隔离到 subagents
 - 支持并行子代理和更清晰的上下文隔离
@@ -124,7 +124,7 @@
 
 ## 5. 降级原则
 
-如果无法确认宿主支持真实子代理，或者当前环境下没有子代理工具，`flutter-forge` 必须降级为：
+如果无法确认宿主支持真实子代理，或者当前环境下没有子代理工具，`forge-cli` 必须降级为：
 
 `单主控 + 串行阶段推进 + 逻辑角色分工`
 
@@ -199,7 +199,7 @@
 - 不要继续输出 `impl-agent-1 / impl-agent-2` 这类会误导用户的并行标识
 - 不要把“逻辑角色分工”说成“宿主已拉起独立实例”
 
-## 8. 适用于 flutter-forge 的宿主判断顺序
+## 8. 适用于 forge-cli 的宿主判断顺序
 
 每次准备进入并行前，按这个顺序判断：
 
@@ -212,7 +212,7 @@
 
 ## 9. 推荐实践
 
-对 `flutter-forge` 来说，更稳的默认策略是：
+对 `forge-cli` 来说，更稳的默认策略是：
 
 - 前置阶段默认按串行门禁推进
 - 只有在宿主能力明确、环境支持、工作包已冻结时，才启用真实并行

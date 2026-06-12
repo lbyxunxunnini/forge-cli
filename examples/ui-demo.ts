@@ -50,7 +50,7 @@ import {
 } from '../src/cli/index.js'
 
 async function main() {
-  console.log('=== Flutter Forge UI 组件演示 ===\n')
+  console.log('=== Forge CLI UI 组件演示 ===\n')
 
   // 1. 主题系统演示
   console.log('1. 主题系统')

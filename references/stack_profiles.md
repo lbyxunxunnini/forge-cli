@@ -1,4 +1,4 @@
-# Flutter Forge Reference - Stack Profiles
+# Forge CLI Reference - Stack Profiles
 
 技术栈 profile 是guardrails初始化的建议模板。它不覆盖项目扫描结果，只用于给 `init_project_guardrails.py` 补足低置信度字段和确认清单。
 

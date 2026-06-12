@@ -1,6 +1,6 @@
-# Flutter Forge Reference - 已有项目规则发现
+# Forge CLI Reference - 已有项目规则发现
 
-除了 Flutter Forge 自己的guardrails，还要扫描项目中已有的规则文件。这些不是正式guardrails，但应作为一等输入参与guardrails生成和校正。
+除了 Forge CLI 自己的guardrails，还要扫描项目中已有的规则文件。这些不是正式guardrails，但应作为一等输入参与guardrails生成和校正。
 
 ## 扫描方式
 
@@ -23,9 +23,9 @@
 
 ## guardrails与已有规则的关系
 
-- guardrails是 Flutter Forge 的项目状态标记，这个定位不变
+- guardrails是 Forge CLI 的项目状态标记，这个定位不变
 - 但guardrails的内容来源应扩展：不只来自扫描推断，也来自已有规则文件
-- 如果项目已有规则文件且覆盖充分，guardrails可以更轻量，主要补 Flutter Forge 特有的字段（如复用知识、UI 来源标注偏好等）
+- 如果项目已有规则文件且覆盖充分，guardrails可以更轻量，主要补 Forge CLI 特有的字段（如复用知识、UI 来源标注偏好等）
 
 ## 不要做的事
 

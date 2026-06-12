@@ -1,4 +1,4 @@
-# Flutter Forge Reference - 阶段转换检查点
+# Forge CLI Reference - 阶段转换检查点
 
 这个文件定义每次阶段转换时必须执行的检查点动作。目标是防止：
 - 阶段转换遗漏（如 S2 后忘记进 S4）

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Flutter Forge controller: phase/gate/resume orchestration + agent prompt generation.
+"""Forge CLI controller: phase/gate/resume orchestration + agent prompt generation.
 
 When invoked with `generate-agent-prompt`, reads the role contract from
 references/roles/<role>.md, assembles project context, and outputs a complete
@@ -68,10 +68,10 @@ def read_role_contract(role: str) -> str:
 
 def read_guardrails_summary(project_root: Path) -> str:
     candidates = [
-        project_root / ".claude/.flutter-forge",
-        project_root / ".trae/.flutter-forge",
-        project_root / ".agents/.flutter-forge",
-        project_root / ".flutter-forge",
+        project_root / ".claude/.forge-cli",
+        project_root / ".trae/.forge-cli",
+        project_root / ".agents/.forge-cli",
+        project_root / ".forge-cli",
     ]
     for base in candidates:
         for f in base.glob("projects/*.project_guardrails.yaml"):
@@ -96,9 +96,9 @@ def build_agent_prompt(
 ) -> str:
     sections = []
 
-    sections.append(f"# Flutter Forge 角色：{role_display}")
+    sections.append(f"# Forge CLI 角色：{role_display}")
     sections.append("")
-    sections.append("你是 Flutter Forge 的子代理，负责独立执行以下角色职责。")
+    sections.append("你是 Forge CLI 的子代理，负责独立执行以下角色职责。")
     sections.append("严格遵守角色边界，不要越权执行其他角色的工作。")
     sections.append("")
 

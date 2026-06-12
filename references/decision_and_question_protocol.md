@@ -1,6 +1,6 @@
-# Flutter Forge Reference - Decision And Question Protocol
+# Forge CLI Reference - Decision And Question Protocol
 
-这份协议定义 `flutter-forge` 在前置收口阶段如何做决策、如何提问、如何控制长上下文，以及子代理在不同阶段的核心价值。
+这份协议定义 `forge-cli` 在前置收口阶段如何做决策、如何提问、如何控制长上下文，以及子代理在不同阶段的核心价值。
 
 ## 1. 目标
 
@@ -410,7 +410,7 @@ UI 冻结摘要包：
 [f-forge] 本轮完成：已完成 xxx；修改了 xxx；实现了 xxx。
 [f-forge] 本轮完成：任务已完成，是否需要更新guardrails
 - 是：更新guardrails
-任务结束，已自动退出 flutter-forge
+任务结束，已自动退出 forge-cli
 ```
 
 ## 10. 反例

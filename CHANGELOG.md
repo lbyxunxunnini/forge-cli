@@ -2,8 +2,20 @@
 
 说明：
 
-- `0.2.x` 中出现的 `legacy_project_scan.md`、`~/.flutter-forge/projects/*.rule_card.yaml` 等表述保留为当时版本的历史事实
+- `0.2.x` 中出现的 `legacy_project_scan.md`、`~/.forge-cli/projects/*.rule_card.yaml` 等表述保留为当时版本的历史事实
 - 当前现行入口与项目护栏路径策略以 `references/existing_project_entry.md`、`references/existing_project_scan.md`、`references/project_guardrails_protocol.md` 为准
+
+## v1.0.0
+
+通用化重构：移除 Flutter 工作流，Forge CLI 成为纯通用 Agent 框架。
+
+### 变更
+
+- 移除 `/flutter-forge` 命令及其 handler，工作流入口统一为 `/workflow`
+- 移除 `/forge-cli`、`/ff` 别名（迁移残留）
+- 清理 `settings.local.json` 中的 sed 迁移重命名规则
+- 保留通用语言支持能力（DartParser、tree-sitter dart、checkDart 等）
+- 项目现在是纯通用 CLI Agent，可独立挂载任意工作流
 
 ## v0.5.0
 
@@ -113,7 +125,7 @@ Session 管理 + 门禁检查 + 日志规范 + 快速/全自动模式。
 
 ## v0.2.5
 
-补强 flutter-forge 的日志门禁，修复不同模型下可见性输出不完整却仍被校验放行的问题。
+补强 forge-cli 的日志门禁，修复不同模型下可见性输出不完整却仍被校验放行的问题。
 
 ### 日志校验强化
 
@@ -146,13 +158,13 @@ Session 管理 + 门禁检查 + 日志规范 + 快速/全自动模式。
 
 ## v0.2.2
 
-修复 flutter-forge 流程掉链和输出格式回归。
+修复 forge-cli 流程掉链和输出格式回归。
 
 ### P0 流程闭环
 
 - **S2→S4 硬阻断**：S2 方案确认完成后必须继续输出 `[f-forge] 阶段：S4 实现中` 并开始实现，不允许停在 S2 结论或等待下一步指令
 - **阶段检查点文档化**：新增 `references/phase_checkpoint.md`，集中描述阶段切换、S2→S4 防掉链、角色日志和 session 恢复检查点
-- **Session 状态持久化对齐**：阶段切换要求通过 `scripts/ff_session.sh` 写入宿主 session，避免手写 `.flutter-forge/session.md` 与现有脚本格式冲突
+- **Session 状态持久化对齐**：阶段切换要求通过 `scripts/ff_session.sh` 写入宿主 session，避免手写 `.forge-cli/session.md` 与现有脚本格式冲突
 
 ### 输出格式校验
 
@@ -182,7 +194,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 ### P2 文档精简
 
 - **触发词精简**：README 首屏只展示 `ff-` / `ff-fast` / `ff-a` 三种主推入口
-- **新增"不适合"小节**：README 新增"什么情况下你不需要 Flutter Forge"
+- **新增"不适合"小节**：README 新增"什么情况下你不需要 Forge CLI"
 - **PLAN_STATUS 合并**：内容合并到 CHANGELOG 末尾的路线图节，删除独立文件
 - **归档交叉引用修复**：`validate_docs_sync.py` 新增归档文件断链检查
 
@@ -241,7 +253,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 - 补充"等待态"行为约束：上下文保持、恢复方式、超时处理
 - 新增 S6 完成阶段定义：收口状态 + 完成日志 + 规则卡出口 + 退出
 - 明确 validate_output.sh 校验频率：只在模式/阶段/完成日志后运行
-- 规则卡草案超时"轮"改为"次触发 flutter-forge 任务"，定义更明确
+- 规则卡草案超时"轮"改为"次触发 forge-cli 任务"，定义更明确
 - 10 秒测试第二条改为"用户输入包含可直接定位的信息"+ 示例
 - ff-fast / ff-a 补充 4 文件分布的显式指引
 - README 新增「30 秒快速上手」区，核心机制从 10 项精简为 6 项
@@ -255,7 +267,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 - 规则卡协议新增无规则卡时强制处理规则：不允许跳过初始化直接进入执行流程
 - 规则卡协议新增用户询问规则卡位置时的回答规范，明确正式规则卡路径优先
 - `task_runtime_prompt.md` 新增规则卡检查硬约束：未命中真实 `.rule_card.yaml` 前不得输出"已加载"
-- `task_runtime_prompt.md` 规则卡查找路径格式统一为完整路径（`.claude/.flutter-forge > .trae/.flutter-forge > .agents/.flutter-forge > .flutter-forge`）
+- `task_runtime_prompt.md` 规则卡查找路径格式统一为完整路径（`.claude/.forge-cli > .trae/.forge-cli > .agents/.forge-cli > .forge-cli`）
 - "UI 优化任务"统一简化为"UI 优化"，涉及 SKILL.md、README.md、session_management.md、question_budget.md、skill_visibility.md、startup_handshake.md、task_runtime_prompt.md
 - `code_review_mode.md` 术语对齐：中间地带→不满足轻量条件但也不需重流程
 - `similar_implementation_search.md` 术语对齐：需求分析阶段→S1 需求确认
@@ -266,7 +278,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 
 - 规则卡正式来源限定为当前目标项目目录内 `<project>.rule_card.yaml` 精确命中
 - 禁止读取 `~/.claude/projects/.../memory/*.yaml`、其它项目目录或其它项目名的规则卡作为兜底
-- 无规则卡时必须输出 `规则卡：未发现，准备初始化`，并生成 `.flutter-forge/projects/<project>.rule_card_draft.yaml`
+- 无规则卡时必须输出 `规则卡：未发现，准备初始化`，并生成 `.forge-cli/projects/<project>.rule_card_draft.yaml`
 - `scripts/project_snapshot.py` 从通配加载改为按当前项目名精确匹配
 - 新增 `scripts/validate_rule_card_resolution.py`，覆盖全局 Claude memory、当前目录其它项目卡、当前项目精确卡三类回归
 - `validate_release.sh` 纳入规则卡解析隔离测试
@@ -282,7 +294,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 - `scripts/init_rule_card.py` 升级为初始化向导，支持 `--profile auto`、显式 profile、`--interactive` 和 `quick_context` 写入
 - 新增 `references/fast_mode.md`、`references/autonomous_mode.md`、`references/stack_profiles.md`、`references/release_playbook.md`
 - 新增多套技术栈 profile：Riverpod / Bloc / go_router+Dio+freezed / GetX / lean MVP
-- 新增 Flutter 技术栈扫描、规则卡 schema 校验、路由 golden cases、文档同步检查和发布 gate
+- 新增 项目技术栈扫描、规则卡 schema 校验、路由 golden cases、文档同步检查和发布 gate
 - 补充宿主子代理支持判断、串行降级协议、大任务摘要包、统一验证工程师和规则卡结束判断出口
 
 ## 0.5.3
@@ -305,7 +317,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 - 新增 `controller` 合并提问规则：多个角色同时发现缺口时，统一聚合成一次最小提问，不让角色轮流追问用户
 - 新增大改版 / 超长 PRD / 超长 UI 文档场景的“阶段摘要包”机制，要求先压缩为需求 / UI / 架构冻结摘要包，再继续下游
 - 新增 `scripts/validate_release.sh`、`scripts/validate_rule_card.py` 和 `scripts/route_golden_tests.py`，把版本一致性、规则卡 schema 和模式路由用例纳入可执行发布检查
-- 新增 `scripts/flutter_stack_scan.py` 与 fixture 回归，首次接入 Flutter 项目时可识别 Riverpod / Bloc / go_router / Dio / freezed / json_serializable / get_it / l10n / test 等技术栈 evidence
+- 新增 `scripts/project_stack_scan.py` 与 fixture 回归，首次接入 项目时可识别 Riverpod / Bloc / go_router / Dio / freezed / json_serializable / get_it / l10n / test 等技术栈 evidence
 - 新增 `scripts/validate_docs_sync.py` 和 `references/demo_transcript.md`，把 demo transcript、load map 和关键文档链接纳入自动同步检查
 - `skill_visibility.md` 新增子 agent 结果摘要示例，要求子 agent 完成时对用户说明“完成了什么”，而不是只写“完成”
 - 新增大任务结束固定出口：先输出“已完成什么 / 修改了什么 / 实现了什么”，再显式判断“是否需要更新规则卡”
@@ -320,7 +332,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 - 明确“完整流程”是执行协议，不是用户可见模式名；对外按任务语义显示为功能开发或页面开发
 - 新增 `references/mode_test_cases.md`：覆盖各模式的最小测试用例，并补充大任务并行时 arch-agent / impl-agent / verify-agent 的对外可见输出示例
 - 新增架构级任务分类：优化/重构/代码审查/迁移/依赖清理/i18n-a11y，角色流程为架构设计师 → 页面工程师
-- 运维直通重定义：仅覆盖排除场景（非 Flutter 任务），analyze/test/build 等工程任务改为轻量任务
+- 运维直通重定义：仅覆盖排除场景（非项目 任务），analyze/test/build 等工程任务改为轻量任务
 - 新增角色流程选择表：有 UI → 四角色，无 UI → 跳 UI 设计师，架构级 → 跳需求+UI，轻量 → 页面工程师
 - 新增"优化"关键词路由：默认进架构级任务，需求+优化进完整流程，样式+优化由 UI 设计师处理
 - 新增高风险结构决策定义：含需求分析师阻断条件
@@ -345,7 +357,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 
 统一四角色提问预算与确认门禁
 
-- 将 `flutter-skills/` 目录下的 10 个官方 Flutter skill 本地副本纳入 `0.5.0` 版本提交
+- 将 `project-skills/` 目录下的 10 个官方 项目 skill 本地副本纳入 `0.5.0` 版本提交
 - 新增 `references/shared_workflow_gates/question_budget.md`，把 `L1-L4` 提问预算从主规则中拆出
 - `SKILL.md` 新增四角色提问预算摘要，明确完整流程不等于问题越多越好
 - `requirement_confirmation.md`、`role_gate_matrix.md` 补充预算和放行规则
@@ -354,25 +366,25 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 
 ## 0.4.4
 
-去外部依赖，Flutter skills 本地化
+去外部依赖，项目 skills 本地化
 
-- 删除 `scripts/discover_flutter_skills.sh` 外部探测脚本
+- 删除 `scripts/discover_project_skills.sh` 外部探测脚本
 - 删除 `references/official_skill_aliases.yaml` 别名映射
-- `references/official_flutter_skills.md` 改为直接引用 `flutter-skills/` 本地副本
+- `references/official_project_skills.md` 改为直接引用 `project-skills/` 本地副本
 - `references/delegation_map.yaml` 每个 skill 加 `path` 字段指向本地副本
 - 移除 task_runtime_prompt.md 中的探测/降级/安装命令整段
-- LICENSE 加 Third-Party Components 段落，标注 flutter-skills/ 来源归属（BSD-3-Clause, Google LLC）
+- LICENSE 加 Third-Party Components 段落，标注 project-skills/ 来源归属（BSD-3-Clause, Google LLC）
 - README 更新架构图、项目结构、集成章节为本地副本模式
 
 ## 0.4.3
 
-更新官方 Flutter Skills 映射：对齐 flutter/skills 仓库命名
+更新官方 项目 Skills 映射：对齐 project/skills 仓库命名
 
-- 删除 20 个旧的 Flutter Forge 命名 skills
-- 安装 10 个官方 flutter/skills（2026-05-14 确认）
+- 删除 20 个旧的 Forge CLI 命名 skills
+- 安装 10 个官方 project/skills（2026-05-14 确认）
 - 更新 official_skill_aliases.yaml：以官方名称为主键，旧名称为别名
 - 更新 delegation_map.yaml：使用正确的官方 skill 名称
-- 更新 official_flutter_skills.md：删除不存在的 16 个 skill，只保留 10 个官方 skill
+- 更新 official_project_skills.md：删除不存在的 16 个 skill，只保留 10 个官方 skill
 - 更新 architecture_designer.md、page_engineer.md、engineering_heuristics.md、debugging_playbook.md、testing_strategy.md 中的 skill 引用
 
 ## 0.4.2
@@ -389,13 +401,13 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 
 同步共创与确认闸门
 
-- 新增 `references/new_project_cocreation_mode.md`，支持从一个模糊 Flutter 项目想法出发，通过多轮问答逐步收口需求、风格、页面结构和第一版范围
+- 新增 `references/new_project_cocreation_mode.md`，支持从一个模糊 项目想法出发，通过多轮问答逐步收口需求、风格、页面结构和第一版范围
 - 主规则新增"新项目共创模式"，放在新项目初始化之前，避免只有想法时过早跳到规则卡和工程细节
 - 补强确认绑定规则：用户一句"确认 / 可以 / 按这个来 / 没问题"只对上一轮明确摘要生效，不能自动吞掉摘要外的未决项
 - 补强 UI 首轮输出闸门：新项目共创模式下，UI 设计师在方向确认后的第一轮只允许输出"结构草案"，不得一次性展开完整页面结构包
 - 更新角色交接格式：新增"结构草案确认状态"和"用户确认状态"约束，未通过时禁止下发完整 UI 包
 - 同步共享门禁：`shared_workflow_gates` 中的确认门禁、角色闸门与顾问式协作规则
-- 更新 README、load map、项目初始化流程和运行时提示，使 Flutter 语义与 H5 版保持一致
+- 更新 README、load map、项目初始化流程和运行时提示，使 项目语义与 H5 版保持一致
 
 ## 0.4.0
 
@@ -405,12 +417,12 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 - 修正 `.skillhub.json` 版本号，使其与 `VERSION` 和 README 的 `0.4.0` 保持一致
 - 优化 README 首屏，明确 GitHub 首发状态、适用人群、暂缺 demo/截图的后续计划
 - 新增老项目接入入口和新项目应用 profile 文档，README 增加可复制开场 prompt
-- 优化任务路由为"硬排除 + 运维直通 + 轻量执行 + 完整流程"，让 Flutter 项目尽量全接管但不牺牲效率
+- 优化任务路由为"硬排除 + 运维直通 + 轻量执行 + 完整流程"，让 项目尽量全接管但不牺牲效率
 - 调整上下文恢复：弱继续表述在存在未完成 session 时轻量恢复，避免长期任务被误当成新任务
 - 新增完整流程升级原因规则：进入重流程时必须说明具体触发点，防止中等任务被过度流程化
 - 收紧 10 秒测试：从需求/设计开始的新页面、新模块、新项目任务优先进入完整流程，不能因描述清晰而误判为轻量任务
 - 补强误路由纠正、需求阶段强制重开、同任务续写恢复和用户确认状态门禁，对齐 h5-forge 的核心工作流闸门
-- 新增 `references/shared_workflow_gates/` 子目录，沉淀可在 Flutter Forge 与 H5 Forge 之间直接复制的通用门禁规则
+- 新增 `references/shared_workflow_gates/` 子目录，沉淀可在 Forge CLI 与 H5 Forge 之间直接复制的通用门禁规则
 - 重构触发系统为"硬触发 + 语义触发 + 示例表达"三层结构，减少关键词堆积导致的误判和维护成本
 
 ## 0.3.7
@@ -418,10 +430,10 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 重构任务路由为排除条件检查、全程接管模式、恢复触发标记明确化
 
 - 重构任务路由：从"10秒测试+快速退出条件"改为"排除条件检查+10秒测试"
-- 排除场景明确化：非Flutter项目、不涉及UI/Widget的操作（纯Dart、配置、CI、git、构建、部署、测试、文档）、纯知识问答、闲聊确认追问
-- 全程接管模式：所有Flutter UI相关任务都进入flutter-forge，只有明确排除的场景才退出
+- 排除场景明确化：非项目项目、不涉及UI/Widget的操作（纯Dart、配置、CI、git、构建、部署、测试、文档）、纯知识问答、闲聊确认追问
+- 全程接管模式：所有项目 UI相关任务都进入forge-cli，只有明确排除的场景才退出
 - 上下文恢复规则增强：需要明确触发标记（ff-、业务关键词）才会恢复之前的工作，其他表述视为新任务
-- 恢复触发标记：ff-、使用flutter-forge、/flutter-forge、继续做这个需求、继续页面开发、继续第2阶段、继续登录页
+- 恢复触发标记：ff-、使用forge-cli、/forge-cli、继续做这个需求、继续页面开发、继续第2阶段、继续登录页
 - 其他表述（"继续之前的工作"、"接着做"、"然后呢"）不触发恢复，视为新任务
 
 ## 0.3.6
@@ -442,7 +454,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 
 可见性标记统一为 [f-forge]、轻量任务强制角色标签、四角色输出强制执行
 
-- 可见性标记统一：`[ff]` 和 `[flutter-forge]` 全量替换为 `[f-forge]`，17 个文件 92 处
+- 可见性标记统一：`[ff]` 和 `[forge-cli]` 全量替换为 `[f-forge]`，17 个文件 92 处
 - 轻量任务强制角色标签：输出格式从 `[f-forge] 轻量任务，直接执行` 改为 `[f-forge] 页面工程师：轻量任务，直接执行`
 - 轻量任务输出节奏约束：只在开始和结束时各输出一次 `[f-forge]` 标记，中间过程不逐条输出
 - 大任务强制四角色输出：新增强制输出规则，禁止跳过需求分析师/UI设计师/架构设计师直接给结论
@@ -464,7 +476,7 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 - 新增四个角色思考框架：需求分析师（PRD 四层法/验收标准模板/隐含需求识别）、UI 设计师（四维评估/组件分类法/布局模式库）、架构设计师（技术选型权衡/风险评估矩阵/文件结构决策树/公共组件抽取标准）、页面工程师（实现优先级/性能优化检查/边界情况清单/代码生成决策）
 - 新增讨论回合机制：触发条件、2 轮上限、决策权优先级（需求分析师>UI设计师>架构设计师>页面工程师）
 - 新增角色输出标注：`[f-forge] 角色名：内容` 格式，每个角色独占一段
-- 新增官方 Flutter skill 调度：架构设计师为调度者，页面工程师为执行者，含降级处理
+- 新增官方 项目 skill 调度：架构设计师为调度者，页面工程师为执行者，含降级处理
 - 新增代码审查模式（`references/code_review_mode.md`）：5 维度审查、严重程度分级
 - 新增迁移辅助（`references/migration_assist.md`）：状态管理迁移、目录重构、命名统一
 - 新增国际化/无障碍检查（`references/i18n_a11y_check.md`）：i18n 5 项 + a11y 6 项检查
@@ -483,8 +495,8 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 - README 重构：新增实际效果展示、诊断命令，安装和使用提前，架构总览下移
 - 安装方式更新：支持 `npx skills add` 安装，git clone 作为备选
 - 新增可见性标记：`[f-forge]` 标记让用户在连续对话中感知 skill 是否在工作
-- 新增会话状态：`.flutter-forge/session.md` 记录当前工作状态，用户可主动查询
-- 拆分 SKILL.md：输入不完整处理、官方 Flutter skills、可见性标记拆为独立 reference（707→518 行）
+- 新增会话状态：`.forge-cli/session.md` 记录当前工作状态，用户可主动查询
+- 拆分 SKILL.md：输入不完整处理、官方 项目 skills、可见性标记拆为独立 reference（707→518 行）
 - 输入处理增强：区分视觉输入（截图/Figma）和文字 UI 描述两条路径，文字 UI 描述不依赖多模态能力
 - UI 输入增加需求确认步骤：从 UI 结构推断业务意图，列出待确认项，不跳过直接写代码
 
@@ -525,42 +537,42 @@ P0 强制层闭环 + P1 路由脚本增强 + P2 文档精简。
 
 ## 0.2.0
 
-Release Flutter Forge 0.2.0
+Release Forge CLI 0.2.0
 
-- 收紧 `flutter-forge` 的主控定位与触发描述，强调 Flutter 项目任务应优先进入 `flutter-forge`，而不是先走通用编码模式
-- 精简 `README`，只保留用户真正需要的信息：用途、安装、自然使用方式、推荐开场、官方 Flutter skills 可选安装，以及触发失败时的 fallback 用法
-- 增加显式触发兜底说明：支持 `ff- ...`、`使用 flutter-forge ...`、`按 flutter-forge 工作模式处理 ...`
-- 将启动流程收口为更明确的握手机制：项目类型、规则卡状态、Flutter skills 状态三项判定
-- 增加"完全态"概念：只有正式规则卡存在且 Flutter skills 状态已就绪时，后续进入项目才静默跳过完整握手
+- 收紧 `forge-cli` 的主控定位与触发描述，强调 项目任务应优先进入 `forge-cli`，而不是先走通用编码模式
+- 精简 `README`，只保留用户真正需要的信息：用途、安装、自然使用方式、推荐开场、官方 项目 skills 可选安装，以及触发失败时的 fallback 用法
+- 增加显式触发兜底说明：支持 `ff- ...`、`使用 forge-cli ...`、`按 forge-cli 工作模式处理 ...`
+- 将启动流程收口为更明确的握手机制：项目类型、规则卡状态、项目 skills 状态三项判定
+- 增加"完全态"概念：只有正式规则卡存在且 项目 skills 状态已就绪时，后续进入项目才静默跳过完整握手
 - 增加"进入工作阶段"日志与输入模型日志，区分 `只给 PRD`、`只给设计图`、`PRD + 设计图`、`上下文不足`、`直接开发任务`
 - 强化规则卡语义：没有正式规则卡就视为项目未初始化；扫描推断、会话记忆、宿主项目记忆不得冒充"已加载规则卡"
-- 统一正式规则卡来源：只认 `~/.flutter-forge/projects/*.rule_card.yaml`，明确排除 `.claude/projects/.../memory/*.yaml` 等宿主侧记忆文件
+- 统一正式规则卡来源：只认 `~/.forge-cli/projects/*.rule_card.yaml`，明确排除 `.claude/projects/.../memory/*.yaml` 等宿主侧记忆文件
 - 固定新项目规则卡生成时机：完成起步方式选择并产出首个设计包后，进入代码前必须生成规则卡并打印路径
 - 调整记忆协议：检查规则卡存在性始终执行，但读取 / 写入长期记忆只在长期协作或用户明确要求时启用
-- 增加 Flutter skills "已就绪 / 未就绪" 状态位，并要求该状态参与是否展开握手日志的判断
-- 新增 Flutter skills 安装 / 映射提醒抑制机制：当用户明确表示不想下载或映射时，记录跨项目偏好，后续只保留探测和状态输出，不再重复提醒安装命令或映射脚本
-- 校正官方 Flutter skills 名称基准，改为以当前 `flutter/skills` 仓库实际 skill 名称为主，旧名称降级为兼容别名
+- 增加 项目 skills "已就绪 / 未就绪" 状态位，并要求该状态参与是否展开握手日志的判断
+- 新增 项目 skills 安装 / 映射提醒抑制机制：当用户明确表示不想下载或映射时，记录跨项目偏好，后续只保留探测和状态输出，不再重复提醒安装命令或映射脚本
+- 校正官方 项目 skills 名称基准，改为以当前 `project/skills` 仓库实际 skill 名称为主，旧名称降级为兼容别名
 - 新增 `references/official_skill_aliases.yaml`，统一维护官方名称与历史名称的兼容映射
 - 更新 `references/delegation_map.yaml`，按当前官方 skill 名称重写委托映射
 - 更新官方 skill 文档，明确探测顺序、更新命令、命名兼容策略，以及不要在多个可发现目录放置同名 skill 副本
 - 新增 `references/load_map.md`，把 reference 的按需加载入口从主文档中抽离，进一步落实 progressive disclosure
-- 新增 `scripts/discover_flutter_skills.sh`，用于扫描项目内与宿主根技能目录、选择 Flutter 协作技能根目录并写入本地映射文件
+- 新增 `scripts/discover_project_skills.sh`，用于扫描项目内与宿主根技能目录、选择 项目协作技能根目录并写入本地映射文件
 - 扩展脚本探测模型，统一覆盖项目内目录与宿主根目录：`.claude/skills/`、`.agents/skills/`、`.cc-switch/skills/`、`.trae/skills/` 及其 `~/` 根目录版本
 - 补充启动握手与工作阶段的示例日志，更新 `example_workflow.md`，让接管时机、规则卡生成时机和技能状态更可见
 - 持续收敛主文档与 reference 边界，降低主文档噪音，把模型内部工作细节从用户文档中剥离
 
 ## 0.1.0
 
-Initial Flutter Forge skill
+Initial Forge CLI skill
 
-- 明确定位为 Flutter 项目内编排 skill，而不是通用代码生成器
+- 明确定位为 项目内编排 skill，而不是通用代码生成器
 - 补充四个角色定义与角色交接格式
 - 补充只给 PRD、只给设计图、输入不完整时的处理规则
-- 补充官方 Flutter Agent Skills 对接策略与委托映射
+- 补充官方 项目 Agent Skills 对接策略与委托映射
 - 补充 progressive disclosure 读取规则
 - 补充记忆读写协议与新项目规则选择流程
 - 新增全局偏好、项目规则卡、规则画像、短期任务记忆分层
-- 补充工程判断标准与 Flutter 专项知识
+- 补充工程判断标准与 项目专项知识
 - 补充测试策略、质量门、构建与静态分析建议
 - 补充反模式检测、模板目录、调试手册
 - 扩展规则卡字段：路由、国际化、主题、性能、依赖注入、质量偏好
@@ -585,7 +597,7 @@ Initial Flutter Forge skill
 
 | 优先级 | 事项 | 状态 |
 |--------|------|------|
-| P1 | 真实 Flutter 项目试跑 1-2 周，记录完整 transcript | 未开始 |
+| P1 | 真实 项目试跑 1-2 周，记录完整 transcript | 未开始 |
 | P1 | 最后一轮低频文档清扫（references/archive 内旧术语） | 进行中 |
 | P2 | 规则卡刷新流程细化（哪些变更必须建议刷新） | 未开始 |
 | P2 | 全仓一致性回归检查 | 进行中 |

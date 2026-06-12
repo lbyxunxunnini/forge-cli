@@ -1,6 +1,6 @@
-# Flutter Forge Reference - Agent Isolation Protocol
+# Forge CLI Reference - Agent Isolation Protocol
 
-flutter-forge 的 5 个角色（需求分析师、UI 设计师、架构设计师、页面工程师、验证工程师）通过隔离子代理执行，避免单 LLM 上下文污染和角色越权。
+forge-cli 的 5 个角色（需求分析师、UI 设计师、架构设计师、页面工程师、验证工程师）通过隔离子代理执行，避免单 LLM 上下文污染和角色越权。
 
 ## 架构
 

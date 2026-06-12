@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create a Flutter Forge project-guardrails file from project snapshot evidence.
+"""Create a Forge CLI project-guardrails file from project snapshot evidence.
 
 Supports profile detection (--profile auto), interactive wizard (--interactive),
 and generates a full guardrails file with evidence and confidence scores.
@@ -152,13 +152,13 @@ def render_guardrails(project_root: Path, data: dict[str, object], profile_name:
     return f"""project_guardrails:
   project:
     name: "{project_name}"
-    type: "flutter"
+    type: "project"
     status: "existing"
-    root_type: "flutter_existing"
+    root_type: "existing"
     overall_confidence: "medium"
     source_rules:
       - "project_snapshot"
-      - "flutter_stack_scan"
+      - "project_stack_scan"
       - "{profile_name}"
 
   team_rules:
@@ -270,7 +270,7 @@ def render_guardrails(project_root: Path, data: dict[str, object], profile_name:
 
 
 def print_wizard_summary(project_root: Path, data: dict[str, object], profile_name: str, profile_reason: str, output: Path) -> None:
-    print("Flutter Forge project-guardrails initialization")
+    print("Forge CLI project-guardrails initialization")
     print(f"project: {project_root}")
     print(f"profile: {profile_name} ({profile_reason})")
     print(f"output: {output}")
@@ -302,15 +302,15 @@ def main() -> int:
     project_root = args.project_root.resolve()
     snapshot_module = load_snapshot(repo)
     data = snapshot_module.snapshot(project_root)
-    if not data["is_flutter_project"]:
-        print(f"FAIL not a Flutter project: {project_root}")
+    if not data["is_project"]:
+        print(f"FAIL not a project: {project_root}")
         return 1
 
     profile_name, profile_reason = choose_profile(data["stack_signals"], args.profile)
     pubspec_hash = compute_pubspec_hash(project_root)
     lib_dirs_snapshot = compute_lib_top_dirs_snapshot(project_root)
 
-    output = args.output or project_root / ".flutter-forge" / "projects" / f"{project_root.name}.project_guardrails.yaml"
+    output = args.output or project_root / ".forge-cli" / "projects" / f"{project_root.name}.project_guardrails.yaml"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(render_guardrails(project_root, data, profile_name, profile_reason, pubspec_hash, lib_dirs_snapshot), encoding="utf-8")
     if args.interactive:

@@ -249,7 +249,7 @@ fi
 printf '%s\n' \
   '[f-forge] 进入 controller' \
   '[f-forge] 模式：启动握手' \
-  '[f-forge] 主控：project_guardrails 已初始化：.claude/.flutter-forge/projects/app.project_guardrails.yaml' \
+  '[f-forge] 主控：project_guardrails 已初始化：.claude/.forge-cli/projects/app.project_guardrails.yaml' \
   '[f-forge] 本轮完成：已完成项目锚点初始化' \
   | scripts/validate_output.sh --require-complete >/dev/null
 
@@ -260,7 +260,7 @@ printf '%s\n' \
 
 if printf '%s\n' \
   '[f-forge] 进入 controller' \
-  '[f-forge] project_guardrails 已初始化：.claude/.flutter-forge/projects/app.project_guardrails.yaml' \
+  '[f-forge] project_guardrails 已初始化：.claude/.forge-cli/projects/app.project_guardrails.yaml' \
   '[f-forge] 本轮完成：已完成项目锚点初始化' \
   | scripts/validate_output.sh --require-complete >/dev/null 2>&1; then
   fail "validate_output accepted project_guardrails status without role or mode"

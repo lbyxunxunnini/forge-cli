@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate flutter-forge phase/contract gates for a target write path.
+"""Evaluate forge-cli phase/contract gates for a target write path.
 
 所有门禁均为硬性阻断，无模糊词，无软约束。
 只检查 session 中的核心字段，不检查日志文件。
@@ -15,10 +15,10 @@ from pathlib import Path
 
 def read_session(project_root: Path) -> dict[str, str]:
     candidates = [
-        project_root / ".claude/.flutter-forge/session.md",
-        project_root / ".trae/.flutter-forge/session.md",
-        project_root / ".agents/.flutter-forge/session.md",
-        project_root / ".flutter-forge/session.md",
+        project_root / ".claude/.forge-cli/session.md",
+        project_root / ".trae/.forge-cli/session.md",
+        project_root / ".agents/.forge-cli/session.md",
+        project_root / ".forge-cli/session.md",
     ]
     session_path = next((path for path in candidates if path.exists()), None)
     if session_path is None:
@@ -34,7 +34,7 @@ def read_session(project_root: Path) -> dict[str, str]:
 
 
 def read_task_gate(project_root: Path) -> dict[str, object]:
-    path = project_root / ".flutter-forge/runtime/task_gate.json"
+    path = project_root / ".forge-cli/runtime/task_gate.json"
     if not path.exists():
         return {}
     try:

@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "Flutter Forge doctor"
+echo "Forge CLI doctor"
 
 python3 --version >/dev/null
 echo "PASS python3: $(python3 --version)"
@@ -25,9 +25,9 @@ else
 fi
 
 if [[ -f pubspec.yaml && -d lib ]]; then
-  echo "PASS current directory looks like Flutter app"
+  echo "PASS current directory looks like project app"
 else
-  echo "INFO current directory is not a Flutter app"
+  echo "INFO current directory is not a project app"
 fi
 
 echo "PASS doctor completed"

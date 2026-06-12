@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
-  echo "usage: scripts/validate_project.sh /path/to/flutter/app" >&2
+  echo "usage: scripts/validate_project.sh /path/to/project/app" >&2
   exit 2
 fi
 
@@ -13,9 +13,9 @@ if [[ ! -d "$PROJECT_ROOT" ]]; then
 fi
 
 if [[ ! -f "$PROJECT_ROOT/pubspec.yaml" || ! -d "$PROJECT_ROOT/lib" ]]; then
-  echo "FAIL not a Flutter app: missing pubspec.yaml or lib/" >&2
+  echo "FAIL not a project app: missing pubspec.yaml or lib/" >&2
   exit 1
 fi
 
 python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/project_snapshot.py" "$PROJECT_ROOT" >/dev/null
-echo "PASS project is valid for Flutter Forge: $PROJECT_ROOT"
+echo "PASS project is valid for Forge CLI: $PROJECT_ROOT"

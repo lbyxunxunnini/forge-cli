@@ -117,7 +117,7 @@ checklist:
     - "受影响功能"
   verification_type: minimal
   commands_run:
-    - "flutter analyze"
+    - "项目验证命令"
 ```
 
 字段说明：

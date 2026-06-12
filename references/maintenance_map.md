@@ -1,4 +1,4 @@
-# Flutter Forge Maintenance Map
+# Forge CLI Maintenance Map
 
 这份文档只服务维护者。它回答一件事：**想改某类规则时，最少需要同步哪些文件。**
 

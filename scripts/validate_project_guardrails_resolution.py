@@ -19,10 +19,10 @@ def load_snapshot(repo: Path):
     return module
 
 
-def write_minimal_flutter_project(root: Path) -> None:
+def write_minimal_project(root: Path) -> None:
     (root / "lib").mkdir(parents=True)
     (root / "pubspec.yaml").write_text(
-        "name: current_app\ndependencies:\n  flutter:\n    sdk: flutter\n",
+        "name: current_app\ndependencies:\n  project:\n    sdk: project\n",
         encoding="utf-8",
     )
 
@@ -47,10 +47,10 @@ def main() -> int:
         temp_root = Path(tmp)
         project = temp_root / "current_app"
         project.mkdir()
-        write_minimal_flutter_project(project)
+        write_minimal_project(project)
 
         # Simulate Claude Code global project memory. It must never count as a
-        # Flutter Forge project_guardrails file for the current target project.
+        # Forge CLI project_guardrails file for the current target project.
         fake_home = temp_root / "home"
         os.environ["HOME"] = str(fake_home)
         write_card(fake_home / ".claude/projects/other/memory/facesong_project_guardrails.yaml")
@@ -59,14 +59,14 @@ def main() -> int:
         if data["project_guardrails"]:
             errors.append(f"global memory was incorrectly loaded: {data['project_guardrails']}")
 
-        write_card(project / ".flutter-forge/projects/facesong.project_guardrails.yaml")
+        write_card(project / ".forge-cli/projects/facesong.project_guardrails.yaml")
         data = snapshot.snapshot(project)
         if data["project_guardrails"]:
             errors.append(f"unrelated local project guardrails were incorrectly loaded: {data['project_guardrails']}")
 
-        write_card(project / ".flutter-forge/projects/current_app.project_guardrails.yaml")
+        write_card(project / ".forge-cli/projects/current_app.project_guardrails.yaml")
         data = snapshot.snapshot(project)
-        expected = [".flutter-forge/projects/current_app.project_guardrails.yaml"]
+        expected = [".forge-cli/projects/current_app.project_guardrails.yaml"]
         if data["project_guardrails"] != expected:
             errors.append(f"current project guardrails were not resolved exactly: {data['project_guardrails']}")
 

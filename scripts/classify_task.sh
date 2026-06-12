@@ -73,8 +73,8 @@ case "$TASK_TEXT" in
   ff[[:space:]]a[[:space:]]*) TASK_TEXT="$(printf '%s' "$TASK_TEXT" | sed -E 's/^ff[[:space:]]+a//')" ;;
   ff-) TASK_TEXT="" ;;
   ff-[[:space:]]*) TASK_TEXT="${TASK_TEXT#ff-}" ;;
-  /flutter-forge) TASK_TEXT="" ;;
-  /flutter-forge[[:space:]]*) TASK_TEXT="${TASK_TEXT#/flutter-forge}" ;;
+  /forge-cli) TASK_TEXT="" ;;
+  /forge-cli[[:space:]]*) TASK_TEXT="${TASK_TEXT#/forge-cli}" ;;
 esac
 TASK_TEXT="$(echo "$TASK_TEXT" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')"
 
@@ -103,7 +103,7 @@ elif [ -z "$TASK_TEXT" ]; then
   confidence="high"
   matched_by="empty_trigger"
 # 1. 启动握手 / 首次接入
-elif echo "$INPUT" | grep -qE '迭代中.*Flutter 项目|已有.*Flutter 项目|先扫描.*项目结构|初始化.*project_guardrails|识别项目结构和 project_guardrails|识别项目结构和 guardrails'; then
+elif echo "$INPUT" | grep -qE '迭代中.*项目|已有.*项目|先扫描.*项目结构|初始化.*project_guardrails|识别项目结构和 project_guardrails|识别项目结构和 guardrails'; then
   mode="启动握手"
   confidence="high"
   matched_by="startup_handshake_keywords"
@@ -257,7 +257,7 @@ if [ "$WRITE_GATE" = "true" ]; then
     echo "task_gate_reason: missing_project_root"
   else
     PROJECT_ROOT_ABS="$(cd "$PROJECT_ROOT" && pwd)"
-    GATE_DIR="$PROJECT_ROOT_ABS/.flutter-forge/runtime"
+    GATE_DIR="$PROJECT_ROOT_ABS/.forge-cli/runtime"
     mkdir -p "$GATE_DIR" 2>/dev/null || true
     MODE="$mode" CONFIDENCE="$confidence" POLICY="$policy" MATCHED_BY="$matched_by" \
     SHOULD_LOAD_GUARDRAILS="$should_load_guardrails" GUARDRAILS_CHECK="$guardrails_check" \

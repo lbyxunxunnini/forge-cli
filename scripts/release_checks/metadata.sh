@@ -35,7 +35,7 @@ fi
 
 info "version metadata is consistent: $version"
 
-tracked_local_files="$(git ls-files | grep -E '(^|/)(\.DS_Store|\.flutter-forge/|\.claude/|memory/runtime/current_task\.yaml$)' || true)"
+tracked_local_files="$(git ls-files | grep -E '(^|/)(\.DS_Store|\.forge-cli/|\.claude/|memory/runtime/current_task\.yaml$)' || true)"
 if [[ -n "$tracked_local_files" ]]; then
   printf '%s\n' "$tracked_local_files" >&2
   fail "local-only files are tracked"

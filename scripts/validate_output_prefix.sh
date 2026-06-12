@@ -23,10 +23,10 @@ done
 # 读取 session
 SESSION_FILE=""
 for candidate in \
-  "$PROJECT_ROOT/.claude/.flutter-forge/session.md" \
-  "$PROJECT_ROOT/.trae/.flutter-forge/session.md" \
-  "$PROJECT_ROOT/.agents/.flutter-forge/session.md" \
-  "$PROJECT_ROOT/.flutter-forge/session.md"; do
+  "$PROJECT_ROOT/.claude/.forge-cli/session.md" \
+  "$PROJECT_ROOT/.trae/.forge-cli/session.md" \
+  "$PROJECT_ROOT/.agents/.forge-cli/session.md" \
+  "$PROJECT_ROOT/.forge-cli/session.md"; do
   if [ -f "$candidate" ]; then
     SESSION_FILE="$candidate"
     break

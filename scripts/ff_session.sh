@@ -44,7 +44,7 @@
 #   --summary_package <摘要包路径或摘要标识>
 #   --last_user_input <最后用户输入摘要>
 #
-# session 路径: 与 project_guardrails 宿主目录一致；无 project_guardrails 时回退 .flutter-forge/session.md
+# session 路径: 与 project_guardrails 宿主目录一致；无 project_guardrails 时回退 .forge-cli/session.md
 
 set -euo pipefail
 
@@ -63,11 +63,11 @@ fi
 PROJECT_ROOT_ABS="$(cd "${PROJECT_ROOT:-.}" && pwd)"
 
 runtime_dir() {
-  printf '%s/.flutter-forge/runtime\n' "$PROJECT_ROOT_ABS"
+  printf '%s/.forge-cli/runtime\n' "$PROJECT_ROOT_ABS"
 }
 
 legacy_session_file() {
-  printf '%s/.flutter-forge/session.md\n' "$PROJECT_ROOT_ABS"
+  printf '%s/.forge-cli/session.md\n' "$PROJECT_ROOT_ABS"
 }
 
 session_file_from_project_guardrails() {
@@ -98,10 +98,10 @@ print(path)
     return 1
   fi
   case "$anchor_path" in
-    .claude/.flutter-forge/projects/*) host_dir=".claude/.flutter-forge" ;;
-    .trae/.flutter-forge/projects/*) host_dir=".trae/.flutter-forge" ;;
-    .agents/.flutter-forge/projects/*) host_dir=".agents/.flutter-forge" ;;
-    .flutter-forge/projects/*) host_dir=".flutter-forge" ;;
+    .claude/.forge-cli/projects/*) host_dir=".claude/.forge-cli" ;;
+    .trae/.forge-cli/projects/*) host_dir=".trae/.forge-cli" ;;
+    .agents/.forge-cli/projects/*) host_dir=".agents/.forge-cli" ;;
+    .forge-cli/projects/*) host_dir=".forge-cli" ;;
     *) return 1 ;;
   esac
   printf '%s/%s/session.md\n' "$PROJECT_ROOT_ABS" "$host_dir"
@@ -109,9 +109,9 @@ print(path)
 
 candidate_session_files() {
   session_file_from_project_guardrails || true
-  printf '%s/.claude/.flutter-forge/session.md\n' "$PROJECT_ROOT_ABS"
-  printf '%s/.trae/.flutter-forge/session.md\n' "$PROJECT_ROOT_ABS"
-  printf '%s/.agents/.flutter-forge/session.md\n' "$PROJECT_ROOT_ABS"
+  printf '%s/.claude/.forge-cli/session.md\n' "$PROJECT_ROOT_ABS"
+  printf '%s/.trae/.forge-cli/session.md\n' "$PROJECT_ROOT_ABS"
+  printf '%s/.agents/.forge-cli/session.md\n' "$PROJECT_ROOT_ABS"
   legacy_session_file
 }
 
@@ -161,7 +161,7 @@ write_session_template() {
   local project_guardrails="$4"
   mkdir -p "$(dirname "$SESSION_FILE")"
   cat > "$SESSION_FILE" <<EOF
-# Flutter Forge Session
+# Forge CLI Session
 
 - 轨道：${track}
 - 当前阶段：${phase}

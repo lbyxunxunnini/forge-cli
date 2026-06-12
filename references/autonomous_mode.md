@@ -1,4 +1,4 @@
-# Flutter Forge Reference - Autonomous Mode
+# Forge CLI Reference - Autonomous Mode
 
 `ff-a` 是全自动执行策略，不是独立任务模式。它的作用是减少确认轮次：缺少信息或改动边界需要收口时，由 controller 选择推荐方案继续推进，并在输出里明确标注采用了什么默认方案。它豁免最强写前确认等待，但不能绕过安全、不可逆、生产环境或全项目级架构切换等高风险中断，也不能自动补核心任务定义。
 

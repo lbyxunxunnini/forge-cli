@@ -1,4 +1,4 @@
-# Flutter Forge CLI Agent 使用指南
+# Forge CLI CLI Agent 使用指南
 
 > 安装、架构、Agent 角色、工作流阶段等信息请参见 [README.md](./README.md)。
 
@@ -21,11 +21,11 @@
 | `run_command` | 执行 shell 命令 |
 | `run_command_with_output` | 执行命令并获取输出 |
 
-### Flutter 专用
+### 项目专用
 
 | 工具 | 功能 |
 |------|------|
-| `scan_project` | 扫描 Flutter 项目结构 |
+| `scan_project` | 扫描 项目结构 |
 | `detect_project_state` | 检测项目根目录状态 |
 | `validate_output` | 验证输出是否符合规范 |
 | `check_guardrails` | 检查项目护栏状态 |
@@ -47,7 +47,7 @@ AI 会：
 ### 2. 修改代码
 
 ```
-> 把 lib/main.dart 中的 MaterialApp title 改成 "My App"
+> 把 src/main.ts 中的 app title 改成 "My App"
 ```
 
 AI 会：
@@ -58,7 +58,7 @@ AI 会：
 ### 3. 运行命令
 
 ```
-> 运行 flutter pub get
+> 运行 npm install
 ```
 
 AI 会：
@@ -81,9 +81,9 @@ AI 会：
 
 ```
 ╔══════════════════════════════════════════╗
-║  Flutter Forge v0.3.0                    ║
+║  Forge CLI v0.3.0                    ║
 ║  模型: deepseek-chat                      ║
-║  项目: /path/to/flutter-project           ║
+║  项目: /path/to/project           ║
 ║  输入 /help 查看命令                      ║
 ╚══════════════════════════════════════════╝
 
@@ -96,7 +96,7 @@ AI 会：
 
 ## 配置文件
 
-配置文件位置：`~/.flutter-forge/config.yaml`
+配置文件位置：`~/.forge-cli/config.yaml`
 
 ```yaml
 models:
@@ -124,7 +124,7 @@ project:
 ### 1. 命令未找到
 
 ```bash
-flutter-forge: command not found
+forge-cli: command not found
 ```
 
 重新安装全局包：

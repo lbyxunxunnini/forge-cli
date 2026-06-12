@@ -22,7 +22,7 @@ REQUIRED_LOAD_MAP_LINKS = [
     "fast_mode.md",
     "autonomous_mode.md",
     "stack_profiles.md",
-    "flutter_stack_detection.md",
+    "project_stack_detection.md",
 ]
 
 
