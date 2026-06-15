@@ -29,6 +29,10 @@ export class AgentOrchestrator {
   private workflowExecutor: WorkflowExecutor;
   private initPromise: Promise<void>;
 
+  // ─── 工作流活跃状态 ────────────────────────────────────────
+  private activeWorkflowName: string | null = null;
+  private activeWorkflowSessionId: string | null = null;
+
   constructor(
     private aiClient: AIClient,
     private contextManager: ContextManager,
@@ -84,6 +88,88 @@ export class AgentOrchestrator {
     }
   }
 
+  // ─── 工作流进入/退出 ─────────────────────────────────────────
+
+  /** 进入工作流模式（所有后续输入路由到该工作流） */
+  enterWorkflow(name: string): void {
+    this.activeWorkflowName = name;
+    this.activeWorkflowSessionId = `wf-${name}-${Date.now()}`;
+    forgeLogger.logInfo(`[orchestrator] 进入工作流: ${name}`);
+  }
+
+  /** 退出工作流模式 */
+  exitWorkflow(): string {
+    const name = this.activeWorkflowName;
+    this.activeWorkflowName = null;
+    this.activeWorkflowSessionId = null;
+    forgeLogger.logInfo(`[orchestrator] 退出工作流: ${name}`);
+    return name || '';
+  }
+
+  /** 获取当前活跃工作流名称 */
+  getActiveWorkflow(): string | null {
+    return this.activeWorkflowName;
+  }
+
+  /** 获取当前活跃工作流 session ID */
+  getActiveWorkflowSessionId(): string | null {
+    return this.activeWorkflowSessionId;
+  }
+
+  /** 语义退出检测：判断用户是否想退出当前工作流 */
+  private async isExitIntent(input: string): Promise<boolean> {
+    const inputLower = input.toLowerCase().trim();
+
+    // 关键词快速匹配
+    const exitKeywords = [
+      '退出工作流', '退出', '结束工作流', '不做了', '不干了',
+      '算了', '停', '取消工作流', 'exit workflow', 'exit wf',
+    ];
+    if (exitKeywords.some(kw => inputLower === kw || inputLower.startsWith(kw + ' '))) {
+      return true;
+    }
+
+    // 短输入用 LLM 兜底（避免误判长文本）
+    if (input.length < 15 && input.length > 1) {
+      try {
+        const result = await this.aiClient.generate(
+          `判断用户是否想退出当前工作流。只回答 "yes" 或 "no"。\n用户输入：${input}`,
+          '你是一个意图分类器。只回复 "yes" 或 "no"，不要回复其他内容。',
+          undefined,
+          1
+        );
+        return result.text.trim().toLowerCase().startsWith('yes');
+      } catch {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /** 在活跃工作流中执行用户输入 */
+  private async executeInActiveWorkflow(userInput: string): Promise<AgentResult> {
+    // 语义退出检测
+    if (await this.isExitIntent(userInput)) {
+      const name = this.exitWorkflow();
+      return { success: true, output: `已退出工作流: ${name}` };
+    }
+
+    const workflow = workflowRegistry.get(this.activeWorkflowName!);
+    if (!workflow) {
+      this.exitWorkflow();
+      return { success: false, output: '', error: `工作流 ${this.activeWorkflowName} 不存在，已自动退出` };
+    }
+
+    const result = await this.workflowExecutor.execute(workflow, this.projectRoot, userInput);
+    return {
+      success: result.success,
+      output: result.output,
+      needsUserInput: result.needsUserInput,
+      error: result.error,
+    };
+  }
+
   // 执行用户输入
   async execute(userInput: string): Promise<AgentResult> {
     // 初始化 tracer
@@ -94,6 +180,14 @@ export class AgentOrchestrator {
     this.toolRetry = new ToolRetryExecutor({ maxAttempts: 2 }, this.tracer);
 
     try {
+      // ─── 0. 活跃工作流模式：所有输入路由到当前工作流 ───
+      if (this.activeWorkflowName) {
+        this.tracer.record('state_change', { to: 'active_workflow', workflow: this.activeWorkflowName });
+        const result = await this.executeInActiveWorkflow(userInput);
+        this.finishTrace();
+        return result;
+      }
+
       // ─── 1. 触发词匹配 → 外部工作流（纯字符串匹配，不调 LLM） ───
       const matchedWorkflow = workflowRegistry.match(userInput);
       if (matchedWorkflow) {
@@ -229,6 +323,15 @@ export class AgentOrchestrator {
     this.tracer.record('user_input', { input: userInput });
 
     try {
+      // ─── 0. 活跃工作流模式 ───
+      if (this.activeWorkflowName) {
+        this.tracer.record('state_change', { to: 'active_workflow', workflow: this.activeWorkflowName });
+        const result = await this.executeInActiveWorkflow(userInput);
+        yield { type: 'text' as const, content: result.output };
+        this.finishTrace();
+        return;
+      }
+
       // ─── 1. 触发词匹配 → 外部工作流 ───
       const matchedWorkflow = workflowRegistry.match(userInput);
       if (matchedWorkflow) {
@@ -280,6 +383,12 @@ export class AgentOrchestrator {
     )) {
       if (event.type === 'text') fullText += event.content;
       yield event;
+    }
+
+    // 更新缓存统计
+    const usage = this.aiClient.getLastUsage();
+    if (usage) {
+      this.contextManager.updateCacheStatsFromUsage(usage);
     }
 
     this.contextManager.addAssistantMessage(fullText);

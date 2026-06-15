@@ -18,10 +18,13 @@ import { handleCommand, getAvailableCommands } from './commands.js';
 import { renderMarkdown } from './renderer.js';
 import { VERSION } from '../version.js';
 import { memoryManager } from '../memory/manager.js';
+import { permissionManager } from '../permissions/manager.js';
 import { forgeLogger } from '../output/logger.js';
 import { taskGroupRenderer } from './task-group.js';
 import { MultilineInput } from '../ui/multiline-input.js';
 import { CommandPalette, Command } from '../ui/command-palette.js';
+import { projectMemoryManager } from '../memory/project-memory.js';
+import { ConversationLog } from '../memory/conversation-log.js';
 
 // Banner ASCII Art
 const FORGE_ART = [
@@ -32,6 +35,13 @@ const FORGE_ART = [
   '██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗',
   '╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝',
 ];
+
+// 生成 session ID
+function generateSessionId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${timestamp}-${random}`;
+}
 
 // 消息类型
 interface Message {
@@ -53,8 +63,10 @@ interface ToolCall {
 /**
  * 主界面组件
  */
-function ForgeApp() {
+function ForgeApp({ resumeSessionId }: { resumeSessionId?: string | null }) {
   const { exit } = useApp();
+  const [sessionId, setSessionId] = useState<string>(() => resumeSessionId || generateSessionId());
+  const [isResuming, setIsResuming] = useState(!!resumeSessionId);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -62,12 +74,36 @@ function ForgeApp() {
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
   const [contextPercent, setContextPercent] = useState(0);
   const [totalTokens, setTotalTokens] = useState(0);
+  const [cacheHitRate, setCacheHitRate] = useState(0);
   const [model, setModel] = useState('');
   const [projectRoot, setProjectRoot] = useState('.');
+  const [activeWorkflow, setActiveWorkflow] = useState<string | null>(null);
   const orchestratorRef = useRef<AgentOrchestrator | null>(null);
   const aiClientRef = useRef<AIClient | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [ctrlCCount, setCtrlCCount] = useState(0);
+  const conversationLogRef = useRef<ConversationLog | null>(null);
+
+  // 保存会话并退出
+  const saveAndExit = useCallback(() => {
+    // 刷新对话日志缓冲区
+    conversationLogRef.current?.destroy();
+
+    // 保存会话到项目记忆（使用 sessionId 作为文件名，避免重复）
+    const history = contextManager.getHistory();
+    if (history.length > 0) {
+      const modelName = aiClientRef.current?.getModel() || 'unknown';
+      // 使用 sessionId 作为导出 ID，如果已存在则覆盖
+      projectMemoryManager.exportSession(history, modelName, sessionId);
+      console.log(chalk.dim(`\n会话已保存: ${sessionId}`));
+    }
+    // 显示恢复提示
+    console.log(chalk.dim('────────────────────────────────────────────────────────────────────────────────'));
+    console.log(chalk.yellow('Resume this session with:'));
+    console.log(chalk.cyan(`  forge --resume ${sessionId}`));
+    console.log('');
+    exit();
+  }, [sessionId, exit]);
 
   // 输入历史记录
   const [inputHistory, setInputHistory] = useState<string[]>([]);
@@ -122,8 +158,8 @@ function ForgeApp() {
         setCtrlCCount(prev => prev + 1);
 
         if (ctrlCCount >= 1) {
-          // 第二次按下，退出
-          exit();
+          // 第二次按下，保存会话并退出
+          saveAndExit();
         } else {
           // 第一次按下，提示
           setMessages(prev => [...prev, {
@@ -149,7 +185,7 @@ function ForgeApp() {
 
     // Ctrl+D: 退出
     if (key.ctrl && inputChar === 'd') {
-      exit();
+      saveAndExit();
       return;
     }
 
@@ -239,6 +275,9 @@ function ForgeApp() {
       // 注册工具
       registerAllTools();
 
+      // 初始化权限管理器
+      permissionManager.setProjectRoot(config.project.root);
+
       // 创建 orchestrator
       const orchestrator = new AgentOrchestrator(
         aiClient, contextManager, toolRegistry, config.project.root
@@ -253,6 +292,10 @@ function ForgeApp() {
 
       // 恢复日志
       forgeLogger.setQuiet(false);
+
+      // 初始化对话日志
+      const log = new ConversationLog(sessionId);
+      conversationLogRef.current = log;
 
       // 设置模型和项目路径
       const displayModel = configManager.getProvider(defaultPk)?.selected || currentModel.name;
@@ -296,6 +339,51 @@ function ForgeApp() {
 
       // 更新上下文状态
       updateContextStatus();
+
+      // 如果是恢复会话，加载历史
+      if (resumeSessionId) {
+        // 优先从对话日志加载（更完整）
+        let history = ConversationLog.loadSession(resumeSessionId);
+        let source = '对话日志';
+
+        // 如果日志没有，从 project-memory 加载
+        if (!history || history.length === 0) {
+          history = projectMemoryManager.load(resumeSessionId);
+          source = '会话记忆';
+        }
+
+        if (history && history.length > 0) {
+          // 将历史消息注入到上下文
+          for (const msg of history) {
+            contextManager.addMessage(msg);
+          }
+          // 更新 UI 显示历史消息
+          const uiMessages: Message[] = history
+            .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+            .map((msg, i) => ({
+              id: `history-${i}`,
+              role: msg.role as 'user' | 'assistant',
+              content: msg.content,
+              timestamp: Date.now(),
+            }));
+          setMessages(uiMessages);
+          setIsResuming(false);
+          setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            role: 'system',
+            content: `已从${source}恢复会话: ${resumeSessionId} (${history.length} 条消息)`,
+            timestamp: Date.now(),
+          }]);
+        } else {
+          setIsResuming(false);
+          setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            role: 'system',
+            content: `无法恢复会话: ${resumeSessionId}`,
+            timestamp: Date.now(),
+          }]);
+        }
+      }
     };
 
     init();
@@ -305,6 +393,11 @@ function ForgeApp() {
   const updateContextStatus = () => {
     setContextPercent(contextManager.getContextPercent());
     setTotalTokens(contextManager.getTotalTokens());
+    setCacheHitRate(contextManager.getCacheHitRate());
+    // 同步活跃工作流状态
+    if (orchestratorRef.current) {
+      setActiveWorkflow(orchestratorRef.current.getActiveWorkflow());
+    }
   };
 
   // 格式化 token 数量
@@ -338,6 +431,9 @@ function ForgeApp() {
     setInput('');
     setIsProcessing(true);
 
+    // 记录用户消息到对话日志
+    conversationLogRef.current?.log('user', trimmedValue);
+
     // 创建 AbortController
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
@@ -355,7 +451,7 @@ function ForgeApp() {
           }]);
         }
         if (result.shouldExit) {
-          exit();
+          saveAndExit();
           return;
         }
         setIsProcessing(false);
@@ -413,6 +509,7 @@ function ForgeApp() {
           content: '操作已中断',
           timestamp: Date.now(),
         }]);
+        conversationLogRef.current?.log('system', '操作已中断');
       } else if (fullText) {
         // 添加 AI 回复
         setMessages(prev => [...prev, {
@@ -421,6 +518,8 @@ function ForgeApp() {
           content: fullText,
           timestamp: Date.now(),
         }]);
+        // 记录助手回复到对话日志
+        conversationLogRef.current?.log('assistant', fullText);
       }
 
       // 清空工具调用
@@ -491,6 +590,12 @@ function ForgeApp() {
         <Text cyan>    项目: </Text>
         <Text white>{projectRoot}</Text>
         <Text cyan>                                     │</Text>
+      </Box>
+      <Box>
+        <Text cyan>│  Session: </Text>
+        <Text dimColor>{sessionId}</Text>
+        {isResuming && <Text yellow> (恢复中)</Text>}
+        <Text cyan>                          │</Text>
       </Box>
       <Box>
         <Text cyan>│  Ctrl+C:中断 │ Ctrl+D:退出 │ /help:帮助 │ 直接输入内容开始对话                 │</Text>
@@ -565,11 +670,23 @@ function ForgeApp() {
         <Text dimColor>────────────────────────────────────────────────────────────────────────────────</Text>
       </Box>
       <Box>
+        {activeWorkflow && (
+          <>
+            <Text yellow>[{activeWorkflow}]</Text>
+            <Text dimColor> │ </Text>
+          </>
+        )}
         <Text yellow>{model}</Text>
         <Text dimColor> │ </Text>
         <Text green>{contextPercent}%</Text>
         <Text dimColor> │ </Text>
         <Text dimColor>{formatTokens(totalTokens)} tokens</Text>
+        {cacheHitRate > 0 && (
+          <>
+            <Text dimColor> │ </Text>
+            <Text green>cache {cacheHitRate.toFixed(0)}%</Text>
+          </>
+        )}
       </Box>
     </Box>
   );
@@ -621,7 +738,7 @@ function ForgeApp() {
               value={input}
               onChange={setInput}
               onSubmit={handleSubmit}
-              placeholder={isProcessing ? '处理中...' : '输入内容开始对话'}
+              placeholder={isProcessing ? '处理中...' : activeWorkflow ? `[${activeWorkflow}] 输入内容...` : '输入内容开始对话'}
               focus={!isProcessing}
               multiline={true}
             />
@@ -637,8 +754,9 @@ function ForgeApp() {
 
 /**
  * 启动 Ink REPL
+ * @param resumeSessionId 可选的 session ID，用于恢复之前的会话
  */
-export async function startInkREPL(): Promise<void> {
+export async function startInkREPL(resumeSessionId?: string | null): Promise<void> {
   // 检查 stdin 是否是 TTY
   if (!process.stdin.isTTY) {
     // 如果不是 TTY（例如通过管道输入），使用传统的 readline REPL
@@ -646,7 +764,7 @@ export async function startInkREPL(): Promise<void> {
     return startREPL();
   }
 
-  const { waitUntilExit } = render(<ForgeApp />);
+  const { waitUntilExit } = render(<ForgeApp resumeSessionId={resumeSessionId} />);
   await waitUntilExit();
 }
 

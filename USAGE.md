@@ -81,7 +81,7 @@ AI 会：
 
 ```
 ╔══════════════════════════════════════════╗
-║  Forge CLI v0.3.0                    ║
+║  Forge CLI v0.1.0                    ║
 ║  模型: deepseek-chat                      ║
 ║  项目: /path/to/project           ║
 ║  输入 /help 查看命令                      ║

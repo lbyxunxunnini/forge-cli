@@ -1,21 +1,51 @@
 # Changelog
 
-说明：
+## v0.1.0
 
-- `0.2.x` 中出现的 `legacy_project_scan.md`、`~/.forge-cli/projects/*.rule_card.yaml` 等表述保留为当时版本的历史事实
-- 当前现行入口与项目护栏路径策略以 `references/existing_project_entry.md`、`references/existing_project_scan.md`、`references/project_guardrails_protocol.md` 为准
+Forge CLI 首个正式版本 — 通用 AI 协作 CLI Agent 框架。
 
-## v1.0.0
+### 核心架构
 
-通用化重构：移除 Flutter 工作流，Forge CLI 成为纯通用 Agent 框架。
+| 模块 | 说明 |
+|------|------|
+| `src/agent/` | Agent 执行循环（AgentLoop / AgentLoopV2） |
+| `src/agents/` | 多 Agent 编排（Orchestrator、Controller、Pool、Registry） |
+| `src/cli/` | CLI 层：Ink React REPL、命令处理、渲染器、输入/布局/对话框/主题系统 |
+| `src/tools/` | 工具系统：20+ 工具（文件读写、命令执行、Glob/Grep、AST、WebFetch/WebSearch 等） |
+| `src/memory/` | 记忆系统：四层架构、写入门槛、去重合并、压缩淘汰、语义召回 |
+| `src/llm/` | LLM 客户端：OpenAI 兼容接口、上下文管理、Token 预算、流式输出 |
+| `src/workflow/` | 工作流引擎：任务路由（8 种模式）、阶段推进、状态管理 |
+| `src/workflows/` | 外部工作流系统：manifest.yaml 驱动、执行器、注册表 |
+| `src/plugins/` | 插件系统：commands/agents/skills/hooks/mcp 架构 |
+| `src/hooks/` | Hooks 系统：5 种事件钩子 |
+| `src/mcp/` | MCP 客户端：Model Context Protocol 外部工具集成 |
+| `src/security/` | 安全检查：9 类检测（注入/XSS/SQL/凭证暴露等） |
+| `src/permissions/` | 权限管理：操作审批与沙箱边界 |
+| `src/config/` | 配置管理：多 Provider/Model 支持、项目配置 |
+| `src/session/` | Session 持久化管理 |
+| `src/modes/` | 运行模式：Autonomous / Fast |
+| `src/confidence/` | 置信度评分 |
+| `src/learning/` | 交互式学习模式 |
+| `src/github/` | GitHub 集成（PR/Issue/Review） |
+| `src/gate/` | 门禁检查（G01-G16） |
 
-### 变更
+### CLI 命令
 
-- 移除 `/flutter-forge` 命令及其 handler，工作流入口统一为 `/workflow`
-- 移除 `/forge-cli`、`/ff` 别名（迁移残留）
-- 清理 `settings.local.json` 中的 sed 迁移重命名规则
-- 保留通用语言支持能力（DartParser、tree-sitter dart、checkDart 等）
-- 项目现在是纯通用 CLI Agent，可独立挂载任意工作流
+`/help` `/model` `/config` `/clear` `/status` `/fast` `/auto` `/session` `/workflow` `/workflows` `/exit-wf` `/skill` `/skill-install` `/plugins` `/mcp` `/security` `/learn` `/memory` `/hook` `/trace` `/theme` `/git` `/diff` `/lint` `/test` `/ast` `/symbol` `/fetch` `/search` `/state` `/exit`
+
+### 技术栈
+
+- Runtime: Node.js 18+
+- 语言: TypeScript
+- AI SDK: Vercel AI SDK (`ai`, `@ai-sdk/openai`)
+- CLI UI: Ink (React for CLI)
+- 构建: tsup
+- 测试: vitest
+
+### 工作流支持
+
+- flutter-forge：原生 TS 移植，15 模块，5 角色子 agent 隔离，11 gate，3 种模式
+- h5-forge：原生 TS 移植，15 模块，5 角色子 agent 隔离，H5/Web 技术栈检测，5 个 profiles
 
 ## v0.5.0
 

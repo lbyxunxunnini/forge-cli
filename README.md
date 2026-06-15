@@ -1,6 +1,8 @@
 # Forge CLI
 
 > 通用 AI 协作 CLI Agent，支持多语言、多模型、可挂载独立工作流
+>
+> **v0.1.0** | MIT License | [GitHub](https://github.com/lbyxunxunnini/forge-cli)
 
 ## 架构
 

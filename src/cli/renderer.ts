@@ -102,6 +102,10 @@ export function renderHelp(): string {
     ['/fetch', '获取网页：/fetch <url> 或 /web <url>'],
     ['/search', '网络搜索：/search <query> 或 /s <query>'],
     ['/state', '状态机管理：/state status/history/graph/snapshot/restore/reset'],
+    ['/out-task', '导出当前会话记忆到 .forge/memory/'],
+    ['/import-task', '导入之前导出的会话记忆'],
+    ['/perm', '权限管理：查看/清除已记住的权限'],
+    ['/cache', '查看缓存命中率统计'],
     ['/exit', '退出程序'],
   ];
 
@@ -114,12 +118,16 @@ export function renderHelp(): string {
   return lines.join('\n');
 }
 
-export function renderStatus(contextSummary: string, model: string, phase?: string): string {
+export function renderStatus(contextSummary: string, model: string, phase?: string, cacheHitRate?: number): string {
   const lines = [
     chalk.bold('\n当前状态:'),
     `  ${chalk.dim('模型:')} ${chalk.yellow(model)}`,
     `  ${chalk.dim('上下文:')} ${contextSummary}`,
   ];
+  if (cacheHitRate !== undefined && cacheHitRate > 0) {
+    const rateColor = cacheHitRate >= 90 ? chalk.green : cacheHitRate >= 70 ? chalk.yellow : chalk.red;
+    lines.push(`  ${chalk.dim('缓存命中率:')} ${rateColor(cacheHitRate.toFixed(1) + '%')}`);
+  }
   if (phase) {
     lines.push(`  ${chalk.dim('阶段:')} ${chalk.green(phase)}`);
   }

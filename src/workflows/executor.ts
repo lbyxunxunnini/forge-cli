@@ -40,6 +40,19 @@ export class WorkflowExecutor {
 
     forgeLogger.logInfo(`[workflow:${workflow.manifest.name}] 进入工作流执行`);
 
+    // ─── flutter-forge 原生 controller 路径 ───
+    if (workflow.manifest.name === 'flutter-forge') {
+      try {
+        return await this.executeFlutterForge(workflow, projectRoot, userInput);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        forgeLogger.logError(`[flutter-forge] 原生 controller 执行失败: ${msg}`);
+        return { success: false, output: '', error: msg };
+      } finally {
+        this.unregisterGateHook();
+      }
+    }
+
     try {
       // 1. 检查可恢复会话
       const resumable = this.store.findResumableSession(userInput);
@@ -170,6 +183,105 @@ export class WorkflowExecutor {
     }
 
     return { success: true, output: outputs.join('\n\n---\n\n') };
+  }
+
+  // ─── flutter-forge 原生 controller ────────────────────────
+
+  /**
+   * flutter-forge 专用执行路径
+   * 动态导入 FlutterForgeController，使用原生 TypeScript 编排逻辑
+   */
+  private async executeFlutterForge(
+    workflow: Workflow,
+    projectRoot: string,
+    userInput: string,
+  ): Promise<WorkflowExecuteResult> {
+    const controllerPath = join(workflow.globalBase, 'scripts', 'controller.ts');
+    if (!existsSync(controllerPath)) {
+      return { success: false, output: '', error: `flutter-forge controller 不存在: ${controllerPath}` };
+    }
+
+    // 确保 .js 文件存在（自动编译）
+    const controllerJsPath = join(workflow.globalBase, 'scripts', 'controller.js');
+    if (!existsSync(controllerJsPath)) {
+      forgeLogger.logInfo('[flutter-forge] 首次运行，编译 scripts...');
+      const compiled = this.compileFlutterForgeScripts(workflow);
+      if (!compiled) {
+        forgeLogger.logWarning('[flutter-forge] 编译失败，回退到通用流水线');
+        return this.fallbackToGenericPipeline(workflow, projectRoot, userInput);
+      }
+    }
+
+    // 导入 FlutterForgeController
+    try {
+      const { FlutterForgeController } = await import(controllerJsPath);
+      const controller = new FlutterForgeController(
+        this.aiClient,
+        this.contextManager,
+        this.toolRegistry,
+        workflow,
+        projectRoot,
+      );
+
+      // 检测 policy
+      let policy: 'standard' | 'fast' | 'autonomous' = 'standard';
+      if (userInput.startsWith('ff-fast')) policy = 'fast';
+      else if (userInput.startsWith('ff-a') || userInput.startsWith('ff a')) policy = 'autonomous';
+
+      return await controller.execute(userInput, policy);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      forgeLogger.logError(`[flutter-forge] 导入 controller 失败: ${msg}`);
+      return this.fallbackToGenericPipeline(workflow, projectRoot, userInput);
+    }
+  }
+
+  /** 编译 flutter-forge 的 .ts 脚本为 .js */
+  private compileFlutterForgeScripts(workflow: Workflow): boolean {
+    const scriptsDir = join(workflow.globalBase, 'scripts');
+    try {
+      const { execSync } = require('child_process');
+      const tsFiles = readdirSync(scriptsDir)
+        .filter(f => f.endsWith('.ts') && f !== 'types.ts' && f !== 'build.ts')
+        .map(f => join(scriptsDir, f));
+
+      for (const file of tsFiles) {
+        const jsFile = file.replace('.ts', '.js');
+        execSync(
+          `npx esbuild "${file}" --outfile="${jsFile}" --format=esm --target=node18 --platform=node`,
+          { cwd: scriptsDir, stdio: 'pipe', timeout: 30000 },
+        );
+      }
+      forgeLogger.logInfo(`[flutter-forge] 编译完成: ${tsFiles.length} 个文件`);
+      return true;
+    } catch (error) {
+      forgeLogger.logError(`[flutter-forge] 编译失败: ${error}`);
+      return false;
+    }
+  }
+
+  /** 回退到通用流水线 */
+  private async fallbackToGenericPipeline(
+    workflow: Workflow,
+    projectRoot: string,
+    userInput: string,
+  ): Promise<WorkflowExecuteResult> {
+    const sessionId = this.generateSessionId();
+    const sessionData: WorkflowSessionData = {
+      workflow: workflow.manifest.name,
+      phase: 'S0',
+      mode: 'feature',
+      activeRole: 'controller',
+      designConfirmed: false,
+      guardrailsLoaded: false,
+      resumeKeys: this.extractResumeKeys(userInput),
+      projectRoot,
+      history: [],
+    };
+    const guardrails = this.store!.loadGuardrails();
+    if (guardrails) sessionData.guardrailsLoaded = true;
+    sessionData.mode = (await this.classifyTask(workflow, userInput)).mode;
+    return this.executePipeline(workflow, sessionData, userInput, sessionId);
   }
 
   /**

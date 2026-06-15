@@ -28,10 +28,20 @@ function createCompatFetch(): typeof fetch {
   };
 }
 
+// 缓存统计信息（从 API 响应中提取）
+export interface UsageInfo {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  prompt_cache_hit_tokens?: number;
+  prompt_cache_miss_tokens?: number;
+}
+
 export class AIClient {
   private provider: ReturnType<typeof createOpenAI>;
   private modelName: string;
   private providerKey: string;
+  private lastUsage: UsageInfo | null = null;
 
   constructor(config: ModelConfig) {
     this.providerKey = config.provider_key || '';
@@ -55,6 +65,10 @@ export class AIClient {
 
   getModel(): string {
     return this.modelName;
+  }
+
+  getLastUsage(): UsageInfo | null {
+    return this.lastUsage;
   }
 
   // 将自定义工具转换为 AI SDK 工具格式
@@ -208,6 +222,20 @@ export class AIClient {
       } else if (event.type === 'tool-result') {
         yield { type: 'tool-result', content: JSON.stringify({ name: event.toolName, result: (event as any).result ?? (event as any).output ?? '' }) };
       }
+    }
+
+    // 提取 usage 统计（包含缓存命中信息）
+    try {
+      const usage = await result.usage;
+      this.lastUsage = {
+        prompt_tokens: (usage as any).promptTokens,
+        completion_tokens: (usage as any).completionTokens,
+        total_tokens: (usage as any).totalTokens,
+        prompt_cache_hit_tokens: (usage as any).promptCacheHitTokens || (usage as any).cachedPromptTokens,
+        prompt_cache_miss_tokens: (usage as any).promptCacheMissTokens,
+      };
+    } catch {
+      // 忽略 usage 提取错误
     }
   }
 }

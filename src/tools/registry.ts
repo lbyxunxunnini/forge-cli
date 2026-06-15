@@ -1,4 +1,5 @@
 import type { Tool, ToolDefinition, ToolResult } from './types.js';
+import { permissionManager } from '../permissions/manager.js';
 
 export class ToolRegistry {
   private tools: Map<string, Tool> = new Map();
@@ -27,6 +28,28 @@ export class ToolRegistry {
         output: '',
         error: `Tool "${name}" not found`,
       };
+    }
+
+    // 权限检查
+    const permCheck = permissionManager.check(name, args);
+    if (permCheck && !permCheck.allowed) {
+      return {
+        success: false,
+        output: '',
+        error: `操作被拒绝: ${permCheck.reason || '权限不足'}`,
+      };
+    }
+
+    // 需要交互式确认
+    if (permCheck === null) {
+      const result = await permissionManager.confirm(name, args);
+      if (!result.allowed) {
+        return {
+          success: false,
+          output: '',
+          error: `操作被拒绝: ${result.reason || '用户拒绝'}`,
+        };
+      }
     }
 
     try {

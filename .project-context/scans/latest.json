@@ -1,0 +1,3346 @@
+{
+  "edge_count": 1588,
+  "file_count": 249,
+  "files": [
+    {
+      "commands": [],
+      "id": "file-settings-local-json-72b1d315",
+      "import_count": 0,
+      "language": "json",
+      "module": ".claude",
+      "path": ".claude/settings.local.json",
+      "role": "source",
+      "size_bytes": 4006,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-gitignore-a5cc2925",
+      "import_count": 0,
+      "language": "",
+      "module": ".",
+      "path": ".gitignore",
+      "role": "other",
+      "size_bytes": 114,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-agents-md-37dd6836",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "AGENTS.md",
+      "role": "document",
+      "size_bytes": 144,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-changelog-md-ab09011f",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "CHANGELOG.md",
+      "role": "document",
+      "size_bytes": 43691,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-cheatsheet-md-85c06b4b",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "CHEATSHEET.md",
+      "role": "document",
+      "size_bytes": 1624,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-contributing-md-3f454a98",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "CONTRIBUTING.md",
+      "role": "document",
+      "size_bytes": 2094,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-license-0398ccd0",
+      "import_count": 0,
+      "language": "",
+      "module": ".",
+      "path": "LICENSE",
+      "role": "other",
+      "size_bytes": 2855,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-open-source-checklist-md-7a7ddd98",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "OPEN_SOURCE_CHECKLIST.md",
+      "role": "document",
+      "size_bytes": 1754,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-quickstart-md-473ea108",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "QUICKSTART.md",
+      "role": "document",
+      "size_bytes": 1883,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-readme-md-8ec9a00b",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "README.md",
+      "role": "document",
+      "size_bytes": 4943,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-roadmap-md-aca0bc86",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "ROADMAP.md",
+      "role": "document",
+      "size_bytes": 19238,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-skill-md-55b84175",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "SKILL.md",
+      "role": "document",
+      "size_bytes": 29292,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-usage-md-3aed33ce",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "USAGE.md",
+      "role": "document",
+      "size_bytes": 3150,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-verification-md-9851b863",
+      "import_count": 0,
+      "language": "markdown",
+      "module": ".",
+      "path": "VERIFICATION.md",
+      "role": "document",
+      "size_bytes": 4850,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-version-b33892fb",
+      "import_count": 0,
+      "language": "",
+      "module": ".",
+      "path": "VERSION",
+      "role": "other",
+      "size_bytes": 7,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-default-yaml-3544d25a",
+      "import_count": 0,
+      "language": "yaml",
+      "module": "config",
+      "path": "config/default.yaml",
+      "role": "source",
+      "size_bytes": 525,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-flutter-forge-integration-plan-md-0936cb46",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/flutter-forge-integration-plan.md",
+      "role": "document",
+      "size_bytes": 72892,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-01-\u6574\u4f53\u5e03\u5c40\u67b6\u6784-md-fa3224f8",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/01-\u6574\u4f53\u5e03\u5c40\u67b6\u6784.md",
+      "role": "document",
+      "size_bytes": 3232,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-02-\u72b6\u6001\u663e\u793a\u673a\u5236-md-5926eca1",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/02-\u72b6\u6001\u663e\u793a\u673a\u5236.md",
+      "role": "document",
+      "size_bytes": 2775,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-03-\u989c\u8272\u7cfb\u7edf-md-307a86b5",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/03-\u989c\u8272\u7cfb\u7edf.md",
+      "role": "document",
+      "size_bytes": 2782,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-04-\u7b26\u53f7\u7cfb\u7edf-md-c6c98f3c",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/04-\u7b26\u53f7\u7cfb\u7edf.md",
+      "role": "document",
+      "size_bytes": 2764,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-05-\u8f93\u5165\u8f93\u51fa\u6a21\u5f0f-md-601a7872",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/05-\u8f93\u5165\u8f93\u51fa\u6a21\u5f0f.md",
+      "role": "document",
+      "size_bytes": 4056,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-06-\u914d\u7f6e\u5411\u5bfc\u6d41\u7a0b-md-1b222db8",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/06-\u914d\u7f6e\u5411\u5bfc\u6d41\u7a0b.md",
+      "role": "document",
+      "size_bytes": 3847,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-07-\u5f02\u6b65\u4efb\u52a1\u53cd\u9988-md-bab6bb28",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/07-\u5f02\u6b65\u4efb\u52a1\u53cd\u9988.md",
+      "role": "document",
+      "size_bytes": 4215,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-08-\u6587\u672c\u6392\u7248\u89c4\u8303-md-f4027fe5",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/08-\u6587\u672c\u6392\u7248\u89c4\u8303.md",
+      "role": "document",
+      "size_bytes": 4131,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-09-\u63a7\u5236\u5feb\u6377\u952e-md-4ce6d721",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/09-\u63a7\u5236\u5feb\u6377\u952e.md",
+      "role": "document",
+      "size_bytes": 4196,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-10-forge-cli\u9002\u914d\u65b9\u6848-md-bedca32e",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/10-forge-cli\u9002\u914d\u65b9\u6848.md",
+      "role": "document",
+      "size_bytes": 6350,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-11-\u6e90\u7801\u67b6\u6784\u603b\u89c8-md-fc2d1055",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/11-\u6e90\u7801\u67b6\u6784\u603b\u89c8.md",
+      "role": "document",
+      "size_bytes": 7549,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-12-\u8bbe\u8ba1\u7cfb\u7edf\u5b9e\u73b0-md-e0f516c4",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/12-\u8bbe\u8ba1\u7cfb\u7edf\u5b9e\u73b0.md",
+      "role": "document",
+      "size_bytes": 9624,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-13-\u72b6\u6001\u7ba1\u7406\u673a\u5236-md-640271b4",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/13-\u72b6\u6001\u7ba1\u7406\u673a\u5236.md",
+      "role": "document",
+      "size_bytes": 13962,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-14-\u6d88\u606f\u7ec4\u4ef6\u7cfb\u7edf-md-187619de",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/14-\u6d88\u606f\u7ec4\u4ef6\u7cfb\u7edf.md",
+      "role": "document",
+      "size_bytes": 14342,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-15-\u8f93\u5165\u7ec4\u4ef6\u5b9e\u73b0-md-ff15d092",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/15-\u8f93\u5165\u7ec4\u4ef6\u5b9e\u73b0.md",
+      "role": "document",
+      "size_bytes": 17545,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-16-\u5e03\u5c40\u7ec4\u4ef6\u5b9e\u73b0-md-360b23af",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/16-\u5e03\u5c40\u7ec4\u4ef6\u5b9e\u73b0.md",
+      "role": "document",
+      "size_bytes": 20886,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-ast\u89e3\u6790\u4e0e\u7b26\u53f7\u641c\u7d22-md-23b5ab54",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/AST\u89e3\u6790\u4e0e\u7b26\u53f7\u641c\u7d22.md",
+      "role": "document",
+      "size_bytes": 9386,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-readme-md-541a3109",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/README.md",
+      "role": "document",
+      "size_bytes": 2749,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-ui\u7ec4\u4ef6\u4f7f\u7528\u6307\u5357-md-1aff9767",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/UI\u7ec4\u4ef6\u4f7f\u7528\u6307\u5357.md",
+      "role": "document",
+      "size_bytes": 17865,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-webfetch\u7f51\u9875\u83b7\u53d6-md-9fcf7987",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/WebFetch\u7f51\u9875\u83b7\u53d6.md",
+      "role": "document",
+      "size_bytes": 8377,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-websearch\u7f51\u7edc\u641c\u7d22-md-ab6bcf16",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/WebSearch\u7f51\u7edc\u641c\u7d22.md",
+      "role": "document",
+      "size_bytes": 8371,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-\u72b6\u6001\u673a\u589e\u5f3a-md-3335bbb2",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/\u72b6\u6001\u673a\u589e\u5f3a.md",
+      "role": "document",
+      "size_bytes": 9951,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-\u7ed3\u6784\u5316\u7f16\u8f91\u4e0egit\u64cd\u4f5c-md-42b3b7ae",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "docs",
+      "path": "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/\u7ed3\u6784\u5316\u7f16\u8f91\u4e0eGit\u64cd\u4f5c.md",
+      "role": "document",
+      "size_bytes": 8649,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-ast-demo-ts-1fca8ad1",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "examples",
+      "path": "examples/ast-demo.ts",
+      "role": "source",
+      "size_bytes": 5181,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-phase5-demo-ts-3b4efd56",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "examples",
+      "path": "examples/phase5-demo.ts",
+      "role": "source",
+      "size_bytes": 4126,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-tree-sitter-demo-ts-f72d2ee9",
+      "import_count": 5,
+      "language": "typescript",
+      "module": "examples",
+      "path": "examples/tree-sitter-demo.ts",
+      "role": "source",
+      "size_bytes": 7229,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-ui-demo-ts-b2f76119",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "examples",
+      "path": "examples/ui-demo.ts",
+      "role": "source",
+      "size_bytes": 5774,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-web-fetch-demo-ts-a1567e7b",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "examples",
+      "path": "examples/web-fetch-demo.ts",
+      "role": "source",
+      "size_bytes": 2933,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-global-preferences-yaml-7816fc44",
+      "import_count": 0,
+      "language": "yaml",
+      "module": "memory",
+      "path": "memory/global_preferences.yaml",
+      "role": "source",
+      "size_bytes": 774,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-current-task-template-yaml-31dc2ce6",
+      "import_count": 0,
+      "language": "yaml",
+      "module": "memory",
+      "path": "memory/runtime/current_task.template.yaml",
+      "role": "source",
+      "size_bytes": 440,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-package-lock-json-fa288d14",
+      "import_count": 0,
+      "language": "json",
+      "module": ".",
+      "path": "package-lock.json",
+      "role": "source",
+      "size_bytes": 155236,
+      "symbol_count": 0
+    },
+    {
+      "commands": [
+        "build: tsup",
+        "dev: tsup --watch",
+        "start: node dist/main.js",
+        "test: vitest run",
+        "test:coverage: vitest run --coverage",
+        "test:watch: vitest",
+        "typecheck: tsc --noEmit"
+      ],
+      "id": "file-package-json-7030d0b2",
+      "import_count": 0,
+      "language": "json",
+      "module": ".",
+      "path": "package.json",
+      "role": "config",
+      "size_bytes": 1395,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-project-state-md-2dc00d8b",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "pm-memory",
+      "path": "pm-memory/PROJECT-STATE.md",
+      "role": "document",
+      "size_bytes": 703,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-prd-md-7f2ae3b0",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "pm-output",
+      "path": "pm-output/iterations/1.0.0/PRD.md",
+      "role": "document",
+      "size_bytes": 6668,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-agent-isolation-protocol-md-dd5190c1",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/agent_isolation_protocol.md",
+      "role": "document",
+      "size_bytes": 4658,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-autonomous-mode-md-743f5b37",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/autonomous_mode.md",
+      "role": "document",
+      "size_bytes": 4510,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-core-contracts-yaml-1a40af4e",
+      "import_count": 0,
+      "language": "yaml",
+      "module": "references",
+      "path": "references/core_contracts.yaml",
+      "role": "document",
+      "size_bytes": 3556,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-decision-and-question-protocol-md-cfcd748d",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/decision_and_question_protocol.md",
+      "role": "document",
+      "size_bytes": 13035,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-engineering-heuristics-md-0af8fe85",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/engineering_heuristics.md",
+      "role": "document",
+      "size_bytes": 4578,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-example-workflow-md-411534d7",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/example_workflow.md",
+      "role": "document",
+      "size_bytes": 4040,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-existing-project-entry-md-17433d6f",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/existing_project_entry.md",
+      "role": "document",
+      "size_bytes": 1675,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-existing-project-scan-md-60f42c26",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/existing_project_scan.md",
+      "role": "document",
+      "size_bytes": 1919,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-existing-rules-discovery-md-61dc9f14",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/existing_rules_discovery.md",
+      "role": "document",
+      "size_bytes": 1786,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-fast-mode-md-96f4de17",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/fast_mode.md",
+      "role": "document",
+      "size_bytes": 5408,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-host-subagent-support-md-aadad6cb",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/host_subagent_support.md",
+      "role": "document",
+      "size_bytes": 7630,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-issue-ledger-md-3f740dc1",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/issue-ledger.md",
+      "role": "document",
+      "size_bytes": 6380,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-load-map-md-b07ad8db",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/load_map.md",
+      "role": "document",
+      "size_bytes": 4889,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-maintenance-map-md-9b01f5cd",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/maintenance_map.md",
+      "role": "document",
+      "size_bytes": 4019,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-memory-protocol-md-1b1a619f",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/memory_protocol.md",
+      "role": "document",
+      "size_bytes": 1448,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-network-and-api-md-28e89879",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/network_and_api.md",
+      "role": "document",
+      "size_bytes": 1630,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-new-project-cocreation-mode-md-ea4e718c",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/new_project_cocreation_mode.md",
+      "role": "document",
+      "size_bytes": 3355,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-phase-checkpoint-md-7dd48062",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/phase_checkpoint.md",
+      "role": "document",
+      "size_bytes": 3986,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-project-guardrails-protocol-md-8972d141",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/project_guardrails_protocol.md",
+      "role": "document",
+      "size_bytes": 9741,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-project-init-flow-md-c441ed61",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/project_init_flow.md",
+      "role": "document",
+      "size_bytes": 2766,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-architecture-designer-md-ddcdcfe4",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/roles/architecture_designer.md",
+      "role": "document",
+      "size_bytes": 4068,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-page-engineer-md-242edac3",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/roles/page_engineer.md",
+      "role": "document",
+      "size_bytes": 3999,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-requirement-analyst-md-4978a0a1",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/roles/requirement_analyst.md",
+      "role": "document",
+      "size_bytes": 4582,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-ui-designer-md-d3f93d99",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/roles/ui_designer.md",
+      "role": "document",
+      "size_bytes": 4228,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-verify-agent-md-277a76fb",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/roles/verify_agent.md",
+      "role": "document",
+      "size_bytes": 3494,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-routing-and-navigation-md-69e76326",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/routing_and_navigation.md",
+      "role": "document",
+      "size_bytes": 1398,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-session-management-md-d5433949",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/session_management.md",
+      "role": "document",
+      "size_bytes": 11379,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-readme-md-4838e150",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/shared_workflow_gates/README.md",
+      "role": "document",
+      "size_bytes": 802,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-advisor-collaboration-md-4ba5fe44",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/shared_workflow_gates/advisor_collaboration.md",
+      "role": "document",
+      "size_bytes": 1008,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-existing-project-consulting-md-5ea1e600",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/shared_workflow_gates/existing_project_consulting.md",
+      "role": "document",
+      "size_bytes": 892,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-question-budget-md-4721f1e5",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/shared_workflow_gates/question_budget.md",
+      "role": "document",
+      "size_bytes": 2629,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-requirement-confirmation-md-6de5004e",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/shared_workflow_gates/requirement_confirmation.md",
+      "role": "document",
+      "size_bytes": 1868,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-role-gate-matrix-md-f9425a19",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/shared_workflow_gates/role_gate_matrix.md",
+      "role": "document",
+      "size_bytes": 2007,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-routing-and-recovery-md-b69778c5",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/shared_workflow_gates/routing_and_recovery.md",
+      "role": "document",
+      "size_bytes": 798,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-skill-visibility-md-60f0c009",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/skill_visibility.md",
+      "role": "document",
+      "size_bytes": 19186,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-stack-profiles-md-63e03ebf",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/stack_profiles.md",
+      "role": "document",
+      "size_bytes": 1657,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-startup-handshake-md-4735d69e",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/startup_handshake.md",
+      "role": "document",
+      "size_bytes": 2518,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-task-runtime-prompt-md-44858679",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/task_runtime_prompt.md",
+      "role": "document",
+      "size_bytes": 30774,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-trigger-words-md-2d9933f8",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/trigger_words.md",
+      "role": "document",
+      "size_bytes": 3782,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-workflow-diagram-md-fa64c4c9",
+      "import_count": 0,
+      "language": "markdown",
+      "module": "references",
+      "path": "references/workflow_diagram.md",
+      "role": "document",
+      "size_bytes": 6034,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-check-project-guardrails-sh-c3a79a57",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/check_project_guardrails.sh",
+      "role": "other",
+      "size_bytes": 6962,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-classify-task-sh-999946f4",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/classify_task.sh",
+      "role": "other",
+      "size_bytes": 11031,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-controller-py-5f70c809",
+      "import_count": 6,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/controller.py",
+      "role": "source",
+      "size_bytes": 13287,
+      "symbol_count": 10
+    },
+    {
+      "commands": [],
+      "id": "file-detect-project-root-state-py-c1c39ff0",
+      "import_count": 5,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/detect_project_root_state.py",
+      "role": "source",
+      "size_bytes": 1579,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-doctor-sh-85d0f42e",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/doctor.sh",
+      "role": "other",
+      "size_bytes": 684,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-ff-session-sh-d54187ba",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/ff_session.sh",
+      "role": "other",
+      "size_bytes": 26110,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-find-existing-rules-sh-5f48e063",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/find_existing_rules.sh",
+      "role": "other",
+      "size_bytes": 2733,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-gate-check-py-fa14096f",
+      "import_count": 5,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/gate_check.py",
+      "role": "source",
+      "size_bytes": 9988,
+      "symbol_count": 7
+    },
+    {
+      "commands": [],
+      "id": "file-hook-check-project-guardrails-sh-3f5d01f2",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/hook_check_project_guardrails.sh",
+      "role": "other",
+      "size_bytes": 7560,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-init-project-guardrails-py-9582ef08",
+      "import_count": 5,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/init_project_guardrails.py",
+      "role": "source",
+      "size_bytes": 12634,
+      "symbol_count": 11
+    },
+    {
+      "commands": [],
+      "id": "file-project-snapshot-py-060703c0",
+      "import_count": 5,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/project_snapshot.py",
+      "role": "source",
+      "size_bytes": 4242,
+      "symbol_count": 7
+    },
+    {
+      "commands": [],
+      "id": "file-gates-sh-a753a97e",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/release_checks/gates.sh",
+      "role": "other",
+      "size_bytes": 10748,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-guardrails-sh-60e55dc0",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/release_checks/guardrails.sh",
+      "role": "other",
+      "size_bytes": 2049,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-lib-sh-e111f8bc",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/release_checks/lib.sh",
+      "role": "other",
+      "size_bytes": 206,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-metadata-sh-e1fe7d60",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/release_checks/metadata.sh",
+      "role": "other",
+      "size_bytes": 1583,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-output-protocol-sh-ef95a852",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/release_checks/output_protocol.sh",
+      "role": "document",
+      "size_bytes": 13341,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-session-sh-6bf608ce",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/release_checks/session.sh",
+      "role": "other",
+      "size_bytes": 4057,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-route-golden-tests-py-a0d40efb",
+      "import_count": 6,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/route_golden_tests.py",
+      "role": "source",
+      "size_bytes": 2451,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-test-e2e-sh-c8eed18d",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/test-e2e.sh",
+      "role": "other",
+      "size_bytes": 817,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-validate-checklist-py-56580d5b",
+      "import_count": 7,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/validate_checklist.py",
+      "role": "source",
+      "size_bytes": 16413,
+      "symbol_count": 12
+    },
+    {
+      "commands": [],
+      "id": "file-validate-docs-sync-py-b7583702",
+      "import_count": 5,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/validate_docs_sync.py",
+      "role": "source",
+      "size_bytes": 4302,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-validate-output-sh-e7bec674",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/validate_output.sh",
+      "role": "other",
+      "size_bytes": 16466,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-validate-output-prefix-sh-a6468648",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/validate_output_prefix.sh",
+      "role": "other",
+      "size_bytes": 2225,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-validate-project-sh-0e59ea8b",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/validate_project.sh",
+      "role": "other",
+      "size_bytes": 601,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-validate-project-guardrails-py-55eeaec1",
+      "import_count": 5,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/validate_project_guardrails.py",
+      "role": "source",
+      "size_bytes": 5486,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-validate-project-guardrails-resolution-py-20866ba3",
+      "import_count": 5,
+      "language": "python",
+      "module": "scripts",
+      "path": "scripts/validate_project_guardrails_resolution.py",
+      "role": "source",
+      "size_bytes": 2826,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-validate-release-sh-9e250794",
+      "import_count": 0,
+      "language": "",
+      "module": "scripts",
+      "path": "scripts/validate_release.sh",
+      "role": "other",
+      "size_bytes": 398,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-97cf4f58",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/agent",
+      "path": "src/agent/index.ts",
+      "role": "source",
+      "size_bytes": 90,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-loop-v2-ts-07b0cffa",
+      "import_count": 8,
+      "language": "typescript",
+      "module": "src/agent",
+      "path": "src/agent/loop-v2.ts",
+      "role": "source",
+      "size_bytes": 8431,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-loop-ts-188af3f3",
+      "import_count": 6,
+      "language": "typescript",
+      "module": "src/agent",
+      "path": "src/agent/loop.ts",
+      "role": "source",
+      "size_bytes": 5885,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-base-agent-ts-6f3399da",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/agents",
+      "path": "src/agents/base-agent.ts",
+      "role": "document",
+      "size_bytes": 3554,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-controller-ts-159c476a",
+      "import_count": 8,
+      "language": "typescript",
+      "module": "src/agents",
+      "path": "src/agents/controller.ts",
+      "role": "source",
+      "size_bytes": 3557,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-8224ce11",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/agents",
+      "path": "src/agents/index.ts",
+      "role": "source",
+      "size_bytes": 283,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-orchestrator-ts-f4d7dbf9",
+      "import_count": 22,
+      "language": "typescript",
+      "module": "src/agents",
+      "path": "src/agents/orchestrator.ts",
+      "role": "source",
+      "size_bytes": 20985,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-pool-ts-d344e663",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/agents",
+      "path": "src/agents/pool.ts",
+      "role": "source",
+      "size_bytes": 3573,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-registry-ts-776d01ea",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/agents",
+      "path": "src/agents/registry.ts",
+      "role": "source",
+      "size_bytes": 5510,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-c4b6871d",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/agents",
+      "path": "src/agents/types.ts",
+      "role": "source",
+      "size_bytes": 665,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-ast-parser-test-ts-b7517757",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/__tests__/ast-parser.test.ts",
+      "role": "test",
+      "size_bytes": 5188,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-git-test-ts-2dd6f79e",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/__tests__/git.test.ts",
+      "role": "test",
+      "size_bytes": 3429,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-state-machine-test-ts-5712d952",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/__tests__/state-machine.test.ts",
+      "role": "test",
+      "size_bytes": 6080,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-structured-edit-test-ts-96bc6cdf",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/__tests__/structured-edit.test.ts",
+      "role": "test",
+      "size_bytes": 4467,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-theme-test-ts-f39f313a",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/__tests__/theme.test.ts",
+      "role": "test",
+      "size_bytes": 2591,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-web-fetch-test-ts-3a3b8180",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/__tests__/web-fetch.test.ts",
+      "role": "test",
+      "size_bytes": 2787,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-web-search-test-ts-d6074b52",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/__tests__/web-search.test.ts",
+      "role": "test",
+      "size_bytes": 2566,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-ast-parser-ts-be50764f",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/ast-parser.ts",
+      "role": "source",
+      "size_bytes": 24981,
+      "symbol_count": 11
+    },
+    {
+      "commands": [],
+      "id": "file-commands-ts-b8113a79",
+      "import_count": 23,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/commands.ts",
+      "role": "source",
+      "size_bytes": 58327,
+      "symbol_count": 20
+    },
+    {
+      "commands": [],
+      "id": "file-dialog-ts-b4f6abd2",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/dialog.ts",
+      "role": "source",
+      "size_bytes": 14395,
+      "symbol_count": 12
+    },
+    {
+      "commands": [],
+      "id": "file-git-ts-9f0799a7",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/git.ts",
+      "role": "source",
+      "size_bytes": 11456,
+      "symbol_count": 7
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-6323aab6",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/index.ts",
+      "role": "source",
+      "size_bytes": 4141,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-input-layout-ts-e5bf1804",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/input-layout.ts",
+      "role": "source",
+      "size_bytes": 7272,
+      "symbol_count": 7
+    },
+    {
+      "commands": [],
+      "id": "file-input-ts-57abf772",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/input.ts",
+      "role": "source",
+      "size_bytes": 8304,
+      "symbol_count": 9
+    },
+    {
+      "commands": [],
+      "id": "file-keybindings-ts-04c4dcc3",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/keybindings.ts",
+      "role": "source",
+      "size_bytes": 5839,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-layout-ts-d09eec2a",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/layout.ts",
+      "role": "source",
+      "size_bytes": 11798,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-message-system-ts-7d49261d",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/message-system.ts",
+      "role": "source",
+      "size_bytes": 14078,
+      "symbol_count": 13
+    },
+    {
+      "commands": [],
+      "id": "file-renderer-v2-ts-04895ea2",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/renderer-v2.ts",
+      "role": "source",
+      "size_bytes": 14285,
+      "symbol_count": 20
+    },
+    {
+      "commands": [],
+      "id": "file-renderer-ts-0e7ff7d0",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/renderer.ts",
+      "role": "source",
+      "size_bytes": 13579,
+      "symbol_count": 15
+    },
+    {
+      "commands": [],
+      "id": "file-repl-ink-tsx-663e07e6",
+      "import_count": 20,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/repl-ink.tsx",
+      "role": "source",
+      "size_bytes": 27639,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-repl-ts-83d0157c",
+      "import_count": 17,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/repl.ts",
+      "role": "source",
+      "size_bytes": 16548,
+      "symbol_count": 9
+    },
+    {
+      "commands": [],
+      "id": "file-spinner-v2-ts-a5b138c6",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/spinner-v2.ts",
+      "role": "source",
+      "size_bytes": 6112,
+      "symbol_count": 5
+    },
+    {
+      "commands": [],
+      "id": "file-spinner-ts-6c882053",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/spinner.ts",
+      "role": "source",
+      "size_bytes": 573,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-state-machine-ts-a554abc2",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/state-machine.ts",
+      "role": "source",
+      "size_bytes": 9367,
+      "symbol_count": 10
+    },
+    {
+      "commands": [],
+      "id": "file-structured-edit-ts-c462b856",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/structured-edit.ts",
+      "role": "source",
+      "size_bytes": 15632,
+      "symbol_count": 17
+    },
+    {
+      "commands": [],
+      "id": "file-task-group-ts-920d9ec0",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/task-group.ts",
+      "role": "source",
+      "size_bytes": 5076,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-theme-ts-7c66bf94",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/theme.ts",
+      "role": "source",
+      "size_bytes": 5388,
+      "symbol_count": 7
+    },
+    {
+      "commands": [],
+      "id": "file-tree-sitter-parser-ts-86c59e79",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/tree-sitter-parser.ts",
+      "role": "source",
+      "size_bytes": 16948,
+      "symbol_count": 12
+    },
+    {
+      "commands": [],
+      "id": "file-web-fetch-ts-6486c7db",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/web-fetch.ts",
+      "role": "source",
+      "size_bytes": 9663,
+      "symbol_count": 7
+    },
+    {
+      "commands": [],
+      "id": "file-web-search-ts-eb855369",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/cli",
+      "path": "src/cli/web-search.ts",
+      "role": "source",
+      "size_bytes": 7191,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-fb9dfb6f",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/confidence",
+      "path": "src/confidence/index.ts",
+      "role": "source",
+      "size_bytes": 203,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-scorer-ts-ead693d4",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/confidence",
+      "path": "src/confidence/scorer.ts",
+      "role": "source",
+      "size_bytes": 7026,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-9de02227",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/confidence",
+      "path": "src/confidence/types.ts",
+      "role": "source",
+      "size_bytes": 1038,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-032e57e0",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/config",
+      "path": "src/config/index.ts",
+      "role": "source",
+      "size_bytes": 179,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-manager-ts-15e3e9a4",
+      "import_count": 6,
+      "language": "typescript",
+      "module": "src/config",
+      "path": "src/config/manager.ts",
+      "role": "source",
+      "size_bytes": 8617,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-4b63eb50",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/config",
+      "path": "src/config/types.ts",
+      "role": "source",
+      "size_bytes": 1803,
+      "symbol_count": 10
+    },
+    {
+      "commands": [],
+      "id": "file-empty-js-17c9554c",
+      "import_count": 0,
+      "language": "javascript",
+      "module": "src",
+      "path": "src/empty.js",
+      "role": "source",
+      "size_bytes": 59,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-checker-ts-6c01a3c8",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/gate",
+      "path": "src/gate/checker.ts",
+      "role": "source",
+      "size_bytes": 4718,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-client-ts-1f35d184",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/github",
+      "path": "src/github/client.ts",
+      "role": "source",
+      "size_bytes": 9142,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-4a73fa51",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/github",
+      "path": "src/github/index.ts",
+      "role": "source",
+      "size_bytes": 223,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-6aa78091",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/github",
+      "path": "src/github/types.ts",
+      "role": "source",
+      "size_bytes": 1305,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-5f2dab62",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/hooks",
+      "path": "src/hooks/index.ts",
+      "role": "source",
+      "size_bytes": 180,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-manager-ts-186461d5",
+      "import_count": 5,
+      "language": "typescript",
+      "module": "src/hooks",
+      "path": "src/hooks/manager.ts",
+      "role": "source",
+      "size_bytes": 7704,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-2a02d86e",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/hooks",
+      "path": "src/hooks/types.ts",
+      "role": "source",
+      "size_bytes": 1016,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-b501b5e3",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/learning",
+      "path": "src/learning/index.ts",
+      "role": "source",
+      "size_bytes": 207,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-manager-ts-c688fbd7",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/learning",
+      "path": "src/learning/manager.ts",
+      "role": "source",
+      "size_bytes": 9315,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-cfc3817f",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/learning",
+      "path": "src/learning/types.ts",
+      "role": "source",
+      "size_bytes": 1125,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-client-v2-ts-58e29037",
+      "import_count": 5,
+      "language": "typescript",
+      "module": "src/llm",
+      "path": "src/llm/client-v2.ts",
+      "role": "source",
+      "size_bytes": 8189,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-client-ts-4fce685d",
+      "import_count": 5,
+      "language": "typescript",
+      "module": "src/llm",
+      "path": "src/llm/client.ts",
+      "role": "source",
+      "size_bytes": 3163,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-context-ts-d4c0d719",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/llm",
+      "path": "src/llm/context.ts",
+      "role": "source",
+      "size_bytes": 11165,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-ac5a440e",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/llm",
+      "path": "src/llm/index.ts",
+      "role": "source",
+      "size_bytes": 192,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-6aa571a6",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/llm",
+      "path": "src/llm/types.ts",
+      "role": "source",
+      "size_bytes": 830,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-main-ts-1af9a5bd",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src",
+      "path": "src/main.ts",
+      "role": "source",
+      "size_bytes": 976,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-client-ts-cae2358e",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/mcp",
+      "path": "src/mcp/client.ts",
+      "role": "source",
+      "size_bytes": 7453,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-5b68d39d",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/mcp",
+      "path": "src/mcp/index.ts",
+      "role": "source",
+      "size_bytes": 206,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-39f05d1a",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/mcp",
+      "path": "src/mcp/types.ts",
+      "role": "source",
+      "size_bytes": 1093,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-compress-ts-a9a259f0",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/memory",
+      "path": "src/memory/compress.ts",
+      "role": "source",
+      "size_bytes": 6265,
+      "symbol_count": 9
+    },
+    {
+      "commands": [],
+      "id": "file-conversation-log-ts-40a2b547",
+      "import_count": 5,
+      "language": "typescript",
+      "module": "src/memory",
+      "path": "src/memory/conversation-log.ts",
+      "role": "source",
+      "size_bytes": 4436,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-dedup-ts-df0c5265",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/memory",
+      "path": "src/memory/dedup.ts",
+      "role": "source",
+      "size_bytes": 4590,
+      "symbol_count": 5
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-8483b6fd",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/memory",
+      "path": "src/memory/index.ts",
+      "role": "source",
+      "size_bytes": 393,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-manager-ts-a16c4a32",
+      "import_count": 8,
+      "language": "typescript",
+      "module": "src/memory",
+      "path": "src/memory/manager.ts",
+      "role": "source",
+      "size_bytes": 19095,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-project-memory-ts-4ca4c812",
+      "import_count": 5,
+      "language": "typescript",
+      "module": "src/memory",
+      "path": "src/memory/project-memory.ts",
+      "role": "source",
+      "size_bytes": 9701,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-threshold-ts-93dca686",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/memory",
+      "path": "src/memory/threshold.ts",
+      "role": "source",
+      "size_bytes": 5673,
+      "symbol_count": 5
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-070ec8e0",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/memory",
+      "path": "src/memory/types.ts",
+      "role": "source",
+      "size_bytes": 2185,
+      "symbol_count": 9
+    },
+    {
+      "commands": [],
+      "id": "file-autonomous-ts-e16c3455",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/modes",
+      "path": "src/modes/autonomous.ts",
+      "role": "source",
+      "size_bytes": 1690,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-fast-ts-7480bb03",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/modes",
+      "path": "src/modes/fast.ts",
+      "role": "source",
+      "size_bytes": 2030,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-a4124f40",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/modes",
+      "path": "src/modes/index.ts",
+      "role": "source",
+      "size_bytes": 224,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-logger-ts-ce390151",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/output",
+      "path": "src/output/logger.ts",
+      "role": "source",
+      "size_bytes": 3270,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-manager-ts-6a10ae28",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/permissions",
+      "path": "src/permissions/manager.ts",
+      "role": "source",
+      "size_bytes": 8896,
+      "symbol_count": 5
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-0f3e2a00",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/plugin-dev",
+      "path": "src/plugin-dev/index.ts",
+      "role": "source",
+      "size_bytes": 287,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-toolkit-ts-20b3deba",
+      "import_count": 6,
+      "language": "typescript",
+      "module": "src/plugin-dev",
+      "path": "src/plugin-dev/toolkit.ts",
+      "role": "source",
+      "size_bytes": 16637,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-6bbc12ff",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/plugin-dev",
+      "path": "src/plugin-dev/types.ts",
+      "role": "source",
+      "size_bytes": 1239,
+      "symbol_count": 10
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-dcd9d9b7",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/plugins",
+      "path": "src/plugins/index.ts",
+      "role": "source",
+      "size_bytes": 293,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-loader-ts-a89602fb",
+      "import_count": 5,
+      "language": "typescript",
+      "module": "src/plugins",
+      "path": "src/plugins/loader.ts",
+      "role": "source",
+      "size_bytes": 8620,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-manager-ts-845792d3",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/plugins",
+      "path": "src/plugins/manager.ts",
+      "role": "source",
+      "size_bytes": 4503,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-166a3292",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/plugins",
+      "path": "src/plugins/types.ts",
+      "role": "source",
+      "size_bytes": 1367,
+      "symbol_count": 9
+    },
+    {
+      "commands": [],
+      "id": "file-checker-ts-de969388",
+      "import_count": 1,
+      "language": "typescript",
+      "module": "src/security",
+      "path": "src/security/checker.ts",
+      "role": "source",
+      "size_bytes": 11020,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-993002af",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/security",
+      "path": "src/security/index.ts",
+      "role": "source",
+      "size_bytes": 217,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-380d8c39",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/security",
+      "path": "src/security/types.ts",
+      "role": "source",
+      "size_bytes": 940,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-manager-ts-9c58c98b",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/session",
+      "path": "src/session/manager.ts",
+      "role": "source",
+      "size_bytes": 4837,
+      "symbol_count": 5
+    },
+    {
+      "commands": [],
+      "id": "file-manager-ts-caa90a3f",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/skills",
+      "path": "src/skills/manager.ts",
+      "role": "source",
+      "size_bytes": 9213,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-classifier-ts-1b394f18",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/classifier.ts",
+      "role": "source",
+      "size_bytes": 1198,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-command-ts-684dcb89",
+      "import_count": 5,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/command.ts",
+      "role": "source",
+      "size_bytes": 2792,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-executor-ts-f12b60c2",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/executor.ts",
+      "role": "source",
+      "size_bytes": 1354,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-filesystem-ts-d3f6c933",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/filesystem.ts",
+      "role": "source",
+      "size_bytes": 18264,
+      "symbol_count": 17
+    },
+    {
+      "commands": [],
+      "id": "file-guardrails-ts-85f19253",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/guardrails.ts",
+      "role": "source",
+      "size_bytes": 2020,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-8d6cbb1a",
+      "import_count": 9,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/index.ts",
+      "role": "source",
+      "size_bytes": 2675,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-memory-ts-90f4cd95",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/memory.ts",
+      "role": "source",
+      "size_bytes": 7082,
+      "symbol_count": 4
+    },
+    {
+      "commands": [],
+      "id": "file-registry-ts-8d369bf2",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/registry.ts",
+      "role": "source",
+      "size_bytes": 1826,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-scanner-ts-56b03979",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/scanner.ts",
+      "role": "source",
+      "size_bytes": 1792,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-b071e6c7",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/types.ts",
+      "role": "source",
+      "size_bytes": 466,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-validator-ts-d4908e05",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/validator.ts",
+      "role": "source",
+      "size_bytes": 2231,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-web-tools-ts-a5ad5a3a",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/tools",
+      "path": "src/tools/web-tools.ts",
+      "role": "source",
+      "size_bytes": 6740,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-app-tsx-ed298998",
+      "import_count": 6,
+      "language": "typescript",
+      "module": "src/ui",
+      "path": "src/ui/app.tsx",
+      "role": "source",
+      "size_bytes": 7101,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-command-palette-tsx-1b5cdc83",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/ui",
+      "path": "src/ui/command-palette.tsx",
+      "role": "source",
+      "size_bytes": 1943,
+      "symbol_count": 3
+    },
+    {
+      "commands": [],
+      "id": "file-index-tsx-5cfdfee0",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/ui",
+      "path": "src/ui/index.tsx",
+      "role": "source",
+      "size_bytes": 1036,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-multiline-input-tsx-f1da7f89",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/ui",
+      "path": "src/ui/multiline-input.tsx",
+      "role": "source",
+      "size_bytes": 4169,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-retry-ts-f0fbc2f9",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/utils",
+      "path": "src/utils/retry.ts",
+      "role": "source",
+      "size_bytes": 6287,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-summary-ts-59462068",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/utils",
+      "path": "src/utils/summary.ts",
+      "role": "source",
+      "size_bytes": 7238,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-trace-ts-54c887cf",
+      "import_count": 3,
+      "language": "typescript",
+      "module": "src/utils",
+      "path": "src/utils/trace.ts",
+      "role": "source",
+      "size_bytes": 7020,
+      "symbol_count": 9
+    },
+    {
+      "commands": [],
+      "id": "file-version-ts-b2e115d6",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src",
+      "path": "src/version.ts",
+      "role": "source",
+      "size_bytes": 32,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-engine-ts-5d9ef405",
+      "import_count": 4,
+      "language": "typescript",
+      "module": "src/workflow",
+      "path": "src/workflow/engine.ts",
+      "role": "source",
+      "size_bytes": 6027,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-0fb2f129",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/workflow",
+      "path": "src/workflow/index.ts",
+      "role": "source",
+      "size_bytes": 213,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-router-ts-84bcd534",
+      "import_count": 2,
+      "language": "typescript",
+      "module": "src/workflow",
+      "path": "src/workflow/router.ts",
+      "role": "source",
+      "size_bytes": 3824,
+      "symbol_count": 8
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-df54cc46",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/workflow",
+      "path": "src/workflow/types.ts",
+      "role": "source",
+      "size_bytes": 943,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-executor-ts-e2fae6a6",
+      "import_count": 11,
+      "language": "typescript",
+      "module": "src/workflows",
+      "path": "src/workflows/executor.ts",
+      "role": "source",
+      "size_bytes": 35771,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-index-ts-66ad77f8",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/workflows",
+      "path": "src/workflows/index.ts",
+      "role": "source",
+      "size_bytes": 320,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-registry-ts-f13ce358",
+      "import_count": 7,
+      "language": "typescript",
+      "module": "src/workflows",
+      "path": "src/workflows/registry.ts",
+      "role": "source",
+      "size_bytes": 3560,
+      "symbol_count": 2
+    },
+    {
+      "commands": [],
+      "id": "file-store-ts-962b9933",
+      "import_count": 6,
+      "language": "typescript",
+      "module": "src/workflows",
+      "path": "src/workflows/store.ts",
+      "role": "source",
+      "size_bytes": 8559,
+      "symbol_count": 1
+    },
+    {
+      "commands": [],
+      "id": "file-types-ts-3ed77be2",
+      "import_count": 0,
+      "language": "typescript",
+      "module": "src/workflows",
+      "path": "src/workflows/types.ts",
+      "role": "source",
+      "size_bytes": 2340,
+      "symbol_count": 6
+    },
+    {
+      "commands": [],
+      "id": "file-architecture-designer-pass-txt-1d9cd234",
+      "import_count": 0,
+      "language": "",
+      "module": "tests",
+      "path": "tests/checklist_fixtures/architecture_designer_pass.txt",
+      "role": "document",
+      "size_bytes": 801,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-page-engineer-fail-missing-txt-d17fda0f",
+      "import_count": 0,
+      "language": "",
+      "module": "tests",
+      "path": "tests/checklist_fixtures/page_engineer_fail_missing.txt",
+      "role": "document",
+      "size_bytes": 116,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-page-engineer-fail-placeholder-txt-f41053a3",
+      "import_count": 0,
+      "language": "",
+      "module": "tests",
+      "path": "tests/checklist_fixtures/page_engineer_fail_placeholder.txt",
+      "role": "document",
+      "size_bytes": 242,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-page-engineer-pass-txt-df2bf4d3",
+      "import_count": 0,
+      "language": "",
+      "module": "tests",
+      "path": "tests/checklist_fixtures/page_engineer_pass.txt",
+      "role": "document",
+      "size_bytes": 469,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-requirement-analyst-pass-txt-ad9c42c2",
+      "import_count": 0,
+      "language": "",
+      "module": "tests",
+      "path": "tests/checklist_fixtures/requirement_analyst_pass.txt",
+      "role": "document",
+      "size_bytes": 507,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-ui-designer-pass-txt-6bf660a2",
+      "import_count": 0,
+      "language": "",
+      "module": "tests",
+      "path": "tests/checklist_fixtures/ui_designer_pass.txt",
+      "role": "document",
+      "size_bytes": 685,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-verify-agent-pass-txt-2a04eab5",
+      "import_count": 0,
+      "language": "",
+      "module": "tests",
+      "path": "tests/checklist_fixtures/verify_agent_pass.txt",
+      "role": "document",
+      "size_bytes": 595,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-route-golden-cases-json-11c2e322",
+      "import_count": 0,
+      "language": "json",
+      "module": "tests",
+      "path": "tests/route_golden_cases.json",
+      "role": "test",
+      "size_bytes": 3774,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-tsconfig-json-61ebb9fd",
+      "import_count": 0,
+      "language": "json",
+      "module": ".",
+      "path": "tsconfig.json",
+      "role": "config",
+      "size_bytes": 530,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-tsup-config-ts-a694ce77",
+      "import_count": 2,
+      "language": "typescript",
+      "module": ".",
+      "path": "tsup.config.ts",
+      "role": "config",
+      "size_bytes": 714,
+      "symbol_count": 0
+    },
+    {
+      "commands": [],
+      "id": "file-vitest-config-ts-e7b129ed",
+      "import_count": 1,
+      "language": "typescript",
+      "module": ".",
+      "path": "vitest.config.ts",
+      "role": "config",
+      "size_bytes": 376,
+      "symbol_count": 0
+    }
+  ],
+  "module_count": 37,
+  "modules": {
+    ".": {
+      "file_count": 19,
+      "paths": [
+        ".gitignore",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "CHEATSHEET.md",
+        "CONTRIBUTING.md",
+        "LICENSE",
+        "OPEN_SOURCE_CHECKLIST.md",
+        "QUICKSTART.md",
+        "README.md",
+        "ROADMAP.md",
+        "SKILL.md",
+        "USAGE.md",
+        "VERIFICATION.md",
+        "VERSION",
+        "package-lock.json",
+        "package.json",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ],
+      "roles": [
+        "config",
+        "document",
+        "other",
+        "source"
+      ]
+    },
+    ".claude": {
+      "file_count": 1,
+      "paths": [
+        ".claude/settings.local.json"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "config": {
+      "file_count": 1,
+      "paths": [
+        "config/default.yaml"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "docs": {
+      "file_count": 24,
+      "paths": [
+        "docs/flutter-forge-integration-plan.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/01-\u6574\u4f53\u5e03\u5c40\u67b6\u6784.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/02-\u72b6\u6001\u663e\u793a\u673a\u5236.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/03-\u989c\u8272\u7cfb\u7edf.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/04-\u7b26\u53f7\u7cfb\u7edf.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/05-\u8f93\u5165\u8f93\u51fa\u6a21\u5f0f.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/06-\u914d\u7f6e\u5411\u5bfc\u6d41\u7a0b.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/07-\u5f02\u6b65\u4efb\u52a1\u53cd\u9988.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/08-\u6587\u672c\u6392\u7248\u89c4\u8303.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/09-\u63a7\u5236\u5feb\u6377\u952e.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/10-forge-cli\u9002\u914d\u65b9\u6848.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/11-\u6e90\u7801\u67b6\u6784\u603b\u89c8.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/12-\u8bbe\u8ba1\u7cfb\u7edf\u5b9e\u73b0.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/13-\u72b6\u6001\u7ba1\u7406\u673a\u5236.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/14-\u6d88\u606f\u7ec4\u4ef6\u7cfb\u7edf.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/15-\u8f93\u5165\u7ec4\u4ef6\u5b9e\u73b0.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/16-\u5e03\u5c40\u7ec4\u4ef6\u5b9e\u73b0.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/AST\u89e3\u6790\u4e0e\u7b26\u53f7\u641c\u7d22.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/README.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/UI\u7ec4\u4ef6\u4f7f\u7528\u6307\u5357.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/WebFetch\u7f51\u9875\u83b7\u53d6.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/WebSearch\u7f51\u7edc\u641c\u7d22.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/\u72b6\u6001\u673a\u589e\u5f3a.md",
+        "docs/\u754c\u9762\u8bbe\u8ba1\u53c2\u8003/\u7ed3\u6784\u5316\u7f16\u8f91\u4e0eGit\u64cd\u4f5c.md"
+      ],
+      "roles": [
+        "document"
+      ]
+    },
+    "examples": {
+      "file_count": 5,
+      "paths": [
+        "examples/ast-demo.ts",
+        "examples/phase5-demo.ts",
+        "examples/tree-sitter-demo.ts",
+        "examples/ui-demo.ts",
+        "examples/web-fetch-demo.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "memory": {
+      "file_count": 2,
+      "paths": [
+        "memory/global_preferences.yaml",
+        "memory/runtime/current_task.template.yaml"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "pm-memory": {
+      "file_count": 1,
+      "paths": [
+        "pm-memory/PROJECT-STATE.md"
+      ],
+      "roles": [
+        "document"
+      ]
+    },
+    "pm-output": {
+      "file_count": 1,
+      "paths": [
+        "pm-output/iterations/1.0.0/PRD.md"
+      ],
+      "roles": [
+        "document"
+      ]
+    },
+    "references": {
+      "file_count": 40,
+      "paths": [
+        "references/agent_isolation_protocol.md",
+        "references/autonomous_mode.md",
+        "references/core_contracts.yaml",
+        "references/decision_and_question_protocol.md",
+        "references/engineering_heuristics.md",
+        "references/example_workflow.md",
+        "references/existing_project_entry.md",
+        "references/existing_project_scan.md",
+        "references/existing_rules_discovery.md",
+        "references/fast_mode.md",
+        "references/host_subagent_support.md",
+        "references/issue-ledger.md",
+        "references/load_map.md",
+        "references/maintenance_map.md",
+        "references/memory_protocol.md",
+        "references/network_and_api.md",
+        "references/new_project_cocreation_mode.md",
+        "references/phase_checkpoint.md",
+        "references/project_guardrails_protocol.md",
+        "references/project_init_flow.md",
+        "references/roles/architecture_designer.md",
+        "references/roles/page_engineer.md",
+        "references/roles/requirement_analyst.md",
+        "references/roles/ui_designer.md",
+        "references/roles/verify_agent.md",
+        "references/routing_and_navigation.md",
+        "references/session_management.md",
+        "references/shared_workflow_gates/README.md",
+        "references/shared_workflow_gates/advisor_collaboration.md",
+        "references/shared_workflow_gates/existing_project_consulting.md",
+        "references/shared_workflow_gates/question_budget.md",
+        "references/shared_workflow_gates/requirement_confirmation.md",
+        "references/shared_workflow_gates/role_gate_matrix.md",
+        "references/shared_workflow_gates/routing_and_recovery.md",
+        "references/skill_visibility.md",
+        "references/stack_profiles.md",
+        "references/startup_handshake.md",
+        "references/task_runtime_prompt.md",
+        "references/trigger_words.md",
+        "references/workflow_diagram.md"
+      ],
+      "roles": [
+        "document"
+      ]
+    },
+    "scripts": {
+      "file_count": 27,
+      "paths": [
+        "scripts/check_project_guardrails.sh",
+        "scripts/classify_task.sh",
+        "scripts/controller.py",
+        "scripts/detect_project_root_state.py",
+        "scripts/doctor.sh",
+        "scripts/ff_session.sh",
+        "scripts/find_existing_rules.sh",
+        "scripts/gate_check.py",
+        "scripts/hook_check_project_guardrails.sh",
+        "scripts/init_project_guardrails.py",
+        "scripts/project_snapshot.py",
+        "scripts/release_checks/gates.sh",
+        "scripts/release_checks/guardrails.sh",
+        "scripts/release_checks/lib.sh",
+        "scripts/release_checks/metadata.sh",
+        "scripts/release_checks/output_protocol.sh",
+        "scripts/release_checks/session.sh",
+        "scripts/route_golden_tests.py",
+        "scripts/test-e2e.sh",
+        "scripts/validate_checklist.py",
+        "scripts/validate_docs_sync.py",
+        "scripts/validate_output.sh",
+        "scripts/validate_output_prefix.sh",
+        "scripts/validate_project.sh",
+        "scripts/validate_project_guardrails.py",
+        "scripts/validate_project_guardrails_resolution.py",
+        "scripts/validate_release.sh"
+      ],
+      "roles": [
+        "document",
+        "other",
+        "source"
+      ]
+    },
+    "src": {
+      "file_count": 3,
+      "paths": [
+        "src/empty.js",
+        "src/main.ts",
+        "src/version.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/agent": {
+      "file_count": 3,
+      "paths": [
+        "src/agent/index.ts",
+        "src/agent/loop-v2.ts",
+        "src/agent/loop.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/agents": {
+      "file_count": 7,
+      "paths": [
+        "src/agents/base-agent.ts",
+        "src/agents/controller.ts",
+        "src/agents/index.ts",
+        "src/agents/orchestrator.ts",
+        "src/agents/pool.ts",
+        "src/agents/registry.ts",
+        "src/agents/types.ts"
+      ],
+      "roles": [
+        "document",
+        "source"
+      ]
+    },
+    "src/cli": {
+      "file_count": 30,
+      "paths": [
+        "src/cli/__tests__/ast-parser.test.ts",
+        "src/cli/__tests__/git.test.ts",
+        "src/cli/__tests__/state-machine.test.ts",
+        "src/cli/__tests__/structured-edit.test.ts",
+        "src/cli/__tests__/theme.test.ts",
+        "src/cli/__tests__/web-fetch.test.ts",
+        "src/cli/__tests__/web-search.test.ts",
+        "src/cli/ast-parser.ts",
+        "src/cli/commands.ts",
+        "src/cli/dialog.ts",
+        "src/cli/git.ts",
+        "src/cli/index.ts",
+        "src/cli/input-layout.ts",
+        "src/cli/input.ts",
+        "src/cli/keybindings.ts",
+        "src/cli/layout.ts",
+        "src/cli/message-system.ts",
+        "src/cli/renderer-v2.ts",
+        "src/cli/renderer.ts",
+        "src/cli/repl-ink.tsx",
+        "src/cli/repl.ts",
+        "src/cli/spinner-v2.ts",
+        "src/cli/spinner.ts",
+        "src/cli/state-machine.ts",
+        "src/cli/structured-edit.ts",
+        "src/cli/task-group.ts",
+        "src/cli/theme.ts",
+        "src/cli/tree-sitter-parser.ts",
+        "src/cli/web-fetch.ts",
+        "src/cli/web-search.ts"
+      ],
+      "roles": [
+        "source",
+        "test"
+      ]
+    },
+    "src/confidence": {
+      "file_count": 3,
+      "paths": [
+        "src/confidence/index.ts",
+        "src/confidence/scorer.ts",
+        "src/confidence/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/config": {
+      "file_count": 3,
+      "paths": [
+        "src/config/index.ts",
+        "src/config/manager.ts",
+        "src/config/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/gate": {
+      "file_count": 1,
+      "paths": [
+        "src/gate/checker.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/github": {
+      "file_count": 3,
+      "paths": [
+        "src/github/client.ts",
+        "src/github/index.ts",
+        "src/github/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/hooks": {
+      "file_count": 3,
+      "paths": [
+        "src/hooks/index.ts",
+        "src/hooks/manager.ts",
+        "src/hooks/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/learning": {
+      "file_count": 3,
+      "paths": [
+        "src/learning/index.ts",
+        "src/learning/manager.ts",
+        "src/learning/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/llm": {
+      "file_count": 5,
+      "paths": [
+        "src/llm/client-v2.ts",
+        "src/llm/client.ts",
+        "src/llm/context.ts",
+        "src/llm/index.ts",
+        "src/llm/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/mcp": {
+      "file_count": 3,
+      "paths": [
+        "src/mcp/client.ts",
+        "src/mcp/index.ts",
+        "src/mcp/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/memory": {
+      "file_count": 8,
+      "paths": [
+        "src/memory/compress.ts",
+        "src/memory/conversation-log.ts",
+        "src/memory/dedup.ts",
+        "src/memory/index.ts",
+        "src/memory/manager.ts",
+        "src/memory/project-memory.ts",
+        "src/memory/threshold.ts",
+        "src/memory/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/modes": {
+      "file_count": 3,
+      "paths": [
+        "src/modes/autonomous.ts",
+        "src/modes/fast.ts",
+        "src/modes/index.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/output": {
+      "file_count": 1,
+      "paths": [
+        "src/output/logger.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/permissions": {
+      "file_count": 1,
+      "paths": [
+        "src/permissions/manager.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/plugin-dev": {
+      "file_count": 3,
+      "paths": [
+        "src/plugin-dev/index.ts",
+        "src/plugin-dev/toolkit.ts",
+        "src/plugin-dev/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/plugins": {
+      "file_count": 4,
+      "paths": [
+        "src/plugins/index.ts",
+        "src/plugins/loader.ts",
+        "src/plugins/manager.ts",
+        "src/plugins/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/security": {
+      "file_count": 3,
+      "paths": [
+        "src/security/checker.ts",
+        "src/security/index.ts",
+        "src/security/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/session": {
+      "file_count": 1,
+      "paths": [
+        "src/session/manager.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/skills": {
+      "file_count": 1,
+      "paths": [
+        "src/skills/manager.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/tools": {
+      "file_count": 12,
+      "paths": [
+        "src/tools/classifier.ts",
+        "src/tools/command.ts",
+        "src/tools/executor.ts",
+        "src/tools/filesystem.ts",
+        "src/tools/guardrails.ts",
+        "src/tools/index.ts",
+        "src/tools/memory.ts",
+        "src/tools/registry.ts",
+        "src/tools/scanner.ts",
+        "src/tools/types.ts",
+        "src/tools/validator.ts",
+        "src/tools/web-tools.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/ui": {
+      "file_count": 4,
+      "paths": [
+        "src/ui/app.tsx",
+        "src/ui/command-palette.tsx",
+        "src/ui/index.tsx",
+        "src/ui/multiline-input.tsx"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/utils": {
+      "file_count": 3,
+      "paths": [
+        "src/utils/retry.ts",
+        "src/utils/summary.ts",
+        "src/utils/trace.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/workflow": {
+      "file_count": 4,
+      "paths": [
+        "src/workflow/engine.ts",
+        "src/workflow/index.ts",
+        "src/workflow/router.ts",
+        "src/workflow/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "src/workflows": {
+      "file_count": 5,
+      "paths": [
+        "src/workflows/executor.ts",
+        "src/workflows/index.ts",
+        "src/workflows/registry.ts",
+        "src/workflows/store.ts",
+        "src/workflows/types.ts"
+      ],
+      "roles": [
+        "source"
+      ]
+    },
+    "tests": {
+      "file_count": 8,
+      "paths": [
+        "tests/checklist_fixtures/architecture_designer_pass.txt",
+        "tests/checklist_fixtures/page_engineer_fail_missing.txt",
+        "tests/checklist_fixtures/page_engineer_fail_placeholder.txt",
+        "tests/checklist_fixtures/page_engineer_pass.txt",
+        "tests/checklist_fixtures/requirement_analyst_pass.txt",
+        "tests/checklist_fixtures/ui_designer_pass.txt",
+        "tests/checklist_fixtures/verify_agent_pass.txt",
+        "tests/route_golden_cases.json"
+      ],
+      "roles": [
+        "document",
+        "test"
+      ]
+    }
+  },
+  "node_count": 1054,
+  "note": "Compact machine index. Do not read this file by default for context recovery; use INDEX.md, project-summary.md, and task-related map/*.md first.",
+  "project_id": "proj-forge-cli-f61a1f2e",
+  "role_counts": {
+    "config": 4,
+    "document": 86,
+    "other": 19,
+    "source": 132,
+    "test": 8
+  },
+  "root": "/Users/agi00114/Desktop/AI/agent\u8bbe\u8ba1/forge-cli",
+  "scanned_at": "2026-06-15T16:30:20+08:00",
+  "worktree": {
+    "branch": "main",
+    "is_git_repo": true,
+    "status": [
+      " M ROADMAP.md",
+      " M src/agents/orchestrator.ts",
+      " M src/cli/commands.ts",
+      " M src/cli/renderer.ts",
+      " M src/cli/repl-ink.tsx",
+      " M src/cli/repl.ts",
+      " M src/llm/client-v2.ts",
+      " M src/llm/context.ts",
+      " M src/main.ts",
+      " M src/memory/manager.ts",
+      " M src/tools/registry.ts",
+      " M src/workflows/executor.ts",
+      "?? .project-context/",
+      "?? docs/flutter-forge-integration-plan.md",
+      "?? pm-memory/",
+      "?? pm-output/",
+      "?? src/memory/conversation-log.ts",
+      "?? src/memory/project-memory.ts",
+      "?? src/permissions/"
+    ]
+  }
+}

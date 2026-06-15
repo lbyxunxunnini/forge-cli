@@ -9,6 +9,15 @@ export interface ContextMessage extends Message {
   compressed?: boolean;
 }
 
+// 缓存统计
+export interface CacheStats {
+  totalRequests: number;
+  cacheHits: number;
+  cacheMisses: number;
+  hitTokens: number;
+  missTokens: number;
+}
+
 export class ContextManager {
   private messages: ContextMessage[] = [];
   private systemPrompt: string = '';
@@ -16,6 +25,17 @@ export class ContextManager {
   private maxMessages: number;
   private maxTokens: number;
   private summarizer?: (messages: ContextMessage[]) => Promise<string>;
+
+  // 缓存优化：稳定前缀大小（压缩时不修改这部分消息）
+  private stablePrefixSize: number = 0;
+  // 缓存统计
+  private cacheStats: CacheStats = {
+    totalRequests: 0,
+    cacheHits: 0,
+    cacheMisses: 0,
+    hitTokens: 0,
+    missTokens: 0,
+  };
 
   constructor(maxMessages: number = 100, maxTokens: number = 32000) {
     this.maxMessages = maxMessages;
@@ -50,6 +70,8 @@ export class ContextManager {
 
   addAssistantMessage(content: string): void {
     this.addMessage({ role: 'assistant', content });
+    // 一轮对话完成后，将之前的消息标记为稳定前缀
+    this.stablePrefixSize = this.messages.length;
   }
 
   /**
@@ -146,6 +168,38 @@ export class ContextManager {
     return Math.min(100, Math.round((this.getTotalTokens() / this.maxTokens) * 100));
   }
 
+  // ─── 缓存统计 ──────────────────────────────────────────────
+
+  getCacheStats(): CacheStats {
+    return { ...this.cacheStats };
+  }
+
+  getCacheHitRate(): number {
+    if (this.cacheStats.totalRequests === 0) return 0;
+    return this.cacheStats.hitTokens / (this.cacheStats.hitTokens + this.cacheStats.missTokens) * 100;
+  }
+
+  /**
+   * 从 API 响应更新缓存统计
+   * 支持 OpenAI 兼容 API 返回的 usage.prompt_cache_hit_tokens
+   */
+  updateCacheStatsFromUsage(usage?: { prompt_cache_hit_tokens?: number; prompt_cache_miss_tokens?: number; prompt_tokens?: number }): void {
+    if (!usage) return;
+    this.cacheStats.totalRequests++;
+
+    const hitTokens = usage.prompt_cache_hit_tokens || 0;
+    const missTokens = usage.prompt_cache_miss_tokens || (usage.prompt_tokens ? usage.prompt_tokens - hitTokens : 0);
+
+    if (hitTokens > 0) {
+      this.cacheStats.cacheHits++;
+      this.cacheStats.hitTokens += hitTokens;
+    }
+    if (missTokens > 0) {
+      this.cacheStats.cacheMisses++;
+      this.cacheStats.missTokens += missTokens;
+    }
+  }
+
   isEmpty(): boolean {
     return this.messages.length === 0;
   }
@@ -198,17 +252,19 @@ export class ContextManager {
   }
 
   private truncateByCount(): void {
-    const prefixSize = Math.min(10, Math.floor(this.maxMessages * 0.2));
+    // 保留稳定前缀 + 最近窗口，确保不破坏缓存一致性
+    const prefixSize = Math.max(this.stablePrefixSize, Math.min(10, Math.floor(this.maxMessages * 0.2)));
     const windowSize = this.maxMessages - prefixSize;
-    const prefix = this.messages.slice(0, prefixSize);
-    const recent = this.messages.slice(this.messages.length - windowSize);
+    const prefix = this.messages.slice(0, Math.min(prefixSize, this.messages.length));
+    const recent = this.messages.slice(Math.max(0, this.messages.length - windowSize));
     this.messages = [...prefix, ...recent];
   }
 
   private compressByTokens(): void {
-    // 策略1: 裁剪低重要性大消息
-    for (const msg of this.messages) {
-      if (msg.importance === 'low' && (msg.tokenEstimate || 0) > 500) {
+    // 策略1: 只裁剪稳定前缀之后的低重要性大消息（保护缓存一致性）
+    for (let i = this.stablePrefixSize; i < this.messages.length; i++) {
+      const msg = this.messages[i];
+      if (msg.importance === 'low' && (msg.tokenEstimate || 0) > 500 && !msg.compressed) {
         msg.content = msg.content.slice(0, 500) + '\n... [已裁剪]';
         msg.tokenEstimate = estimateTokens(msg.content);
         msg.compressed = true;
@@ -224,10 +280,10 @@ export class ContextManager {
   private async summarizeOldMessages(): Promise<void> {
     if (!this.summarizer) return;
 
-    // 取前 20% ~ 50% 的消息做摘要
-    const prefixSize = Math.min(5, Math.floor(this.messages.length * 0.1));
-    const summarizeEnd = Math.floor(this.messages.length * 0.5);
-    const toSummarize = this.messages.slice(prefixSize, summarizeEnd);
+    // 摘要范围：稳定前缀之后、最近窗口之前的消息
+    const summarizeStart = Math.min(this.stablePrefixSize + 2, this.messages.length - 5);
+    const summarizeEnd = Math.max(summarizeStart + 3, Math.floor(this.messages.length * 0.6));
+    const toSummarize = this.messages.slice(summarizeStart, summarizeEnd);
 
     if (toSummarize.length < 3) return;
 
@@ -241,10 +297,12 @@ export class ContextManager {
         compressed: true,
       };
 
-      // 替换被摘要的消息
-      const prefix = this.messages.slice(0, prefixSize);
+      // 替换被摘要的消息，保留稳定前缀
+      const prefix = this.messages.slice(0, summarizeStart);
       const recent = this.messages.slice(summarizeEnd);
       this.messages = [...prefix, summaryMsg, ...recent];
+      // 更新稳定前缀大小（摘要消息成为新的前缀边界）
+      this.stablePrefixSize = prefix.length + 1;
     } catch {
       // 摘要失败，降级为简单截断
       this.truncateByCount();

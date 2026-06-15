@@ -7,6 +7,8 @@ import { workflowRegistry } from '../workflows/index.js';
 import type { AgentOrchestrator } from '../agents/index.js';
 import { renderHelp, renderStatus, renderSuccess, renderError } from './renderer.js';
 import { memoryManager } from '../memory/manager.js';
+import { projectMemoryManager } from '../memory/project-memory.js';
+import { permissionManager } from '../permissions/manager.js';
 import { generateSummary, formatSummary } from '../utils/summary.js';
 import { getTheme, setTheme, getThemeName, getAvailableThemes } from './theme.js';
 import { gitManager } from './git.js';
@@ -59,8 +61,11 @@ const REGISTERED_COMMANDS = new Set([
   '/fast', '/auto', '/session', '/plugins', '/mcp', '/security', '/learn',
   '/review', '/hook', '/memory', '/trace', '/theme', '/git', '/diff',
   '/lint', '/test', '/ast', '/symbol', '/sym', '/fetch', '/web',
-  '/search', '/s', '/state', '/workflow', '/skill', '/skills',
+  '/search', '/s', '/state', '/workflow', '/workflows', '/exit-wf', '/skill', '/skills',
   '/skill-install', '/skill-up', '/skill-remove',
+  '/out-task', '/import-task',
+  '/perm',
+  '/cache',
 ]);
 
 export async function handleCommand(
@@ -97,7 +102,7 @@ export async function handleCommand(
       contextManager.clear();
       return { handled: true, output: renderSuccess('上下文已清空') };
     case '/status':
-      return { handled: true, output: renderStatus(contextManager.getSummary(), aiClient.getModel()) };
+      return { handled: true, output: renderStatus(contextManager.getSummary(), aiClient.getModel(), undefined, contextManager.getCacheHitRate()) };
     case '/fast':
       return handleFastCommand(orchestrator);
     case '/auto':
@@ -144,7 +149,10 @@ export async function handleCommand(
     case '/state':
       return handleStateCommand(args);
     case '/workflow':
+    case '/workflows':
       return await handleWorkflowCommand(args, orchestrator);
+    case '/exit-wf':
+      return handleExitWfCommand(orchestrator);
     case '/skill':
     case '/skills':
       return handleSkillCommand(orchestrator);
@@ -154,6 +162,14 @@ export async function handleCommand(
       return await handleSkillUpdateCommand();
     case '/skill-remove':
       return handleSkillRemoveCommand(args);
+    case '/out-task':
+      return handleOutTaskCommand(contextManager, aiClient);
+    case '/import-task':
+      return handleImportTaskCommand(contextManager);
+    case '/perm':
+      return handlePermCommand(args);
+    case '/cache':
+      return handleCacheCommand(contextManager);
     default:
       return { handled: false };
   }
@@ -1166,22 +1182,35 @@ async function handleWorkflowCommand(
 ): Promise<CommandResult> {
   const workflows = workflowRegistry.getAll();
 
-  // 无参数：列出所有工作流
+  // 检查当前是否已在工作流中
+  if (orchestrator?.getActiveWorkflow()) {
+    const active = orchestrator.getActiveWorkflow();
+    if (args.length === 0) {
+      return {
+        handled: true,
+        output: [
+          chalk.bold(`\n当前在工作流中: ${chalk.yellow(active)}`),
+          chalk.dim('输入内容将在工作流中处理，或输入 /exit-wf 退出'),
+        ].join('\n'),
+      };
+    }
+  }
+
+  // 无参数：列出所有工作流，支持数字选择
   if (args.length === 0) {
     if (workflows.length === 0) {
       return { handled: true, output: chalk.dim('未安装任何工作流。将工作流放到 ~/.forge-cli/workflows/ 目录即可。') };
     }
 
-    const lines = [chalk.bold('\n已安装工作流：')];
-    for (const wf of workflows) {
+    const options = workflows.map(wf => {
       const triggers = wf.manifest.triggers.join(', ');
-      lines.push(`  ${chalk.cyan(wf.manifest.name)} v${wf.manifest.version} — ${wf.manifest.description}`);
-      lines.push(`    触发词: ${chalk.dim(triggers)}`);
-      lines.push(`    角色: ${chalk.dim(wf.manifest.roles.map(r => r.name).join(', '))}`);
-    }
-    lines.push('');
-    lines.push(chalk.dim('使用方式: 输入触发词直接进入，或 /workflow <名称> 手动启动'));
-    return { handled: true, output: lines.join('\n') };
+      return `${chalk.cyan(wf.manifest.name)} v${wf.manifest.version} — ${wf.manifest.description}\n     触发词: ${chalk.dim(triggers)}  角色: ${chalk.dim(wf.manifest.roles.map(r => r.name).join(', '))}`;
+    });
+
+    const sel = await selectOption('选择工作流:', options);
+    if (sel === null) return { handled: true, output: chalk.dim('已取消') };
+
+    return startWorkflow(workflows[sel], '', orchestrator);
   }
 
   // 有参数：启动指定工作流
@@ -1212,13 +1241,45 @@ async function startWorkflow(
     return { handled: true, output: renderError('Orchestrator 未初始化') };
   }
 
-  // 直接调用 executeWorkflow，不经过触发词匹配
-  const result = await orchestrator.executeWorkflow(workflow.manifest.name, userPrompt || '');
+  // 进入工作流模式（持久状态，后续输入都路由到该工作流）
+  orchestrator.enterWorkflow(workflow.manifest.name);
+
+  // 如果有初始 prompt，执行一次
+  if (userPrompt) {
+    const result = await orchestrator.executeWorkflow(workflow.manifest.name, userPrompt);
+    return {
+      handled: true,
+      output: [
+        renderSuccess(`已进入工作流: ${workflow.manifest.name}`),
+        '',
+        result.output || '',
+        '',
+        chalk.dim(`输入内容将在工作流中处理。/exit-wf 退出。`),
+      ].filter(Boolean).join('\n'),
+    };
+  }
 
   return {
     handled: true,
-    output: result.output || chalk.dim(`[workflow] ${workflow.manifest.name} 执行完成`),
+    output: [
+      renderSuccess(`已进入工作流: ${workflow.manifest.name} v${workflow.manifest.version}`),
+      `  ${chalk.dim(workflow.manifest.description)}`,
+      `  ${chalk.dim('触发词:')} ${workflow.manifest.triggers.join(', ')}`,
+      '',
+      chalk.dim('输入内容开始工作流，或直接输入触发词。/exit-wf 退出。'),
+    ].join('\n'),
   };
+}
+
+// ─── /exit-wf ─────────────────────────────────────────
+
+function handleExitWfCommand(orchestrator?: AgentOrchestrator): CommandResult {
+  if (!orchestrator) return { handled: true, output: renderError('Orchestrator 未初始化') };
+  if (!orchestrator.getActiveWorkflow()) {
+    return { handled: true, output: chalk.dim('当前没有活跃的工作流') };
+  }
+  const name = orchestrator.exitWorkflow();
+  return { handled: true, output: renderSuccess(`已退出工作流: ${name}`) };
 }
 
 // ─── /skill ─────────────────────────────────────────────────
@@ -1276,7 +1337,13 @@ export function getAvailableCommands(): Array<{ command: string; description: st
     { command: '/skill-install', description: '安装远程技能', args: '<github-url>' },
     { command: '/skill-up', description: '检查技能更新' },
     { command: '/skill-remove', description: '删除技能', args: '<name>' },
-    { command: '/workflow', description: '启动工作流' },
+    { command: '/workflow', description: '启动/管理工作流', args: '[名称]' },
+    { command: '/workflows', description: '列出并选择工作流' },
+    { command: '/exit-wf', description: '退出当前活跃工作流' },
+    { command: '/out-task', description: '导出当前会话记忆到 .forge/memory/' },
+    { command: '/import-task', description: '导入之前导出的会话记忆' },
+    { command: '/perm', description: '权限管理：查看/清除已记住的权限' },
+    { command: '/cache', description: '查看缓存命中率统计' },
     { command: '/exit', description: '退出程序' },
   ];
 }
@@ -1332,4 +1399,151 @@ function handleSkillRemoveCommand(args: string[]): CommandResult {
     return { handled: true, output: renderSuccess(result.message) };
   }
   return { handled: true, output: renderError(result.message) };
+}
+
+// ─── /cache ─────────────────────────────────────────────────
+
+function handleCacheCommand(ctx: ContextManager): CommandResult {
+  const stats = ctx.getCacheStats();
+  const hitRate = ctx.getCacheHitRate();
+
+  const rateColor = hitRate >= 90 ? chalk.green : hitRate >= 70 ? chalk.yellow : chalk.red;
+  const rateStr = stats.totalRequests > 0 ? rateColor(hitRate.toFixed(1) + '%') : chalk.dim('无数据');
+
+  const lines = [
+    chalk.bold('\n缓存统计'),
+    chalk.dim('─────────────────'),
+    `  ${chalk.dim('命中率:')} ${rateStr}`,
+    `  ${chalk.dim('总请求数:')} ${chalk.cyan(stats.totalRequests)}`,
+    `  ${chalk.dim('命中次数:')} ${chalk.green(stats.cacheHits)}`,
+    `  ${chalk.dim('未命中次数:')} ${chalk.red(stats.cacheMisses)}`,
+    `  ${chalk.dim('命中 Token:')} ${chalk.cyan(stats.hitTokens.toLocaleString())}`,
+    `  ${chalk.dim('未命中 Token:')} ${chalk.cyan(stats.missTokens.toLocaleString())}`,
+  ];
+
+  return { handled: true, output: lines.join('\n') };
+}
+
+// ─── /perm ──────────────────────────────────────────────────
+
+function handlePermCommand(args: string[]): CommandResult {
+  // /perm — 显示已记住的权限
+  if (args.length === 0) {
+    const entries = permissionManager.getAll();
+    const allowAll = permissionManager.isAllowAll();
+
+    const lines = [
+      chalk.bold('\n权限管理'),
+      chalk.dim('─────────────────'),
+      `  ${chalk.dim('全局放行:')} ${allowAll ? chalk.green('已开启') : chalk.red('已关闭')}`,
+    ];
+
+    if (entries.length === 0) {
+      lines.push(`  ${chalk.dim('无已记住的权限')}`);
+    } else {
+      lines.push('');
+      lines.push(chalk.bold('已记住的权限:'));
+      for (const e of entries) {
+        const time = new Date(e.timestamp).toLocaleString('zh-CN');
+        const opLabel = e.operation === 'delete' ? chalk.red(e.operation) : chalk.cyan(e.operation);
+        lines.push(`  ${opLabel}  ${chalk.dim(e.pathPattern)}  ${chalk.dim(time)}`);
+      }
+    }
+
+    lines.push('');
+    lines.push(chalk.dim('用法:'));
+    lines.push(chalk.dim('  /perm             显示已记住的权限'));
+    lines.push(chalk.dim('  /perm allow-all   切换全局放行模式'));
+    lines.push(chalk.dim('  /perm clear       清除所有已记住的权限'));
+    lines.push(chalk.dim('  /perm forget <path> [op]  忘记指定路径的权限'));
+
+    return { handled: true, output: lines.join('\n') };
+  }
+
+  const sub = args[0];
+
+  switch (sub) {
+    case 'allow-all': {
+      const current = permissionManager.isAllowAll();
+      permissionManager.setAllowAll(!current);
+      return { handled: true, output: renderSuccess(`全局放行模式已${!current ? '开启' : '关闭'}`) };
+    }
+    case 'clear': {
+      permissionManager.clearAll();
+      return { handled: true, output: renderSuccess('已清除所有已记住的权限') };
+    }
+    case 'forget': {
+      if (args.length < 2) {
+        return { handled: true, output: renderError('用法: /perm forget <path> [operation]') };
+      }
+      const path = args[1];
+      const op = args[2] as 'read' | 'write' | 'execute' | 'delete' | undefined;
+      const success = permissionManager.forget(path, op);
+      return {
+        handled: true,
+        output: success
+          ? renderSuccess(`已忘记 ${path} 的权限`)
+          : renderError(`未找到 ${path} 的权限记录`),
+      };
+    }
+    default:
+      return { handled: true, output: renderError(`未知子命令: ${sub}\n可用: allow-all, clear, forget`) };
+  }
+}
+
+// ─── /out-task ──────────────────────────────────────────────
+
+function handleOutTaskCommand(ctx: ContextManager, ai: AIClient): CommandResult {
+  const history = ctx.getHistory();
+  if (history.length === 0) {
+    return { handled: true, output: renderError('当前会话无对话内容，无法导出') };
+  }
+
+  const exported = projectMemoryManager.exportSummary(history, ai.getModel());
+
+  const lines = [
+    renderSuccess(`摘要已导出`),
+    `  ${chalk.dim('路径:')} ${chalk.cyan(exported.filePath)}`,
+    `  ${chalk.dim('ID:')} ${chalk.yellow(exported.id)}`,
+    `  ${chalk.dim('消息数:')} ${exported.messageCount}`,
+    `  ${chalk.dim('Token:')} ~${exported.tokenEstimate}`,
+  ];
+
+  return { handled: true, output: lines.join('\n') };
+}
+
+// ─── /import-task ───────────────────────────────────────────
+
+async function handleImportTaskCommand(ctx: ContextManager): Promise<CommandResult> {
+  const allMemories = projectMemoryManager.list();
+  // 只显示摘要类型的文件（用于导入参考）
+  const memories = allMemories.filter(m => m.type === 'summary');
+
+  if (memories.length === 0) {
+    return { handled: true, output: chalk.dim('\n无可导入的会话摘要。使用 /out-task 先导出当前会话摘要。') };
+  }
+
+  const options = memories.map(m => {
+    const time = new Date(m.timestamp).toLocaleString('zh-CN');
+    return `${chalk.cyan(m.id)}  ${chalk.dim(time)}  ${m.messageCount}条消息  ${m.summary || ''}`;
+  });
+
+  const sel = await selectOption('选择要导入的会话摘要:', options);
+  if (sel === null) return { handled: true, output: chalk.dim('已取消') };
+
+  const chosen = memories[sel];
+  const messages = projectMemoryManager.load(chosen.id);
+  if (!messages) {
+    return { handled: true, output: renderError(`加载摘要失败: ${chosen.id}`) };
+  }
+
+  // 注入到上下文
+  for (const msg of messages) {
+    ctx.addMessage(msg);
+  }
+
+  return {
+    handled: true,
+    output: renderSuccess(`已导入会话记忆 ${chosen.id}（${messages.length} 条消息）`),
+  };
 }

@@ -592,6 +592,45 @@ export class MemoryManager {
       totalAccess,
     };
   }
+
+  // ─── 子目录支持（方案 B：工作流专属记忆） ─────────────────
+
+  /** 获取项目级记忆子目录路径 */
+  getProjectSubdir(subdir: string): string {
+    return join(MEMORY_DIR, subdir);
+  }
+
+  /** 获取全局记忆子目录路径 */
+  getGlobalSubdir(subdir: string): string {
+    return join(MEMORY_DIR, subdir);
+  }
+
+  /** 从子目录加载 YAML 文件 */
+  loadSubdirYaml(subdir: string, filename: string): Record<string, unknown> | null {
+    const filePath = join(this.getProjectSubdir(subdir), filename);
+    if (!existsSync(filePath)) return null;
+    try {
+      const { parse: parseYaml } = require('yaml');
+      return parseYaml(readFileSync(filePath, 'utf-8'));
+    } catch {
+      return null;
+    }
+  }
+
+  /** 保存 YAML 到子目录 */
+  saveSubdirYaml(subdir: string, filename: string, data: Record<string, unknown>): void {
+    const dir = this.getProjectSubdir(subdir);
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    const { stringify: stringifyYaml } = require('yaml');
+    writeFileSync(join(dir, filename), stringifyYaml(data), 'utf-8');
+  }
+
+  /** 列出子目录中的文件 */
+  listSubdir(subdir: string): string[] {
+    const dir = this.getProjectSubdir(subdir);
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir).filter(f => !f.startsWith('.'));
+  }
 }
 
 export const memoryManager = new MemoryManager();

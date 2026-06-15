@@ -9,6 +9,7 @@ import { handleCommand } from './commands.js';
 import { renderBanner, renderAssistantStart, renderError, renderSuccess, renderMarkdown, truncate } from './renderer.js';
 import { VERSION } from '../version.js';
 import { memoryManager } from '../memory/manager.js';
+import { permissionManager } from '../permissions/manager.js';
 import { PROVIDER_PRESETS } from '../config/types.js';
 import { inputLayoutManager } from './input-layout.js';
 import { taskGroupRenderer } from './task-group.js';
@@ -138,6 +139,9 @@ export async function startREPL(): Promise<void> {
   forgeLogger.setQuiet(true);
 
   registerAllTools();
+
+  // 初始化权限管理器
+  permissionManager.setProjectRoot(config.project.root);
 
   const orchestrator = new AgentOrchestrator(
     aiClient, contextManager, toolRegistry, config.project.root
