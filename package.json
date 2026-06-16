@@ -1,6 +1,6 @@
 {
   "name": "forge-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "通用 AI 协作 CLI Agent - 支持多模型、多语言、多工具",
   "type": "module",
   "main": "dist/main.js",

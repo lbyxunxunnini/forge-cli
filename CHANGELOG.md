@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.1.1
+
+修复 MultilineInput 粘贴与光标问题，实现流式输出，优化 AI 生成长度限制。
+
+### 修复
+
+- **MultilineInput 粘贴处理**：使用 Ink 原生 `usePaste` hook 替代不可靠的 `useInput` 检测方案
+- **粘贴摘要显示**：粘贴多行代码时显示 `[Pasted ~N lines]` 摘要，提交时展开实际内容
+- **光标位置同步**：输入字符、退格、换行时正确更新粘贴区域位置
+- **流式输出**：从一次性输出改为实时流式显示 AI 回复
+- **AI 输出长度**：`maxTokens` 从 4096 增加到 8192，避免长回复被截断
+
+### 优化
+
+- 添加调试日志系统，日志输出到 `forge-debug.log`
+- 修复 `react-devtools-core` 构建错误
+- 清理无用的 `clipboardy` 依赖
+
 ## v0.1.0
 
 Forge CLI 首个正式版本 — 通用 AI 协作 CLI Agent 框架。

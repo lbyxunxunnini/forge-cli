@@ -1,7 +1,24 @@
 import { generateText, streamText, tool, stepCountIs } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
+import { appendFileSync, mkdirSync } from 'fs';
+import { join } from 'path';
 import type { ModelConfig } from '../config/types.js';
+
+// 日志文件路径
+const LOG_DIR = process.cwd();
+const LOG_FILE = join(LOG_DIR, 'forge-debug.log');
+
+// 写入日志
+function writeLog(level: string, message: string, data?: any) {
+  const timestamp = new Date().toISOString();
+  const logLine = `[${timestamp}] [${level}] ${message}${data ? ' ' + JSON.stringify(data) : ''}\n`;
+  try {
+    appendFileSync(LOG_FILE, logLine);
+  } catch {
+    // 忽略写入错误
+  }
+}
 
 export interface AgentTool {
   name: string;
@@ -120,6 +137,7 @@ export class AIClient {
       system: systemPrompt,
       tools: convertedTools,
       temperature: 0.7,
+      maxTokens: 8192,
       stopWhen: maxSteps ? stepCountIs(maxSteps) : undefined,
     });
 
@@ -145,6 +163,7 @@ export class AIClient {
       system: systemPrompt,
       tools: convertedTools,
       temperature: 0.7,
+      maxTokens: 8192,
       stopWhen: maxSteps ? stepCountIs(maxSteps) : undefined,
     });
 
@@ -180,6 +199,7 @@ export class AIClient {
       system: systemMsg?.content,
       tools: convertedTools,
       temperature: 0.7,
+      maxTokens: 8192,
       stopWhen: maxSteps ? stepCountIs(maxSteps) : undefined,
     });
 
@@ -202,6 +222,14 @@ export class AIClient {
     const systemMsg = messages.find(m => m.role === 'system');
     const otherMsgs = messages.filter(m => m.role !== 'system');
 
+    writeLog('INFO', 'streamWithMessages 开始', {
+      model: this.modelName,
+      messageCount: otherMsgs.length,
+      maxTokens: 8192,
+      maxSteps,
+      lastMessage: otherMsgs[otherMsgs.length - 1]?.content?.substring(0, 100)
+    });
+
     const result = streamText({
       model: this.provider.chat(this.modelName),
       messages: otherMsgs.map(m => ({
@@ -211,18 +239,43 @@ export class AIClient {
       system: systemMsg?.content,
       tools: convertedTools,
       temperature: 0.7,
+      maxTokens: 8192,
       stopWhen: maxSteps ? stepCountIs(maxSteps) : undefined,
     });
 
+    let eventCount = 0;
+    let totalText = '';
+    let lastEventTime = Date.now();
+
     for await (const event of result.fullStream) {
+      const now = Date.now();
+      const timeSinceLastEvent = now - lastEventTime;
+      lastEventTime = now;
+      eventCount++;
+
       if (event.type === 'text-delta') {
-        yield { type: 'text', content: (event as any).text ?? (event as any).textDelta ?? '' };
+        const text = (event as any).text ?? (event as any).textDelta ?? '';
+        totalText += text;
+        yield { type: 'text', content: text };
       } else if (event.type === 'tool-call') {
+        writeLog('DEBUG', `工具调用 #${eventCount}`, { toolName: event.toolName, timeSinceLastEvent });
         yield { type: 'tool-call', content: JSON.stringify({ name: event.toolName, args: (event as any).args ?? (event as any).input ?? {} }) };
       } else if (event.type === 'tool-result') {
+        writeLog('DEBUG', `工具结果 #${eventCount}`, { toolName: event.toolName, timeSinceLastEvent });
         yield { type: 'tool-result', content: JSON.stringify({ name: event.toolName, result: (event as any).result ?? (event as any).output ?? '' }) };
       }
+
+      // 每 50 个事件记录一次进度
+      if (eventCount % 50 === 0) {
+        writeLog('DEBUG', `流进度`, { eventCount, textLength: totalText.length, timeSinceLastEvent });
+      }
     }
+
+    writeLog('INFO', 'streamWithMessages 完成', {
+      eventCount,
+      textLength: totalText.length,
+      textPreview: totalText.substring(0, 200)
+    });
 
     // 提取 usage 统计（包含缓存命中信息）
     try {

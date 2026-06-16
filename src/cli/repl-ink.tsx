@@ -467,6 +467,15 @@ function ForgeApp({ resumeSessionId }: { resumeSessionId?: string | null }) {
       let fullText = '';
       const currentToolCalls: ToolCall[] = [];
 
+      // 创建临时的 assistant 消息用于流式显示
+      const streamingMessageId = Date.now().toString();
+      setMessages(prev => [...prev, {
+        id: streamingMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now(),
+      }]);
+
       for await (const event of orchestratorRef.current.executeStream(value.trim())) {
         // 检查是否被中断
         if (abortController.signal.aborted) {
@@ -475,6 +484,12 @@ function ForgeApp({ resumeSessionId }: { resumeSessionId?: string | null }) {
 
         if (event.type === 'text') {
           fullText += event.content;
+          // 实时更新 assistant 消息内容
+          setMessages(prev => prev.map(msg =>
+            msg.id === streamingMessageId
+              ? { ...msg, content: fullText }
+              : msg
+          ));
         } else if (event.type === 'tool-call') {
           try {
             const call = JSON.parse(event.content);
@@ -503,6 +518,8 @@ function ForgeApp({ resumeSessionId }: { resumeSessionId?: string | null }) {
 
       // 检查是否被中断
       if (abortController.signal.aborted) {
+        // 删除临时消息，添加中断消息
+        setMessages(prev => prev.filter(msg => msg.id !== streamingMessageId));
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
           role: 'system',
@@ -511,15 +528,11 @@ function ForgeApp({ resumeSessionId }: { resumeSessionId?: string | null }) {
         }]);
         conversationLogRef.current?.log('system', '操作已中断');
       } else if (fullText) {
-        // 添加 AI 回复
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: fullText,
-          timestamp: Date.now(),
-        }]);
         // 记录助手回复到对话日志
         conversationLogRef.current?.log('assistant', fullText);
+      } else {
+        // 没有内容，删除临时消息
+        setMessages(prev => prev.filter(msg => msg.id !== streamingMessageId));
       }
 
       // 清空工具调用

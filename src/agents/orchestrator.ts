@@ -322,6 +322,18 @@ export class AgentOrchestrator {
     this.tracer = initTracer(traceId, { consoleOutput: false });
     this.tracer.record('user_input', { input: userInput });
 
+    // 写入日志文件
+    const { appendFileSync } = await import('fs');
+    const { join } = await import('path');
+    const LOG_FILE = join(process.cwd(), 'forge-debug.log');
+    const writeLog = (msg: string) => {
+      try {
+        appendFileSync(LOG_FILE, `[${new Date().toISOString()}] [Orchestrator] ${msg}\n`);
+      } catch {}
+    };
+
+    writeLog(`executeStream 开始: "${userInput.substring(0, 100)}"`);
+
     try {
       // ─── 0. 活跃工作流模式 ───
       if (this.activeWorkflowName) {
@@ -354,10 +366,13 @@ export class AgentOrchestrator {
 
       // ─── 3. 无工作流匹配 → 直接回答 ───
       this.tracer.record('state_change', { to: 'direct_response' });
+      writeLog('进入 directResponseStream');
       yield* this.directResponseStream(userInput);
+      writeLog('directResponseStream 完成');
       this.finishTrace();
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
+      writeLog(`executeStream 错误: ${err.message}`);
       this.tracer.traceError(err, 'orchestrator.executeStream');
       this.finishTrace();
       throw err;
@@ -366,7 +381,17 @@ export class AgentOrchestrator {
 
   // 非工作流流式回答
   private async *directResponseStream(userInput: string): AsyncGenerator<{ type: 'text' | 'tool-call' | 'tool-result'; content: string }> {
+    const { appendFileSync } = await import('fs');
+    const { join } = await import('path');
+    const LOG_FILE = join(process.cwd(), 'forge-debug.log');
+    const writeLog = (msg: string) => {
+      try {
+        appendFileSync(LOG_FILE, `[${new Date().toISOString()}] [directResponseStream] ${msg}\n`);
+      } catch {}
+    };
+
     this.contextManager.addUserMessage(userInput);
+    writeLog(`开始处理用户输入, 消息数: ${this.contextManager.getMessages().length}`);
 
     const tools = this.toolRegistry.getAll().map(t => ({
       name: t.definition.name,
@@ -376,14 +401,22 @@ export class AgentOrchestrator {
     }));
 
     let fullText = '';
+    let eventCount = 0;
     for await (const event of this.aiClient.streamWithMessages(
       this.contextManager.getMessages(),
       tools,
       5
     )) {
+      eventCount++;
       if (event.type === 'text') fullText += event.content;
       yield event;
+
+      if (eventCount % 100 === 0) {
+        writeLog(`事件 #${eventCount}, 文本长度: ${fullText.length}`);
+      }
     }
+
+    writeLog(`流完成, 事件数: ${eventCount}, 文本长度: ${fullText.length}, 文本预览: ${fullText.substring(0, 200)}`);
 
     // 更新缓存统计
     const usage = this.aiClient.getLastUsage();

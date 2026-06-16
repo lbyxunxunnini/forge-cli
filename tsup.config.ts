@@ -35,5 +35,9 @@ const require = createRequire(import.meta.url);
   esbuildOptions(options) {
     options.jsx = 'automatic';
     options.jsxImportSource = 'react';
+    // react-devtools-core 是 ink 的可选调试依赖，Node.js 环境不需要
+    options.alias = {
+      'react-devtools-core': 'data:text/javascript,export default {}',
+    };
   },
 });
